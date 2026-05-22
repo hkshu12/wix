@@ -1,15 +1,24 @@
-import { fireEvent, render, screen, within } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import App from './App';
 
+const resumeMock = vi.fn().mockResolvedValue(undefined);
+
 vi.mock('./audio/AudioEngine', () => ({
-  AudioEngine: vi.fn().mockImplementation(() => ({
-    sync: vi.fn(),
-    stop: vi.fn()
-  }))
+  AudioEngine: vi.fn().mockImplementation(function MockAudioEngine() {
+    return {
+      resume: resumeMock,
+      sync: vi.fn().mockResolvedValue(undefined),
+      stop: vi.fn()
+    };
+  })
 }));
 
 describe('App', () => {
+  beforeEach(() => {
+    resumeMock.mockClear();
+  });
+
   it('renders the white-noise mixer shell and default ambience catalog', () => {
     render(<App />);
 
@@ -32,5 +41,13 @@ describe('App', () => {
     expect(within(activePanel).getByText('海边')).toBeInTheDocument();
     expect(within(activePanel).getByLabelText('雨声音量')).toHaveValue('65');
     expect(within(activePanel).getByLabelText('海边音量')).toHaveValue('65');
+  });
+
+  it('unlocks audio from the play button user gesture', async () => {
+    render(<App />);
+
+    fireEvent.click(screen.getByRole('button', { name: /开始播放/ }));
+
+    await waitFor(() => expect(resumeMock).toHaveBeenCalledTimes(1));
   });
 });

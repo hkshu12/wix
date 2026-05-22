@@ -55,6 +55,14 @@ export async function deleteCustomTrack(id: string, options: CustomLibraryOption
   db.close();
 }
 
+export function revokeCustomTrackUrls(tracks: Array<Pick<CustomTrack, 'objectUrl'>>): void {
+  for (const track of tracks) {
+    if (track.objectUrl.startsWith('blob:') && typeof URL.revokeObjectURL === 'function') {
+      URL.revokeObjectURL(track.objectUrl);
+    }
+  }
+}
+
 function openDatabase(databaseName = DEFAULT_DATABASE): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
     const request = indexedDB.open(databaseName, 1);

@@ -1,5 +1,5 @@
-import { beforeEach, describe, expect, it } from 'vitest';
-import { deleteCustomTrack, listCustomTracks, saveCustomTrack } from './customLibrary';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { deleteCustomTrack, listCustomTracks, revokeCustomTrackUrls, saveCustomTrack } from './customLibrary';
 
 describe('custom sound library persistence', () => {
   beforeEach(async () => {
@@ -32,5 +32,20 @@ describe('custom sound library persistence', () => {
     await deleteCustomTrack(saved.id, { databaseName: 'white-noise-mixer-test' });
 
     expect(await listCustomTracks({ databaseName: 'white-noise-mixer-test' })).toEqual([]);
+  });
+
+  it('revokes generated object URLs without touching non-blob URLs', () => {
+    const revoke = vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => undefined);
+
+    revokeCustomTrackUrls([
+      { objectUrl: 'blob:first' },
+      { objectUrl: 'https://example.com/audio.mp3' },
+      { objectUrl: 'blob:second' }
+    ]);
+
+    expect(revoke).toHaveBeenCalledTimes(2);
+    expect(revoke).toHaveBeenCalledWith('blob:first');
+    expect(revoke).toHaveBeenCalledWith('blob:second');
+    revoke.mockRestore();
   });
 });

@@ -12,7 +12,13 @@ import {
   type MixerState
 } from './domain/mixer';
 import { BUILT_IN_SOUNDS } from './domain/sounds';
-import { deleteCustomTrack, listCustomTracks, saveCustomTrack, type CustomTrack } from './storage/customLibrary';
+import {
+  deleteCustomTrack,
+  listCustomTracks,
+  revokeCustomTrackUrls,
+  saveCustomTrack,
+  type CustomTrack
+} from './storage/customLibrary';
 import './App.css';
 
 const heroStats = [
@@ -27,11 +33,23 @@ export default function App() {
   const [customTracks, setCustomTracks] = useState<CustomTrack[]>([]);
   const [importStatus, setImportStatus] = useState('支持 MP3、WAV、M4A 等浏览器可解码音频');
   const engineRef = useRef<AudioEngine | null>(null);
+  const customTracksRef = useRef<CustomTrack[]>([]);
 
   const allSounds = useMemo<PlayableSound[]>(() => [...BUILT_IN_SOUNDS, ...customTracks], [customTracks]);
   const selectedLayers = mixer.layers
     .map((layer) => ({ layer, sound: allSounds.find((sound) => sound.id === layer.soundId) }))
     .filter((entry): entry is { layer: MixerState['layers'][number]; sound: PlayableSound } => Boolean(entry.sound));
+
+  function replaceCustomTracks(nextTracks: CustomTrack[]) {
+    revokeCustomTrackUrls(customTracksRef.current);
+    customTracksRef.current = nextTracks;
+    setCustomTracks(nextTracks);
+  }
+
+  function getAudioEngine() {
+    engineRef.current ??= new AudioEngine();
+    return engineRef.current;
+  }
 
   useEffect(() => {
     let cancelled = false;
@@ -39,19 +57,21 @@ export default function App() {
     listCustomTracks()
       .then((tracks) => {
         if (!cancelled) {
-          setCustomTracks(tracks);
+          replaceCustomTracks(tracks);
         }
       })
       .catch(() => setImportStatus('无法读取已导入音频，请检查浏览器存储权限。'));
 
     return () => {
       cancelled = true;
+      revokeCustomTrackUrls(customTracksRef.current);
+      customTracksRef.current = [];
     };
   }, []);
 
   useEffect(() => {
     if (!engineRef.current && mixer.isPlaying) {
-      engineRef.current = new AudioEngine();
+      getAudioEngine();
     }
 
     void engineRef.current?.sync(mixer, allSounds).catch(() => {
@@ -76,7 +96,7 @@ export default function App() {
     try {
       await saveCustomTrack(file);
       const tracks = await listCustomTracks();
-      setCustomTracks(tracks);
+      replaceCustomTracks(tracks);
       setImportStatus(`${file.name} 已持久化到本机音频库。`);
     } catch {
       setImportStatus('导入失败：当前环境无法保存该文件。');
@@ -89,7 +109,15 @@ export default function App() {
       ...state,
       layers: state.layers.filter((layer) => layer.soundId !== track.id)
     }));
-    setCustomTracks(await listCustomTracks());
+    replaceCustomTracks(await listCustomTracks());
+  }
+
+  async function handlePlayToggle() {
+    if (!mixer.isPlaying) {
+      await getAudioEngine().resume();
+    }
+
+    setMixer((state) => setPlaying(state, !state.isPlaying));
   }
 
   return (
@@ -106,7 +134,7 @@ export default function App() {
             <button
               className="primary-action"
               type="button"
-              onClick={() => setMixer((state) => setPlaying(state, !state.isPlaying))}
+              onClick={() => void handlePlayToggle()}
             >
               {mixer.isPlaying ? '暂停播放' : '开始播放'}
             </button>

@@ -13,6 +13,7 @@ export class AudioEngine {
   private readonly master: GainNode;
   private readonly activeLayers = new Map<string, ActiveLayer>();
   private readonly bufferCache = new Map<string, AudioBuffer>();
+  private syncVersion = 0;
 
   constructor(context: AudioContext = new AudioContext()) {
     this.context = context;
@@ -20,7 +21,14 @@ export class AudioEngine {
     this.master.connect(context.destination);
   }
 
+  async resume(): Promise<void> {
+    if (this.context.state === 'suspended') {
+      await this.context.resume();
+    }
+  }
+
   async sync(state: MixerState, sounds: PlayableSound[]): Promise<void> {
+    const syncVersion = (this.syncVersion += 1);
     this.master.gain.value = state.masterVolume;
 
     if (!state.isPlaying || state.layers.length === 0) {
@@ -28,9 +36,7 @@ export class AudioEngine {
       return;
     }
 
-    if (this.context.state === 'suspended') {
-      await this.context.resume();
-    }
+    await this.resume();
 
     const plan = createAudioGraphPlan(state, sounds);
     const plannedIds = new Set(plan.map((layer) => layer.soundId));
@@ -42,7 +48,11 @@ export class AudioEngine {
     }
 
     for (const layer of plan) {
-      const active = this.activeLayers.get(layer.soundId) ?? (await this.startLayer(layer));
+      const active = this.activeLayers.get(layer.soundId) ?? (await this.startLayer(layer, syncVersion));
+      if (!active || syncVersion !== this.syncVersion) {
+        continue;
+      }
+
       active.gain.gain.setTargetAtTime(layer.finalVolume, this.context.currentTime, 0.04);
       active.source.playbackRate.setTargetAtTime(layer.finalPlaybackRate, this.context.currentTime, 0.04);
       active.panner?.pan.setTargetAtTime(layer.finalPan, this.context.currentTime, 0.04);
@@ -50,13 +60,18 @@ export class AudioEngine {
   }
 
   stop(): void {
+    this.syncVersion += 1;
     for (const soundId of [...this.activeLayers.keys()]) {
       this.stopLayer(soundId);
     }
   }
 
-  private async startLayer(layer: AudioGraphLayer): Promise<ActiveLayer> {
+  private async startLayer(layer: AudioGraphLayer, syncVersion: number): Promise<ActiveLayer | null> {
     const buffer = await this.resolveBuffer(layer.sound);
+    if (syncVersion !== this.syncVersion) {
+      return null;
+    }
+
     const source = this.context.createBufferSource();
     const gain = this.context.createGain();
     const panner = typeof this.context.createStereoPanner === 'function' ? this.context.createStereoPanner() : null;
