@@ -463,6 +463,7 @@ Expose via context:
 
 ```tsx
 // src/layout/StudioContext.tsx
+import { createContext, useContext, type ReactNode } from 'react';
 import type { MixerState } from '../domain/mixer';
 import type { CustomTrack } from '../storage/customLibrary';
 import type { PlayableSound } from '../audio/audioGraphPlan';
@@ -478,17 +479,30 @@ export interface StudioContextValue {
   handleDeleteCustomTrack: (track: CustomTrack) => Promise<void>;
   handlePlayToggle: () => Promise<void>;
 }
+
+const StudioContext = createContext<StudioContextValue | null>(null);
+
+export function StudioProvider({ value, children }: { value: StudioContextValue; children: ReactNode }) {
+  return <StudioContext.Provider value={value}>{children}</StudioContext.Provider>;
+}
+
+export function useStudio() {
+  const ctx = useContext(StudioContext);
+  if (!ctx) throw new Error('useStudio must be used within AppLayout');
+  return ctx;
+}
 ```
 
 `AppLayout.tsx` skeleton:
 
 ```tsx
 import { Outlet } from 'react-router-dom';
-import { StudioProvider } from './StudioContext';
+import { StudioProvider, type StudioContextValue } from './StudioContext';
 // ...imports from current App.tsx...
 
 export function AppLayout() {
   // all state/effects/handlers from App.tsx
+  const studioValue: StudioContextValue = { mixer, setMixer, customTracks, importStatus, allSounds, selectedLayers, handleImport, handleDeleteCustomTrack, handlePlayToggle };
   return (
     <StudioProvider value={studioValue}>
       <Outlet />
