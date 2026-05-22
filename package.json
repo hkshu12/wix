@@ -28,7 +28,8 @@
     "@capacitor/android": "^8.3.4",
     "@capacitor/core": "^8.3.4",
     "react": "^19.2.6",
-    "react-dom": "^19.2.6"
+    "react-dom": "^19.2.6",
+    "react-router-dom": "^7.15.1"
   },
   "devDependencies": {
     "@capacitor/cli": "^8.3.4",
