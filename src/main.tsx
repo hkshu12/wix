@@ -8,10 +8,12 @@ import './theme/tokens.css';
 
 registerSW({ immediate: true });
 
+const routerBasename = import.meta.env.BASE_URL.replace(/\/$/, '') || undefined;
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <ThemeProvider>
-      <BrowserRouter>
+      <BrowserRouter basename={routerBasename}>
         <AppRouter />
       </BrowserRouter>
     </ThemeProvider>

@@ -21,5 +21,12 @@ export default tseslint.config(
     rules: {
       '@typescript-eslint/no-explicit-any': 'error'
     }
+  },
+  {
+    files: ['scripts/**/*.mjs'],
+    languageOptions: {
+      ecmaVersion: 2022,
+      globals: globals.node
+    }
   }
 );
