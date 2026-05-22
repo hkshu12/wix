@@ -1,10 +1,11 @@
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import App from './App';
+import { AppRouter } from '../router/AppRouter';
+import { renderWithRouter } from '../test/renderWithRouter';
 
 const resumeMock = vi.fn().mockResolvedValue(undefined);
 
-vi.mock('./audio/AudioEngine', () => ({
+vi.mock('../audio/AudioEngine', () => ({
   AudioEngine: vi.fn().mockImplementation(function MockAudioEngine() {
     return {
       resume: resumeMock,
@@ -14,23 +15,22 @@ vi.mock('./audio/AudioEngine', () => ({
   })
 }));
 
-describe('App', () => {
+describe('StudioPage', () => {
   beforeEach(() => {
     resumeMock.mockClear();
+    localStorage.clear();
   });
 
-  it('renders the white-noise mixer shell and default ambience catalog', () => {
-    render(<App />);
+  it('renders studio without marketing stat grid', () => {
+    renderWithRouter(<AppRouter />, { routerProps: { initialEntries: ['/studio'] } });
 
-    expect(screen.getByRole('heading', { name: /白噪音混音器/ })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /开始播放/ })).toBeInTheDocument();
+    expect(screen.queryByLabelText('应用能力概览')).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: /雨声/ })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /篝火/ })).toBeInTheDocument();
     expect(screen.getByLabelText(/导入自定义音乐/)).toBeInTheDocument();
   });
 
   it('selects multiple sounds and exposes per-layer volume controls', () => {
-    render(<App />);
+    renderWithRouter(<AppRouter />, { routerProps: { initialEntries: ['/studio'] } });
 
     fireEvent.click(screen.getByRole('button', { name: /雨声/ }));
     fireEvent.click(screen.getByRole('button', { name: /海边/ }));
@@ -44,9 +44,9 @@ describe('App', () => {
   });
 
   it('unlocks audio from the play button user gesture', async () => {
-    render(<App />);
+    renderWithRouter(<AppRouter />, { routerProps: { initialEntries: ['/studio'] } });
 
-    fireEvent.click(screen.getByRole('button', { name: /开始播放/ }));
+    fireEvent.click(screen.getByRole('button', { name: '播放' }));
 
     await waitFor(() => expect(resumeMock).toHaveBeenCalledTimes(1));
   });
