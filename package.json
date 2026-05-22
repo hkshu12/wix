@@ -1,0 +1,49 @@
+{
+  "name": "white-noise-mixer",
+  "version": "1.0.0",
+  "description": "Cross-platform white noise mixer for Web, PWA, and Android.",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 0.0.0.0",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview --host 0.0.0.0",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint .",
+    "android:sync": "npm run build && cap sync android",
+    "android:open": "cap open android"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hkshu12/wix.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/hkshu12/wix/issues"
+  },
+  "homepage": "https://github.com/hkshu12/wix#readme",
+  "dependencies": {
+    "@capacitor/android": "^8.3.4",
+    "@capacitor/core": "^8.3.4",
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^8.3.4",
+    "@eslint/js": "^10.0.1",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@vitejs/plugin-react": "^6.0.2",
+    "eslint": "^10.4.0",
+    "fake-indexeddb": "^6.2.5",
+    "globals": "^17.6.0",
+    "jsdom": "^29.1.1",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.59.4",
+    "vite": "^8.0.14",
+    "vite-plugin-pwa": "^1.3.0",
+    "vitest": "^4.1.7"
+  }
+}
