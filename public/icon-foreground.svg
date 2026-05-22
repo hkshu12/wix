@@ -1,9 +1,5 @@
 <svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Wix">
   <defs>
-    <linearGradient id="bg" x1="64" y1="48" x2="448" y2="464" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#020617" />
-      <stop offset="1" stop-color="#0F172A" />
-    </linearGradient>
     <linearGradient id="barA" x1="0" y1="1" x2="0" y2="0">
       <stop stop-color="#22D3EE" />
       <stop offset="1" stop-color="#38BDF8" />
@@ -16,8 +12,6 @@
       <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#22D3EE" flood-opacity="0.35" />
     </filter>
   </defs>
-  <rect width="512" height="512" rx="112" fill="url(#bg)" />
-  <!-- Equalizer bars (audio) -->
   <g filter="url(#glow)" opacity="0.92">
     <rect x="72" y="248" width="40" height="128" rx="20" fill="url(#barA)" />
     <rect x="124" y="208" width="40" height="168" rx="20" fill="url(#barB)" />
@@ -27,7 +21,6 @@
     <rect x="332" y="212" width="40" height="164" rx="20" fill="url(#barB)" />
     <rect x="384" y="256" width="40" height="120" rx="20" fill="url(#barA)" />
   </g>
-  <!-- Waveform (audio) -->
   <path
     d="M88 392 C132 352 156 432 200 392 S280 352 324 392 S412 432 456 388"
     stroke="#F8FAFC"
