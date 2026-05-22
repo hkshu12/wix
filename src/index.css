@@ -1,0 +1,92 @@
+@import 'tailwindcss';
+
+@theme {
+  --font-sans: 'DM Sans', 'Noto Sans SC', ui-sans-serif, system-ui, sans-serif;
+  --radius-xl: 1.25rem;
+  --shadow-glow: 0 0 80px -20px rgb(34 211 238 / 0.35);
+}
+
+@layer base {
+  :root {
+    color-scheme: dark;
+    --bg-deep: #050810;
+    --bg-elevated: rgb(255 255 255 / 0.04);
+    --stroke: rgb(255 255 255 / 0.08);
+    --accent: #22d3ee;
+    --accent-dim: rgb(34 211 238 / 0.55);
+  }
+
+  html {
+    @apply antialiased;
+    background: var(--bg-deep);
+  }
+
+  body {
+    @apply m-0 min-h-[100dvh] text-zinc-100 font-sans;
+    background:
+      radial-gradient(1200px 600px at 10% -10%, rgb(34 211 238 / 0.12), transparent 55%),
+      radial-gradient(900px 500px at 100% 0%, rgb(167 139 250 / 0.1), transparent 50%),
+      linear-gradient(180deg, #070b14 0%, #050810 40%, #03050a 100%);
+    background-attachment: fixed;
+  }
+
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  ::selection {
+    background: rgb(34 211 238 / 0.25);
+  }
+}
+
+@utility glass-panel {
+  background: linear-gradient(
+    145deg,
+    rgb(255 255 255 / 0.07) 0%,
+    rgb(255 255 255 / 0.02) 100%
+  );
+  border: 1px solid var(--stroke);
+  backdrop-filter: blur(18px);
+  box-shadow:
+    0 1px 0 rgb(255 255 255 / 0.06) inset,
+    0 24px 80px -40px rgb(0 0 0 / 0.85);
+}
+
+@utility touch-scroll {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
+input.ambient-range {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    rgb(34 211 238 / 0.35),
+    rgb(167 139 250 / 0.35)
+  );
+  outline: none;
+}
+
+input.ambient-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  background: #f4f4f5;
+  box-shadow: 0 0 0 2px rgb(34 211 238 / 0.45);
+  cursor: pointer;
+}
+
+input.ambient-range::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  background: #f4f4f5;
+  border: 0;
+  box-shadow: 0 0 0 2px rgb(34 211 238 / 0.45);
+  cursor: pointer;
+}
