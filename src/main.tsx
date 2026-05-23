@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router-dom';
 import { registerSW } from 'virtual:pwa-register';
 import { AppRouter } from './router/AppRouter';
 import { ThemeProvider } from './theme/ThemeProvider';
+import './layout/safeArea.css';
 import './theme/tokens.css';
 
 registerSW({ immediate: true });

@@ -29,11 +29,12 @@ describe('StudioPage', () => {
     expect(screen.getByLabelText(/导入自定义音乐/)).toBeInTheDocument();
   });
 
-  it('selects multiple sounds and exposes per-layer volume controls', () => {
+  it('selects multiple sounds and exposes per-layer volume controls in the mixer drawer', () => {
     renderWithRouter(<AppRouter />, { routerProps: { initialEntries: ['/studio'] } });
 
     fireEvent.click(screen.getByRole('button', { name: /雨声/ }));
     fireEvent.click(screen.getByRole('button', { name: /海边/ }));
+    fireEvent.click(screen.getByRole('button', { name: /混音与导入/ }));
 
     const activePanel = screen.getByLabelText('当前混音轨道');
 

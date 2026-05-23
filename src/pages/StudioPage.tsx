@@ -1,4 +1,6 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { BottomDrawer } from '../components/BottomDrawer';
 import { Slider } from '../components/Slider';
 import {
   setGlobalPlaybackRate,
@@ -7,6 +9,7 @@ import {
   setStereoWidth,
   toggleLayer
 } from '../domain/mixer';
+import { assetUrl } from '../lib/assetUrl';
 import { useStudio } from '../layout/StudioContext';
 import { ThemeToggle } from '../theme/ThemeToggle';
 import './StudioPage.css';
@@ -22,20 +25,80 @@ export function StudioPage() {
     handleDeleteCustomTrack,
     handlePlayToggle
   } = useStudio();
+  const [drawerOpen, setDrawerOpen] = useState(false);
+
+  const activeCount = mixer.layers.length;
 
   return (
-    <main className="studio-page">
+    <main className="studio-page studio-remote">
       <header className="studio-topbar">
         <div className="studio-topbar-start">
-          <img className="studio-mark" src="/icon.svg" alt="" width={28} height={28} />
-          <span className="studio-title">白噪音混音器</span>
+          <img className="studio-mark" src={assetUrl('icon.svg')} alt="" width={28} height={28} />
+          <div>
+            <span className="studio-title">白噪音混音器</span>
+            <p className="studio-subtitle">远程声景 · 点选即播</p>
+          </div>
         </div>
         <div className="studio-topbar-actions">
-          <button className="studio-btn studio-btn--primary" type="button" onClick={() => void handlePlayToggle()}>
-            {mixer.isPlaying ? '暂停' : '播放'}
-          </button>
-          <label className="studio-btn studio-btn--secondary">
-            导入
+          <Link className="studio-btn studio-btn--ghost" to="/" state={{ fromIntro: true }}>
+            介绍
+          </Link>
+          <ThemeToggle />
+        </div>
+      </header>
+
+      <section className="studio-stage" aria-labelledby="remote-sounds-title">
+        <div className="studio-stage-heading">
+          <h2 id="remote-sounds-title">选择环境声</h2>
+          <p>像遥控器一样叠加远处声景，无需在页面间来回切换。</p>
+        </div>
+        <div className="sound-grid sound-grid--remote">
+          {allSounds.map((sound) => {
+            const selected = mixer.layers.some((layer) => layer.soundId === sound.id);
+            const accent = sound.kind === 'built-in' ? sound.accent : '#a78bfa';
+            const icon = sound.kind === 'built-in' ? sound.icon : '🎵';
+            const subtitle =
+              sound.kind === 'built-in' ? sound.subtitle : `${formatBytes(sound.size)} · ${sound.fileName}`;
+
+            return (
+              <button
+                className={`sound-card sound-card--remote ${selected ? 'selected' : ''}`}
+                key={sound.id}
+                style={{ '--accent': accent } as React.CSSProperties}
+                type="button"
+                aria-pressed={selected}
+                onClick={() => setMixer((state) => toggleLayer(state, sound.id))}
+              >
+                <span className="sound-icon">{icon}</span>
+                <span className="sound-card-copy">
+                  <strong>{sound.title}</strong>
+                  <small>{subtitle}</small>
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </section>
+
+      <footer className="studio-dock" aria-label="播放与混音控制">
+        <button className="studio-dock-play" type="button" onClick={() => void handlePlayToggle()}>
+          <span className="studio-dock-play-icon" aria-hidden>
+            {mixer.isPlaying ? '❚❚' : '▶'}
+          </span>
+          <span>{mixer.isPlaying ? '暂停' : '播放'}</span>
+        </button>
+        <button className="studio-dock-mixer" type="button" onClick={() => setDrawerOpen(true)}>
+          <span>混音与导入</span>
+          {activeCount > 0 ? <span className="studio-dock-badge">{activeCount}</span> : null}
+        </button>
+      </footer>
+
+      <BottomDrawer open={drawerOpen} title="混音与导入" onClose={() => setDrawerOpen(false)}>
+        <section className="drawer-section" aria-labelledby="drawer-import-title">
+          <h3 id="drawer-import-title">添加到本机</h3>
+          <p className="drawer-hint">从底部抽屉导入音频，混音台与轨道调节都在此完成。</p>
+          <label className="studio-btn studio-btn--secondary drawer-import-btn">
+            导入音频
             <input
               aria-label="导入自定义音乐"
               type="file"
@@ -43,52 +106,11 @@ export function StudioPage() {
               onChange={(event) => void handleImport(event.target.files)}
             />
           </label>
-          <Link className="studio-btn studio-btn--ghost" to="/" state={{ fromIntro: true }}>
-            介绍
-          </Link>
-          <ThemeToggle />
-        </div>
-        <p className="studio-import-status">{importStatus}</p>
-      </header>
-
-      <section className="studio-grid">
-        <section className="panel catalog-panel" aria-labelledby="catalog-title">
-          <div className="panel-heading">
-            <h2 id="catalog-title">选择并混合声音</h2>
-          </div>
-          <div className="sound-grid">
-            {allSounds.map((sound) => {
-              const selected = mixer.layers.some((layer) => layer.soundId === sound.id);
-              const accent = sound.kind === 'built-in' ? sound.accent : '#a78bfa';
-              const icon = sound.kind === 'built-in' ? sound.icon : '🎵';
-              const subtitle =
-                sound.kind === 'built-in' ? sound.subtitle : `${formatBytes(sound.size)} · ${sound.fileName}`;
-
-              return (
-                <button
-                  className={`sound-card ${selected ? 'selected' : ''}`}
-                  key={sound.id}
-                  style={{ '--accent': accent } as React.CSSProperties}
-                  type="button"
-                  aria-pressed={selected}
-                  onClick={() => setMixer((state) => toggleLayer(state, sound.id))}
-                >
-                  <span className="sound-icon">{icon}</span>
-                  <span>
-                    <strong>{sound.title}</strong>
-                    <small>{subtitle}</small>
-                  </span>
-                </button>
-              );
-            })}
-          </div>
+          <p className="studio-import-status">{importStatus}</p>
         </section>
 
-        <section className="panel mixer-panel" aria-label="当前混音轨道">
-          <div className="panel-heading">
-            <h2>混音控制台</h2>
-          </div>
-
+        <section className="drawer-section panel mixer-panel" aria-label="当前混音轨道">
+          <h3>混音控制台</h3>
           <div className="global-controls">
             <Slider
               label="主音量"
@@ -116,8 +138,8 @@ export function StudioPage() {
           <div className="layers">
             {selectedLayers.length === 0 ? (
               <div className="empty-state">
-                <span>🎚️</span>
-                <p>从左侧选择一个或多个声音开始混音。</p>
+                <span>📡</span>
+                <p>在上方选择声音后，可在此调节每轨音量与声像。</p>
               </div>
             ) : (
               selectedLayers.map(({ layer, sound }) => (
@@ -125,7 +147,7 @@ export function StudioPage() {
                   <div className="layer-title">
                     <span>{sound.kind === 'built-in' ? sound.icon : '🎵'}</span>
                     <div>
-                      <h3>{sound.title}</h3>
+                      <h4>{sound.title}</h4>
                       <p>{sound.kind === 'built-in' ? sound.subtitle : sound.fileName}</p>
                     </div>
                     <button
@@ -173,7 +195,7 @@ export function StudioPage() {
             )}
           </div>
         </section>
-      </section>
+      </BottomDrawer>
     </main>
   );
 }
