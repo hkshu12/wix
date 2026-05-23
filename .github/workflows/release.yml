@@ -147,30 +147,10 @@ jobs:
           name: android-apk
           path: white-noise-mixer-v${{ needs.resolve-version.outputs.version }}-android.apk
 
-  deploy-pages:
-    needs: [resolve-version, build-web]
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Download web dist
-        uses: actions/download-artifact@v4
-        with:
-          name: web-dist
-          path: .
-
-      - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: dist
-
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
-
+  # Pages deploy for tags is handled by pages.yml on main. Tag-triggered deploys
+  # are often blocked by github-pages environment protection rules.
   publish-release:
-    needs: [resolve-version, build-web, build-android, deploy-pages]
+    needs: [resolve-version, build-web, build-android]
     runs-on: ubuntu-latest
     steps:
       - name: Download release artifacts
