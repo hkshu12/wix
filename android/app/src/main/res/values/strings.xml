@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">White Noise Mixer</string>
-    <string name="title_activity_main">White Noise Mixer</string>
+    <string name="app_name">wix</string>
+    <string name="title_activity_main">wix</string>
     <string name="package_name">app.whiteNoiseMixer.studio</string>
     <string name="custom_url_scheme">app.whiteNoiseMixer.studio</string>
 </resources>
