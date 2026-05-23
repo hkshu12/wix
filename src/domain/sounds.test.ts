@@ -12,7 +12,7 @@ describe('built-in sound catalog', () => {
     const ids = BUILT_IN_SOUNDS.map((sound) => sound.id);
 
     expect(new Set(ids).size).toBe(ids.length);
-    expect(BUILT_IN_SOUNDS.every((sound) => sound.title && sound.engine.kind)).toBe(true);
+    expect(BUILT_IN_SOUNDS.every((sound) => sound.title && sound.src.startsWith('sounds/'))).toBe(true);
   });
 
   it('looks up built-in sounds by id', () => {

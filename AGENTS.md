@@ -61,6 +61,6 @@ export PATH="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$ANDROID_SDK_ROOT/platfo
 ### Notes
 
 - This is a fully client-side SPA — no backend services, databases, or API keys needed.
-- Audio is procedurally generated via Web Audio API; no audio files are shipped.
+- Built-in ambiences ship as CC0 looped OGG files under `public/sounds/` (see `public/sounds/ATTRIBUTION.md`).
 - The Gradle daemon takes ~60 s on a cold start; subsequent Android builds are faster.
 - The first `./gradlew` invocation downloads Gradle 8.x (~140 MB); this is cached afterwards.

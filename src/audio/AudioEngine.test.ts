@@ -21,6 +21,7 @@ describe('AudioEngine lifecycle', () => {
     vi.stubGlobal(
       'fetch',
       vi.fn().mockResolvedValue({
+        ok: true,
         arrayBuffer: () => Promise.resolve(new ArrayBuffer(4))
       })
     );

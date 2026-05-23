@@ -8,8 +8,6 @@ export type BuiltInSoundId =
   | 'brown-noise'
   | 'pink-noise';
 
-export type ProceduralEngineKind = 'crackle' | 'rain' | 'surf' | 'hearth' | 'rumble' | 'forest' | 'brown' | 'pink';
-
 export interface BuiltInSound {
   id: BuiltInSoundId;
   kind: 'built-in';
@@ -17,11 +15,8 @@ export interface BuiltInSound {
   subtitle: string;
   icon: string;
   accent: string;
-  engine: {
-    kind: ProceduralEngineKind;
-    filterFrequency: number;
-    resonance: number;
-  };
+  /** Path under `public/`, e.g. `sounds/rain.ogg` */
+  src: string;
 }
 
 export const BUILT_IN_SOUNDS: BuiltInSound[] = [
@@ -32,7 +27,7 @@ export const BUILT_IN_SOUNDS: BuiltInSound[] = [
     subtitle: '跳动木柴与轻微爆裂',
     icon: '🔥',
     accent: '#ff9f43',
-    engine: { kind: 'crackle', filterFrequency: 1800, resonance: 3.4 }
+    src: 'sounds/campfire.ogg'
   },
   {
     id: 'rain',
@@ -41,7 +36,7 @@ export const BUILT_IN_SOUNDS: BuiltInSound[] = [
     subtitle: '密集雨滴与窗外氛围',
     icon: '🌧️',
     accent: '#60a5fa',
-    engine: { kind: 'rain', filterFrequency: 2600, resonance: 1.2 }
+    src: 'sounds/rain.ogg'
   },
   {
     id: 'ocean',
@@ -50,7 +45,7 @@ export const BUILT_IN_SOUNDS: BuiltInSound[] = [
     subtitle: '潮汐般起伏的浪声',
     icon: '🌊',
     accent: '#22d3ee',
-    engine: { kind: 'surf', filterFrequency: 720, resonance: 0.8 }
+    src: 'sounds/ocean.ogg'
   },
   {
     id: 'fireplace',
@@ -59,7 +54,7 @@ export const BUILT_IN_SOUNDS: BuiltInSound[] = [
     subtitle: '温暖室内燃烧声',
     icon: '🪵',
     accent: '#fb7185',
-    engine: { kind: 'hearth', filterFrequency: 1250, resonance: 2.2 }
+    src: 'sounds/fireplace.ogg'
   },
   {
     id: 'thunder',
@@ -68,7 +63,7 @@ export const BUILT_IN_SOUNDS: BuiltInSound[] = [
     subtitle: '低频滚动与雨夜空间',
     icon: '⛈️',
     accent: '#818cf8',
-    engine: { kind: 'rumble', filterFrequency: 220, resonance: 4 }
+    src: 'sounds/thunder.ogg'
   },
   {
     id: 'forest',
@@ -77,7 +72,7 @@ export const BUILT_IN_SOUNDS: BuiltInSound[] = [
     subtitle: '树叶、微风与远处鸟鸣',
     icon: '🌲',
     accent: '#34d399',
-    engine: { kind: 'forest', filterFrequency: 3400, resonance: 0.9 }
+    src: 'sounds/forest.ogg'
   },
   {
     id: 'brown-noise',
@@ -86,7 +81,7 @@ export const BUILT_IN_SOUNDS: BuiltInSound[] = [
     subtitle: '柔和低频专注底噪',
     icon: '🟤',
     accent: '#a16207',
-    engine: { kind: 'brown', filterFrequency: 520, resonance: 0.7 }
+    src: 'sounds/brown-noise.ogg'
   },
   {
     id: 'pink-noise',
@@ -95,7 +90,7 @@ export const BUILT_IN_SOUNDS: BuiltInSound[] = [
     subtitle: '均衡舒缓的睡眠底噪',
     icon: '🌸',
     accent: '#f472b6',
-    engine: { kind: 'pink', filterFrequency: 1400, resonance: 0.6 }
+    src: 'sounds/pink-noise.ogg'
   }
 ];
 

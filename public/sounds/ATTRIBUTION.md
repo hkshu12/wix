@@ -1,0 +1,23 @@
+# Built-in ambience audio (CC0)
+
+All files in this folder are used as looping built-in presets in the mixer.
+They are **CC0 / public domain** and may be used without attribution (credit is still appreciated).
+
+| File | Preset | Source |
+|------|--------|--------|
+| `rain.ogg` | 雨声 | [loop_rain.ogg](https://github.com/lavenderdotpet/CC0-Public-Domain-Sounds/blob/main/40-cc0-water-splash-slime-sfx/loop_rain.ogg) |
+| `ocean.ogg` | 海边 | [loop_water_02.ogg](https://github.com/lavenderdotpet/CC0-Public-Domain-Sounds/blob/main/40-cc0-water-splash-slime-sfx/loop_water_02.ogg) |
+| `campfire.ogg` | 篝火 | [wood_cracking_01–04.ogg](https://github.com/lavenderdotpet/CC0-Public-Domain-Sounds/tree/main/100-CC0-wood-metal-SFX) (concatenated & extended) |
+| `fireplace.ogg` | 壁炉 | [ambient_01.ogg](https://github.com/lavenderdotpet/CC0-Public-Domain-Sounds/blob/main/30-cc0-sfx-loops/ambient_01.ogg) |
+| `thunder.ogg` | 远雷 | [Fake Thunder 1.wav](https://github.com/lavenderdotpet/CC0-Public-Domain-Sounds/blob/main/Micro%20Pack%20-%20Chairmat/Fake%20Thunder%201.wav) (trimmed/encoded to OGG) |
+| `forest.ogg` | 森林 | [ambient_03.ogg](https://github.com/lavenderdotpet/CC0-Public-Domain-Sounds/blob/main/30-cc0-sfx-loops/ambient_03.ogg) |
+| `brown-noise.ogg` | 棕噪音 | [noise_01.ogg](https://github.com/lavenderdotpet/CC0-Public-Domain-Sounds/blob/main/30-cc0-sfx-loops/noise_01.ogg) |
+| `pink-noise.ogg` | 粉噪音 | [noise_02.ogg](https://github.com/lavenderdotpet/CC0-Public-Domain-Sounds/blob/main/30-cc0-sfx-loops/noise_02.ogg) |
+
+**Collection:** [lavenderdotpet/CC0-Public-Domain-Sounds](https://github.com/lavenderdotpet/CC0-Public-Domain-Sounds) (CC0).
+
+To re-download raw sources and rebuild `campfire.ogg` / `thunder.ogg`:
+
+```bash
+./scripts/download-builtin-sounds.sh
+```
