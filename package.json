@@ -10,6 +10,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "icons:generate": "node scripts/generate-icons.mjs",
+    "version:sync": "node scripts/sync-version.mjs",
     "lint": "eslint .",
     "android:sync": "npm run build && cap sync android",
     "android:open": "cap open android"
