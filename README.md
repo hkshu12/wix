@@ -41,6 +41,8 @@ Or run **Actions → Release → Run workflow**, enter a version like `1.0.0`, a
 Each release publishes:
 
 - `white-noise-mixer-web-v<version>.zip` — production `dist/`
-- `white-noise-mixer-v<version>-android.apk` — debug APK (`assembleDebug`)
+- `wix-v<version>-android.apk` — release APK (`assembleRelease`, signed with `android/wix-release.keystore`)
+
+**Android install note:** Release APKs share one project keystore so upgrades install over the previous release build. If you previously installed a debug-signed APK (local `assembleDebug` or older CI builds), uninstall once before installing a release-signed APK.
 
 Version numbers are synced to `package.json` and `android/app/build.gradle` during the release build.

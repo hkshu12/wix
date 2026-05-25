@@ -2,7 +2,7 @@ import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'app.whiteNoiseMixer.studio',
-  appName: 'White Noise Mixer',
+  appName: 'wix',
   webDir: 'dist',
   server: {
     androidScheme: 'https'
