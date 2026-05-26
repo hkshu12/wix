@@ -18,6 +18,7 @@ GitHub Actions workflows under `.github/workflows/`:
 | `ci.yml` | Push/PR to `main` | Lint, test, and build |
 | `pages.yml` | Push to `main` | Deploy latest web build to GitHub Pages |
 | `release.yml` | Tag `v*.*.*` or manual | Versioned GitHub Release (web zip + Android APK) and Pages deploy |
+| `daily-improvement.yml` | Daily 06:00 CST or manual | Launch Cursor Cloud Agent to discover improvements and open a PR — see [docs/automation/daily-improvement.md](docs/automation/daily-improvement.md) |
 
 ### GitHub Pages
 

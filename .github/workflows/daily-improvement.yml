@@ -1,0 +1,32 @@
+# Daily discovery + implementation for the wix white-noise mixer.
+# Schedule: 06:00 Asia/Shanghai (22:00 UTC previous calendar day).
+name: Daily improvement
+
+on:
+  schedule:
+    # 22:00 UTC = 06:00 CST (UTC+8) next morning
+    - cron: '0 22 * * *'
+  workflow_dispatch:
+    inputs:
+      starting_ref:
+        description: Git ref for the cloud agent to start from
+        required: false
+        default: main
+        type: string
+
+concurrency:
+  group: daily-improvement
+  cancel-in-progress: false
+
+jobs:
+  launch-cloud-agent:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Launch Cursor Cloud Agent
+        env:
+          CURSOR_API_KEY: ${{ secrets.CURSOR_API_KEY }}
+          WIX_STARTING_REF: ${{ github.event.inputs.starting_ref || 'main' }}
+        run: bash .github/scripts/launch-daily-improvement-agent.sh

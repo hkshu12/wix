@@ -58,9 +58,15 @@ export PATH="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$ANDROID_SDK_ROOT/platfo
 | Production build | `npm run build` |
 | Android sync + build | `npm run build && npx cap sync android && cd android && ./gradlew assembleDebug` |
 
+### Daily improvement automation
+
+A scheduled GitHub Action (06:00 Asia/Shanghai) launches a Cursor Cloud Agent using
+`.cursor/automations/daily-improvement-prompt.md`. The agent updates `docs/IMPROVEMENT_BACKLOG.md`,
+implements one backlog item, and opens a PR. Setup: [docs/automation/daily-improvement.md](docs/automation/daily-improvement.md).
+
 ### Notes
 
-- This is a fully client-side SPA — no backend services, databases, or API keys needed.
+- This is a fully client-side SPA — no backend services, databases, or API keys needed for local dev.
 - Built-in ambiences ship as CC0 looped OGG files under `public/sounds/` (see `public/sounds/ATTRIBUTION.md`).
 - The Gradle daemon takes ~60 s on a cold start; subsequent Android builds are faster.
 - The first `./gradlew` invocation downloads Gradle 8.x (~140 MB); this is cached afterwards.
