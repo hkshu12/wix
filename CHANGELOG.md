@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.3.0] - 2026-05-27
+
+### Added
+
+- Mixer snapshot persistence: active layers, per-layer controls, master volume, stereo width, and global playback rate restore after refresh (playback stays paused until you press play).
+
 ## [1.2.0] - 2026-05-27
 
 ### Added
