@@ -84,7 +84,7 @@ export function AppLayout() {
 
     void engineRef.current?.sync(mixer, allSounds).catch(() => {
       setMixer((state) => setPlaying(state, false));
-      setImportStatus('音频启动失败，请重新点击播放或更换导入文件。');
+      setImportStatus('音频加载失败（已自动重试），请检查网络后重新播放或更换文件。');
     });
 
     return () => {

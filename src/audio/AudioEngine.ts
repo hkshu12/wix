@@ -2,6 +2,7 @@ import { createAudioGraphPlan, type AudioGraphLayer, type PlayableSound } from '
 import type { MixerState } from '../domain/mixer';
 import type { BuiltInSound } from '../domain/sounds';
 import { assetUrl } from '../lib/assetUrl';
+import { decodeAudioDataWithRetry, fetchArrayBufferWithRetry } from './loadAudioWithRetry';
 
 interface ActiveLayer {
   source: AudioBufferSourceNode;
@@ -138,11 +139,7 @@ export class AudioEngine {
   }
 
   private async decodeFromUrl(url: string): Promise<AudioBuffer> {
-    const response = await fetch(url);
-    if (!response.ok) {
-      throw new Error(`Failed to load audio (${response.status}): ${url}`);
-    }
-    const data = await response.arrayBuffer();
-    return this.context.decodeAudioData(data.slice(0));
+    const data = await fetchArrayBufferWithRetry(url);
+    return decodeAudioDataWithRetry(this.context, data);
   }
 }
