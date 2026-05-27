@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
 import { joinBasePath, pwaScopeFromBase } from './src/lib/basePath';
+import { PWA_DISPLAY_ORIENTATION } from './src/lib/studioLayoutMedia';
 
 const base = process.env.VITE_BASE_PATH ?? '/';
 const pwaScope = pwaScopeFromBase(base);
@@ -27,7 +28,7 @@ export default defineConfig({
         theme_color: '#07111f',
         background_color: '#07111f',
         display: 'standalone',
-        orientation: 'any',
+        orientation: PWA_DISPLAY_ORIENTATION,
         start_url: pwaScope.start_url,
         scope: pwaScope.scope,
         icons: [
