@@ -5,6 +5,16 @@ import { getHasEnteredStudio } from '../storage/onboarding';
 import { renderWithRouter } from '../test/renderWithRouter';
 
 describe('LandingPage', () => {
+  it('lists sleep timer, presets, and mix persistence in features', () => {
+    renderWithRouter(<AppRouter />, { routerProps: { initialEntries: ['/'] } });
+
+    const features = screen.getByRole('region', { name: '能做什么' });
+
+    expect(features).toHaveTextContent(/睡眠定时（15–60 分钟）/);
+    expect(features).toHaveTextContent(/命名场景预设/);
+    expect(features).toHaveTextContent(/刷新后自动恢复/);
+  });
+
   it('marks entered studio and navigates on 开始使用', async () => {
     renderWithRouter(<AppRouter />, { routerProps: { initialEntries: ['/'] } });
 

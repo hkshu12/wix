@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.11.0] - 2026-05-27
+
+### Changed
+
+- Landing page feature list and steps now describe sleep timer, named mixer presets, and mix persistence after refresh.
+
 ## [1.10.0] - 2026-05-27
 
 ### Added

@@ -32,8 +32,8 @@
 | **横屏与安全区细化** | 平板横屏 | 主要为竖屏远程式布局 | 横屏 `@media` 调整网格与 dock |
 | **新内置环境声** | 风扇、咖啡馆、列车等 | 8 轨 CC0 集 | 扩展 `sounds.ts` + `sounds:download` |
 | **大文件导入进度** | 长播客/长环境录音 | 仅状态文案 | `FileReader` 进度或分块提示 |
-| **混音 ARIA 实时区域** | 读屏知播放/定时状态 | 定时已有 live；播放无 | `aria-live` 播报播放切换 |
-| **落地页功能列表更新** | 新用户了解能力 | 未提及定时、预设、持久化 | 补充 Studio 已有功能文案 |
+| **混音 ARIA 实时区域** | 读屏知播放/定时状态 | 定时已有 live；播放切换无播报 | `aria-live` + 仅在状态变化时更新文案 |
+| ~~落地页功能列表更新~~ | 新用户了解能力 | — | 本次 v1.11.0 |
 
 ### 体验场景与缺口（摘要）
 
@@ -47,26 +47,28 @@
 | 旅行/办公 | 离线 PWA、子路径安装 | v1.6.0 manifest 对齐 |
 | 弱网/首次加载 | 内置 OGG 偶发失败 | fetch+decode 指数退避重试（v1.8.0） |
 | 前庭敏感 | 减少 UI 动效 | 系统「减少动态效果」下抽屉/导航瞬时切换（v1.10.0） |
+| 新用户认知 | 落地页了解 Studio 能力 | v1.11.0 补充定时/预设/持久化文案 |
 | 自定义内容 | 导入本地音频 | IndexedDB + 混音层可恢复 |
 
 ### 外部信号
 
-- GitHub Issues：当前无 open issue。
-- 近期 CHANGELOG：v1.9.0 焦点陷阱、v1.10.0 减少动效——**避免重复**。
-- 同类 App 常见能力：后台播放、分享配方、落地页能力说明——下一项优先 **落地页功能文案** 或 **混音播放 ARIA live**（小 diff）。
+- GitHub Issues：当前无 open issue（2026-05-27）。
+- 近期 CHANGELOG：v1.10.0 减少动效已合入 main——**避免重复**。
+- 同类 App 常见能力：后台播放、分享配方、能力说明页——本次落地页；下一项建议 **混音播放 ARIA live** 或 **导出混音 JSON**。
 
 ## 本次选中项
 
-**减少动效（`prefers-reduced-motion`，P1）**
+**落地页功能列表更新（P2）**
 
-- **理由**：抽屉与 Android 侧栏使用 transform/opacity 过渡；系统开启「减少动态效果」的用户仍会看到滑动动画，易诱发不适；纯 CSS 变量 + 媒体查询，无原生依赖，可单测 `matchMedia` 辅助函数。
-- **范围**：`tokens.css` 动效时长变量；`BottomDrawer` / `AndroidNavDrawer` / 更新进度条过渡；`motionPreference.ts` 供后续 JS 动效复用。
+- **理由**：Studio 已具备睡眠定时、场景预设、混音/定时持久化，但落地页「能做什么」仍像初版功能集，新用户与 PWA 安装前无法感知差异化能力；纯文案 + 单测，无原生依赖，单 PR 可交付。
+- **范围**：`LandingPage.tsx` 功能列表与使用步骤；`LandingPage.test.tsx` 断言关键能力文案。
 
 ## 历史已完成
 
 | 日期 | 项 | 引用 |
 | --- | --- | --- |
-| 2026-05-27 | 减少动效（prefers-reduced-motion） | v1.10.0（本次） |
+| 2026-05-27 | 落地页功能列表更新 | v1.11.0（本次） |
+| 2026-05-27 | 减少动效（prefers-reduced-motion） | [PR #21](https://github.com/hkshu12/wix/pull/21), [v1.10.0](https://github.com/hkshu12/wix/releases/tag/v1.10.0) |
 | 2026-05-27 | 混音台底部抽屉焦点陷阱 | [PR #20](https://github.com/hkshu12/wix/pull/20), [v1.9.0](https://github.com/hkshu12/wix/releases/tag/v1.9.0) |
 | 2026-05-27 | 音频 fetch/decode 失败重试 | [v1.8.0](https://github.com/hkshu12/wix/releases/tag/v1.8.0) |
 | 2026-05-27 | 睡眠定时跨刷新持久化 | [PR #18](https://github.com/hkshu12/wix/pull/18), [v1.7.0](https://github.com/hkshu12/wix/releases/tag/v1.7.0) |
