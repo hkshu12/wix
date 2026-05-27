@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.12.0] - 2026-05-27
+
+### Added
+
+- Screen reader announcements for play/pause and adding or removing ambience layers via a dedicated `role="status"` live region on the studio page (sleep timer announcements unchanged).
+
 ## [1.11.0] - 2026-05-27
 
 ### Changed

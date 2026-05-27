@@ -52,6 +52,24 @@ describe('StudioPage', () => {
     await waitFor(() => expect(resumeMock).toHaveBeenCalledTimes(1));
   });
 
+  it('announces play/pause and layer toggles in the playback status region', async () => {
+    renderWithRouter(<AppRouter />, { routerProps: { initialEntries: ['/studio'] } });
+
+    const status = screen.getByLabelText('混音播放状态');
+
+    fireEvent.click(screen.getByRole('button', { name: '播放' }));
+    await waitFor(() => expect(status).toHaveTextContent('已开始播放'));
+
+    fireEvent.click(screen.getByRole('button', { name: /雨声/ }));
+    await waitFor(() => expect(status).toHaveTextContent('已添加 雨声'));
+
+    fireEvent.click(screen.getByRole('button', { name: '暂停' }));
+    await waitFor(() => expect(status).toHaveTextContent('已暂停播放'));
+
+    fireEvent.click(screen.getByRole('button', { name: /雨声/ }));
+    await waitFor(() => expect(status).toHaveTextContent('已移除 雨声，混音已清空'));
+  });
+
   it('starts a sleep timer from the mixer drawer and shows remaining time in the dock', () => {
     renderWithRouter(<AppRouter />, { routerProps: { initialEntries: ['/studio'] } });
 
