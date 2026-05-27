@@ -10,6 +10,7 @@ export interface StudioContextValue {
   setMixer: Dispatch<SetStateAction<MixerState>>;
   customTracks: CustomTrack[];
   importStatus: string;
+  importProgress: number | null;
   allSounds: PlayableSound[];
   selectedLayers: Array<{ layer: MixerState['layers'][number]; sound: PlayableSound }>;
   handleImport: (files: FileList | null) => Promise<void>;
