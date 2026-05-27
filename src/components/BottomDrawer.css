@@ -8,7 +8,7 @@
   background: rgba(2, 6, 23, 0.55);
   opacity: 0;
   pointer-events: none;
-  transition: opacity 180ms ease;
+  transition: opacity var(--motion-duration-fast) ease;
 }
 
 .bottom-drawer-scrim.open {
@@ -31,7 +31,7 @@
   background: var(--panel-bg);
   box-shadow: var(--shadow);
   transform: translateY(calc(100% + var(--safe-bottom)));
-  transition: transform 240ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition: transform var(--motion-duration-drawer) var(--motion-ease-drawer);
   padding-bottom: var(--safe-bottom);
 }
 

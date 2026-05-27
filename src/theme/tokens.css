@@ -1,4 +1,8 @@
 :root {
+  --motion-duration-fast: 180ms;
+  --motion-duration-nav: 220ms;
+  --motion-duration-drawer: 240ms;
+  --motion-ease-drawer: cubic-bezier(0.22, 1, 0.36, 1);
   color-scheme: light dark;
   font-family:
     Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei",
@@ -64,6 +68,14 @@ input {
 
 button {
   cursor: pointer;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --motion-duration-fast: 0ms;
+    --motion-duration-nav: 0ms;
+    --motion-duration-drawer: 0ms;
+  }
 }
 
 .theme-toggle {

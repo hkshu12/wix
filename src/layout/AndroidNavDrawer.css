@@ -5,7 +5,7 @@
   background: rgba(2, 6, 23, 0.45);
   opacity: 0;
   pointer-events: none;
-  transition: opacity 180ms ease;
+  transition: opacity var(--motion-duration-fast) ease;
   z-index: 40;
 }
 
@@ -28,7 +28,7 @@
   border-right: 1px solid var(--border);
   box-shadow: var(--shadow);
   transform: translateX(-105%);
-  transition: transform 220ms ease;
+  transition: transform var(--motion-duration-nav) ease;
   z-index: 50;
 }
 
