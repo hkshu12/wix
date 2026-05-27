@@ -393,6 +393,21 @@ p {
   justify-content: center;
 }
 
+.studio-import-progress {
+  margin-top: 10px;
+  height: 8px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--text) 10%, transparent);
+  overflow: hidden;
+}
+
+.studio-import-progress > span {
+  display: block;
+  height: 100%;
+  background: var(--accent-gradient);
+  transition: width var(--motion-duration-fast) ease;
+}
+
 .studio-import-status {
   margin: 10px 0 0;
   font-size: 0.82rem;

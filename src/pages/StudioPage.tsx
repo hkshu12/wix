@@ -29,6 +29,7 @@ export function StudioPage() {
     mixer,
     setMixer,
     importStatus,
+    importProgress,
     allSounds,
     selectedLayers,
     handleImport,
@@ -193,6 +194,18 @@ export function StudioPage() {
               onChange={(event) => void handleImport(event.target.files)}
             />
           </label>
+          {importProgress != null ? (
+            <div
+              className="studio-import-progress"
+              role="progressbar"
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-valuenow={importProgress}
+              aria-label={`正在读取音频 ${importProgress}%`}
+            >
+              <span style={{ width: `${importProgress}%` }} />
+            </div>
+          ) : null}
           <p className="studio-import-status">{importStatus}</p>
         </section>
 

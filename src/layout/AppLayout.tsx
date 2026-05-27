@@ -25,6 +25,7 @@ import {
   saveMixerPreset,
   type MixerPreset
 } from '../storage/mixerPresets';
+import { formatFileReadPercent } from '../lib/readFileWithProgress';
 import { useSleepTimerController } from '../hooks/useSleepTimerController';
 import { StudioProvider, type StudioContextValue } from './StudioContext';
 import { UpdateProvider } from './UpdateContext';
@@ -33,6 +34,7 @@ export function AppLayout() {
   const [mixer, setMixer] = useState<MixerState>(() => hydrateMixerState(readMixerSnapshot()));
   const [customTracks, setCustomTracks] = useState<CustomTrack[]>([]);
   const [importStatus, setImportStatus] = useState('支持 MP3、WAV、M4A 等浏览器可解码音频');
+  const [importProgress, setImportProgress] = useState<number | null>(null);
   const [mixerPresets, setMixerPresets] = useState<MixerPreset[]>(() => readMixerPresets());
   const engineRef = useRef<AudioEngine | null>(null);
   const customTracksRef = useRef<CustomTrack[]>([]);
@@ -109,14 +111,21 @@ export function AppLayout() {
       return;
     }
 
-    setImportStatus(`正在导入 ${file.name}...`);
+    setImportStatus(`正在读取 ${file.name}…`);
+    setImportProgress(0);
     try {
-      await saveCustomTrack(file);
+      await saveCustomTrack(file, {
+        onReadProgress: (progress) => {
+          setImportProgress(formatFileReadPercent(progress));
+        }
+      });
       const tracks = await listCustomTracks();
       replaceCustomTracks(tracks);
       setImportStatus(`${file.name} 已持久化到本机音频库。`);
     } catch {
       setImportStatus('导入失败：当前环境无法保存该文件。');
+    } finally {
+      setImportProgress(null);
     }
   }
 
@@ -251,6 +260,7 @@ export function AppLayout() {
     setMixer,
     customTracks,
     importStatus,
+    importProgress,
     allSounds,
     selectedLayers,
     handleImport,

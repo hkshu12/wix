@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.16.0] - 2026-05-27
+
+### Added
+
+- Custom audio import shows a progress bar while the file is read into memory, so long recordings no longer look stuck on a static status message.
+
 ## [1.15.0] - 2026-05-27
 
 ### Added

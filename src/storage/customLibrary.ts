@@ -1,5 +1,8 @@
+import { readFileAsArrayBuffer, type FileReadProgress } from '../lib/readFileWithProgress';
+
 export interface CustomLibraryOptions {
   databaseName?: string;
+  onReadProgress?: (progress: FileReadProgress) => void;
 }
 
 export interface CustomTrack {
@@ -31,7 +34,7 @@ export async function saveCustomTrack(file: File, options: CustomLibraryOptions 
     mimeType: file.type || 'audio/mpeg',
     size: file.size,
     createdAt: Date.now(),
-    bytes: await file.arrayBuffer()
+    bytes: await readFileAsArrayBuffer(file, options.onReadProgress)
   };
 
   await writeToStore(db, 'readwrite', (store) => store.put(storedTrack));

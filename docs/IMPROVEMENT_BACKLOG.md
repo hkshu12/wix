@@ -31,7 +31,7 @@
 | ~~导出/分享混音配置~~ | 向朋友分享「雨+篝火」配方 | — | 已完成 v1.13.0 |
 | ~~横屏与安全区细化~~ | 平板/手机横屏 | — | 已完成 v1.14.0 |
 | **新内置环境声** | 风扇、咖啡馆、列车等 | 8 轨 CC0 集 | 扩展 `sounds.ts` + `sounds:download` |
-| **大文件导入进度** | 长播客/长环境录音 | 仅状态文案 | `FileReader` 进度或分块提示 |
+| ~~大文件导入进度~~ | 长播客/长环境录音 | 仅状态文案 | `FileReader` 进度条（v1.16.0） |
 | ~~混音 ARIA 实时区域~~ | 读屏知播放/定时状态 | — | 已完成 v1.12.0 |
 | ~~落地页功能列表更新~~ | 新用户了解能力 | — | 已完成 v1.11.0 |
 | ~~桌面键盘快捷键~~ | 办公专注时免鼠标 | — | 已完成 v1.15.0（Space 播放/暂停） |
@@ -53,34 +53,36 @@
 | 读屏用户 | 播放/加轨状态播报 | v1.12.0 混音台 `role="status"` live 区域 |
 | 社交分享 | 把配方发给朋友 | v1.13.0 JSON 分享码复制/粘贴导入 |
 | 平板横屏 | 一屏多看环境声、少挡内容 | v1.14.0 宽屏多列 + 手机横屏右侧 dock |
-| 自定义内容 | 导入本地音频 | IndexedDB + 混音层可恢复；大文件无进度条 |
+| 自定义内容 | 导入本地音频 | IndexedDB + 混音层可恢复；读取阶段有进度条（v1.16.0） |
 
-### 代码与架构备注（2026-05-27 二次挖掘）
+### 代码与架构备注（2026-05-27 三次挖掘）
 
-- **分层清晰**：`domain/` / `storage/` / `audio/` 与 `AppLayout` 编排分离良好；`AppLayout` 仍偏大（导入/预设/分享共用 `importStatus` 字符串）。
-- **键盘**：此前仅 Escape/Tab 焦点陷阱；Studio 页无全局快捷键监听。
-- **响应式**：v1.14.0 已加横屏媒体查询与 PWA `orientation: any`。
-- **测试**：Vitest + `StudioPage` 集成测覆盖主流程；域逻辑单测覆盖 sleep timer、share、layout media。
+- **分层清晰**：`domain/` / `storage/` / `audio/` 与 `AppLayout` 编排分离良好；`AppLayout` 仍偏大（导入/预设/分享共用状态）。
+- **导入路径**：`readFileAsArrayBuffer`（`lib/readFileWithProgress.ts`）→ `saveCustomTrack` → IndexedDB；进度仅覆盖读取阶段，写入 IndexedDB 仍瞬时完成。
+- **键盘**：Space 播放/暂停已上线；`?` 帮助仍缺。
+- **响应式**：v1.14.0 横屏与 PWA `orientation: any`。
+- **测试**：Vitest + `StudioPage` 集成测；域/存储/工具函数单测覆盖 sleep timer、share、keyboard、file read。
 - **Android**：Capacitor 8；后台音频仍为最大平台缺口（P1）。
 
 ### 外部信号
 
 - GitHub Issues：当前无 open issue（2026-05-27）。
-- 近期 CHANGELOG：v1.14.0 横屏已发布——**避免重复**。
-- 同类 App 常见能力：后台播放、更多环境声、键盘控制——下一项建议 **Android 后台** 或 **导入进度** / **新内置声**。
+- 近期 CHANGELOG：v1.15.0 Space 快捷键已合并（PR #26）——**避免重复**。
+- 同类 App 常见能力：后台播放、更多环境声、快捷键说明——下一项建议 **Android 后台**、**新内置声** 或 **`?` 快捷键帮助**。
 
 ## 本次选中项
 
-**桌面键盘快捷键（P2）— Space 播放/暂停**
+**大文件导入进度条（P2）**
 
-- **理由**：v1.14.0 横屏已交付；P1 Android 后台需原生插件调研，超出单次 PR 可靠范围。办公/桌面 PWA 用户高频用键盘，纯前端 hook + 域函数即可，与现有 ARIA 播报复用。
-- **范围**：`domain/studioKeyboard.ts` 判定逻辑、`useStudioKeyboardShortcuts`、Studio 页集成、Vitest；不实现 `?` 帮助（留 backlog）。
+- **理由**：v1.15.0 已交付 Space 快捷键；P1 Android 后台需原生插件，单次 PR 风险高。自定义音频导入在弱机/长文件场景下此前只有静态「正在导入…」，用户无法判断卡死还是进行中；`FileReader` 进度纯前端、与 `UpdatePage` 进度条模式一致，改动面可控。
+- **范围**：`readFileAsArrayBuffer`、`saveCustomTrack` 回调、`importProgress` 状态、Studio 抽屉 `role="progressbar"`、单测；不含 IndexedDB 写入分块。
 
 ## 历史已完成
 
 | 日期 | 项 | 引用 |
 | --- | --- | --- |
-| 2026-05-27 | 桌面键盘快捷键（Space） | v1.15.0（本次） |
+| 2026-05-27 | 大文件导入进度条 | v1.16.0（本次） |
+| 2026-05-27 | 桌面键盘快捷键（Space） | [PR #26](https://github.com/hkshu12/wix/pull/26), [v1.15.0](https://github.com/hkshu12/wix/releases/tag/v1.15.0) |
 | 2026-05-27 | 横屏与安全区细化 | [v1.14.0](https://github.com/hkshu12/wix/releases/tag/v1.14.0) |
 | 2026-05-27 | 导出/分享混音配置 | [v1.13.0](https://github.com/hkshu12/wix/releases/tag/v1.13.0) |
 | 2026-05-27 | 混音播放 ARIA live 播报 | [v1.12.0](https://github.com/hkshu12/wix/releases/tag/v1.12.0) |
