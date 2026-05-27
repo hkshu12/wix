@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { BottomDrawer } from '../components/BottomDrawer';
 import { Slider } from '../components/Slider';
@@ -17,6 +17,7 @@ import {
   formatPlayToggleAnnouncement
 } from '../domain/playbackAnnouncement';
 import { usePlaybackAnnouncer } from '../hooks/usePlaybackAnnouncer';
+import { useStudioKeyboardShortcuts } from '../hooks/useStudioKeyboardShortcuts';
 import { assetUrl } from '../lib/assetUrl';
 import { SLEEP_TIMER_PRESETS_MINUTES } from '../domain/sleepTimer';
 import { useStudio } from '../layout/StudioContext';
@@ -63,11 +64,15 @@ export function StudioPage() {
 
   const activeCount = mixer.layers.length;
 
-  async function handlePlayToggleWithAnnouncement() {
+  const handlePlayToggleWithAnnouncement = useCallback(async () => {
     const nextPlaying = !mixer.isPlaying;
     await handlePlayToggle();
     announcePlayback(formatPlayToggleAnnouncement(nextPlaying));
-  }
+  }, [announcePlayback, handlePlayToggle, mixer.isPlaying]);
+
+  useStudioKeyboardShortcuts({ drawerOpen, navOpen }, () => {
+    void handlePlayToggleWithAnnouncement();
+  });
 
   function handleLayerToggle(soundId: string, soundTitle: string) {
     const wasSelected = mixer.layers.some((layer) => layer.soundId === soundId);

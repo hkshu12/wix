@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.15.0] - 2026-05-27
+
+### Added
+
+- Studio keyboard shortcut: press **Space** to play or pause when the mixer drawer and Android menu are closed; ignored while typing in form fields inside the drawer.
+
 ## [1.14.0] - 2026-05-27
 
 ### Added

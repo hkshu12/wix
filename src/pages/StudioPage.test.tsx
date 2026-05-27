@@ -132,6 +132,38 @@ describe('StudioPage', () => {
     expect(within(activePanel).getByText('海边')).toBeInTheDocument();
   });
 
+  it('toggles playback with Space when the mixer drawer is closed', async () => {
+    renderWithRouter(<AppRouter />, { routerProps: { initialEntries: ['/studio'] } });
+
+    fireEvent.keyDown(window, { key: ' ', code: 'Space' });
+    await waitFor(() => expect(resumeMock).toHaveBeenCalledTimes(1));
+    expect(screen.getByRole('button', { name: '暂停' })).toBeInTheDocument();
+
+    fireEvent.keyDown(window, { key: ' ', code: 'Space' });
+    await waitFor(() => expect(screen.getByRole('button', { name: '播放' })).toBeInTheDocument());
+  });
+
+  it('does not toggle playback with Space while the mixer drawer is open', async () => {
+    renderWithRouter(<AppRouter />, { routerProps: { initialEntries: ['/studio'] } });
+
+    fireEvent.click(screen.getByRole('button', { name: /混音与导入/ }));
+    fireEvent.keyDown(window, { key: ' ', code: 'Space' });
+
+    expect(resumeMock).not.toHaveBeenCalled();
+    expect(screen.getByRole('button', { name: '播放' })).toBeInTheDocument();
+  });
+
+  it('does not toggle playback with Space while typing in the drawer', async () => {
+    renderWithRouter(<AppRouter />, { routerProps: { initialEntries: ['/studio'] } });
+
+    fireEvent.click(screen.getByRole('button', { name: /混音与导入/ }));
+    const presetInput = screen.getByLabelText('预设名称');
+    presetInput.focus();
+    fireEvent.keyDown(presetInput, { key: ' ', code: 'Space' });
+
+    expect(resumeMock).not.toHaveBeenCalled();
+  });
+
   it('cancels an active sleep timer', () => {
     renderWithRouter(<AppRouter />, { routerProps: { initialEntries: ['/studio'] } });
 
