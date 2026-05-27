@@ -16,12 +16,13 @@
 
 | 项 | 场景 | 当前不足 | 建议方案 |
 | --- | --- | --- | --- |
-| ~~场景预设（收藏组合）~~ | 专注/睡眠/旅行固定搭配 | — | 本次实现（v1.4.0） |
+| ~~场景预设（收藏组合）~~ | 专注/睡眠/旅行固定搭配 | — | 已完成 v1.4.0 |
 | **Android 后台播放与锁屏控制** | 锁屏/切 App 继续听 | 纯 WebView，无 Media Session | Capacitor 插件或原生 foreground service |
-| **PWA `start_url` 与 Pages 子路径** | GitHub Pages 子目录安装 PWA | manifest `start_url: '/'` 可能与 `VITE_BASE_PATH` 不一致 | 构建时注入 base 到 manifest |
+| ~~PWA `start_url` 与 Pages 子路径~~ | GitHub Pages 子目录安装 PWA | — | 本次实现（v1.6.0） |
 | **音频加载失败重试** | 弱网或 OGG 缺失 | `fetch` 失败直接抛错 | 指数退避重试 + 用户可见错误态 |
 | **减少动效（`prefers-reduced-motion`）** | 前庭敏感用户 | 无媒体查询适配 | CSS/JS 缩短或关闭过渡 |
 | **底部抽屉焦点陷阱** | 键盘/读屏用户 | 有 `role="dialog"` 但无 focus trap | `focus-trap` 或自管 Tab 循环 |
+| **睡眠定时持久化** | 睡前设好定时后刷新页面 | 定时器仅存内存 | 可选写入 `localStorage` 并在恢复时校验剩余时间 |
 
 ### P2
 
@@ -32,6 +33,7 @@
 | **新内置环境声** | 风扇、咖啡馆、列车等 | 8 轨 CC0 集 | 扩展 `sounds.ts` + `sounds:download` |
 | **大文件导入进度** | 长播客/长环境录音 | 仅状态文案 | `FileReader` 进度或分块提示 |
 | **混音 ARIA 实时区域** | 读屏知播放/定时状态 | 部分控件有 label | `aria-live` 播报播放与定时 |
+| **落地页功能列表更新** | 新用户了解能力 | 未提及定时、预设、Android 更新 | 补充 Studio 已有功能文案 |
 
 ### 体验场景与缺口（摘要）
 
@@ -42,26 +44,27 @@
 | 冥想 | 慢速播放、简单组合 | 有全局/ per-track 速度 |
 | 哄娃 | 长时间稳定循环 | 定时渐出可用 |
 | 屏蔽噪音 | 粉/棕噪 + 雨声 | 内置齐全 |
-| 旅行/办公 | 离线 PWA、小体积 | PWA 缓存静态资源 |
+| 旅行/办公 | 离线 PWA、子路径安装 | v1.6.0 起 manifest 与 `VITE_BASE_PATH` 对齐 |
 | 自定义内容 | 导入本地音频 | IndexedDB + 混音层可恢复 |
 
 ### 外部信号
 
 - GitHub Issues：当前无 open issue。
-- 近期 CHANGELOG：v1.3.0 混音持久化、v1.2.0 睡眠定时——**避免重复**。
+- 近期 CHANGELOG：v1.5.0 Android 更新、v1.4.0 场景预设——**避免重复**。
 - 同类 App 常见能力：后台播放、分享配方、PWA 子路径——与剩余 P1/P2 一致。
 
 ## 本次选中项
 
-**场景预设（收藏组合）（P1）**
+**PWA `start_url` 与 GitHub Pages 子路径对齐（P1）**
 
-- **理由**：混音快照已能恢复上次状态，但专注/睡眠等场景需要多套命名组合并一键切换；`localStorage` CRUD + 应用时过滤不可用音轨，边界清晰，单 PR 可交付。
-- **范围**：最多 12 个预设；保存当前主音量、立体声宽度、全局速率与各层参数；加载时保留播放/暂停状态；自定义轨删除后加载预设自动剔除对应层。
+- **理由**：CI/Pages 构建使用 `VITE_BASE_PATH=/{repo}/`，但 manifest 固定 `start_url: '/'` 与根路径图标，导致「添加到主屏幕」在子路径部署时打开错误 URL 或图标 404；改动集中在 `vite.config.ts` + 可测 helper，单 PR 可交付。
+- **范围**：根据 `VITE_BASE_PATH` 注入 manifest 的 `start_url`、`scope` 与图标路径；单元测试覆盖根路径与子路径。
 
 ## 历史已完成
 
 | 日期 | 项 | 引用 |
 | --- | --- | --- |
+| 2026-05-27 | PWA manifest 与 Pages 子路径对齐 | v1.6.0（本次） |
 | 2026-05-27 | Android 自动更新与应用菜单（设置/关于/更新） | [PR #14](https://github.com/hkshu12/wix/pull/14), [v1.5.0](https://github.com/hkshu12/wix/releases/tag/v1.5.0) |
 | 2026-05-27 | 场景预设（收藏组合） | [PR #15](https://github.com/hkshu12/wix/pull/15), [v1.4.0](https://github.com/hkshu12/wix/releases/tag/v1.4.0) |
 | 2026-05-27 | 混音状态持久化 | [PR #13](https://github.com/hkshu12/wix/pull/13), [v1.3.0](https://github.com/hkshu12/wix/releases/tag/v1.3.0) |
