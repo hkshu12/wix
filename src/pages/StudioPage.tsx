@@ -10,6 +10,7 @@ import {
   toggleLayer
 } from '../domain/mixer';
 import { assetUrl } from '../lib/assetUrl';
+import { SLEEP_TIMER_PRESETS_MINUTES } from '../domain/sleepTimer';
 import { useStudio } from '../layout/StudioContext';
 import { ThemeToggle } from '../theme/ThemeToggle';
 import './StudioPage.css';
@@ -23,7 +24,12 @@ export function StudioPage() {
     selectedLayers,
     handleImport,
     handleDeleteCustomTrack,
-    handlePlayToggle
+    handlePlayToggle,
+    sleepTimerRemainingLabel,
+    sleepTimerActive,
+    sleepTimerFading,
+    startSleepTimer,
+    cancelSleepTimer
   } = useStudio();
   const [drawerOpen, setDrawerOpen] = useState(false);
 
@@ -81,6 +87,11 @@ export function StudioPage() {
       </section>
 
       <footer className="studio-dock" aria-label="播放与混音控制">
+        {sleepTimerActive ? (
+          <p className="studio-dock-timer" aria-live="polite">
+            {sleepTimerFading ? '渐出中' : '定时'} · {sleepTimerRemainingLabel}
+          </p>
+        ) : null}
         <button className="studio-dock-play" type="button" onClick={() => void handlePlayToggle()}>
           <span className="studio-dock-play-icon" aria-hidden>
             {mixer.isPlaying ? '❚❚' : '▶'}
@@ -107,6 +118,33 @@ export function StudioPage() {
             />
           </label>
           <p className="studio-import-status">{importStatus}</p>
+        </section>
+
+        <section className="drawer-section" aria-labelledby="drawer-sleep-timer-title">
+          <h3 id="drawer-sleep-timer-title">睡眠定时</h3>
+          <p className="drawer-hint">到时自动将主音量在 30 秒内渐弱并暂停播放，避免突然静音惊醒。</p>
+          <div className="sleep-timer-presets" role="group" aria-label="睡眠定时预设">
+            {SLEEP_TIMER_PRESETS_MINUTES.map((minutes) => (
+              <button
+                key={minutes}
+                className="studio-btn studio-btn--secondary sleep-timer-preset"
+                type="button"
+                onClick={() => startSleepTimer(minutes)}
+              >
+                {minutes} 分钟
+              </button>
+            ))}
+          </div>
+          {sleepTimerActive ? (
+            <div className="sleep-timer-active">
+              <p aria-live="polite">
+                {sleepTimerFading ? '正在渐出…' : '剩余'} {sleepTimerRemainingLabel}
+              </p>
+              <button className="ghost-button" type="button" onClick={cancelSleepTimer}>
+                取消定时
+              </button>
+            </div>
+          ) : null}
         </section>
 
         <section className="drawer-section panel mixer-panel" aria-label="当前混音轨道">

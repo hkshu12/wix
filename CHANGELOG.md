@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.2.0] - 2026-05-27
+
+### Added
+
+- Sleep timer with 15/30/45/60 minute presets: countdown in the studio dock and drawer, 30-second master-volume fade-out before auto-pause.
+
 ## [1.1.0] - 2026-05-23
 
 ### Added

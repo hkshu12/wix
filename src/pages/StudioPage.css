@@ -182,6 +182,50 @@ p {
   backdrop-filter: blur(16px);
 }
 
+.studio-dock:has(.studio-dock-timer) {
+  grid-template-columns: 1fr;
+  grid-template-rows: auto 1fr 1fr;
+}
+
+.studio-dock-timer {
+  grid-column: 1 / -1;
+  margin: 0;
+  text-align: center;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.sleep-timer-presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.sleep-timer-preset {
+  flex: 1 1 calc(50% - 8px);
+  min-width: 7rem;
+}
+
+.sleep-timer-active {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+}
+
+.sleep-timer-active p {
+  margin: 0;
+  font-weight: 700;
+  color: var(--text);
+}
+
 .studio-dock-play,
 .studio-dock-mixer {
   display: inline-flex;
