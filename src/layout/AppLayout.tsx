@@ -3,10 +3,12 @@ import { Outlet } from 'react-router-dom';
 import { AudioEngine } from '../audio/AudioEngine';
 import type { PlayableSound } from '../audio/audioGraphPlan';
 import {
-  createInitialMixerState,
-  setPlaying,
-  type MixerState
-} from '../domain/mixer';
+  hydrateMixerState,
+  readMixerSnapshot,
+  writeMixerSnapshot,
+  filterMixerLayersToSounds
+} from '../storage/mixerSnapshot';
+import { setPlaying, type MixerState } from '../domain/mixer';
 import { BUILT_IN_SOUNDS } from '../domain/sounds';
 import {
   deleteCustomTrack,
@@ -19,7 +21,7 @@ import { useSleepTimerController } from '../hooks/useSleepTimerController';
 import { StudioProvider, type StudioContextValue } from './StudioContext';
 
 export function AppLayout() {
-  const [mixer, setMixer] = useState<MixerState>(() => createInitialMixerState());
+  const [mixer, setMixer] = useState<MixerState>(() => hydrateMixerState(readMixerSnapshot()));
   const [customTracks, setCustomTracks] = useState<CustomTrack[]>([]);
   const [importStatus, setImportStatus] = useState('支持 MP3、WAV、M4A 等浏览器可解码音频');
   const engineRef = useRef<AudioEngine | null>(null);
@@ -50,6 +52,11 @@ export function AppLayout() {
       .then((tracks) => {
         if (!cancelled) {
           replaceCustomTracks(tracks);
+          const allowedSoundIds = new Set([
+            ...BUILT_IN_SOUNDS.map((sound) => sound.id),
+            ...tracks.map((track) => track.id)
+          ]);
+          setMixer((state) => filterMixerLayersToSounds(state, allowedSoundIds));
         }
       })
       .catch(() => setImportStatus('无法读取已导入音频，请检查浏览器存储权限。'));
@@ -77,6 +84,14 @@ export function AppLayout() {
       }
     };
   }, [allSounds, mixer]);
+
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+      writeMixerSnapshot(mixer);
+    }, 250);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [mixer]);
 
   async function handleImport(fileList: FileList | null) {
     const file = fileList?.[0];
