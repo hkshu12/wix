@@ -15,6 +15,7 @@ import {
   saveCustomTrack,
   type CustomTrack
 } from '../storage/customLibrary';
+import { useSleepTimerController } from '../hooks/useSleepTimerController';
 import { StudioProvider, type StudioContextValue } from './StudioContext';
 
 export function AppLayout() {
@@ -23,6 +24,8 @@ export function AppLayout() {
   const [importStatus, setImportStatus] = useState('支持 MP3、WAV、M4A 等浏览器可解码音频');
   const engineRef = useRef<AudioEngine | null>(null);
   const customTracksRef = useRef<CustomTrack[]>([]);
+
+  const sleepTimerController = useSleepTimerController({ mixer, setMixer });
 
   const allSounds = useMemo<PlayableSound[]>(() => [...BUILT_IN_SOUNDS, ...customTracks], [customTracks]);
   const selectedLayers = mixer.layers
@@ -118,7 +121,12 @@ export function AppLayout() {
     selectedLayers,
     handleImport,
     handleDeleteCustomTrack,
-    handlePlayToggle
+    handlePlayToggle,
+    sleepTimerRemainingLabel: sleepTimerController.remainingLabel,
+    sleepTimerActive: sleepTimerController.isActive,
+    sleepTimerFading: sleepTimerController.isFading,
+    startSleepTimer: sleepTimerController.startPreset,
+    cancelSleepTimer: sleepTimerController.cancel
   };
 
   return (

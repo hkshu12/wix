@@ -1,6 +1,7 @@
 import { createContext, useContext, type Dispatch, type ReactNode, type SetStateAction } from 'react';
 import type { PlayableSound } from '../audio/audioGraphPlan';
 import type { MixerState } from '../domain/mixer';
+import type { SleepTimerPresetMinutes } from '../domain/sleepTimer';
 import type { CustomTrack } from '../storage/customLibrary';
 
 export interface StudioContextValue {
@@ -13,6 +14,11 @@ export interface StudioContextValue {
   handleImport: (files: FileList | null) => Promise<void>;
   handleDeleteCustomTrack: (track: CustomTrack) => Promise<void>;
   handlePlayToggle: () => Promise<void>;
+  sleepTimerRemainingLabel: string;
+  sleepTimerActive: boolean;
+  sleepTimerFading: boolean;
+  startSleepTimer: (minutes: SleepTimerPresetMinutes) => void;
+  cancelSleepTimer: () => void;
 }
 
 const StudioContext = createContext<StudioContextValue | null>(null);
