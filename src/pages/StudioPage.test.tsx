@@ -164,6 +164,30 @@ describe('StudioPage', () => {
     expect(resumeMock).not.toHaveBeenCalled();
   });
 
+  it('opens keyboard shortcuts help with ? and closes with Escape', () => {
+    renderWithRouter(<AppRouter />, { routerProps: { initialEntries: ['/studio'] } });
+
+    expect(screen.queryByRole('dialog', { name: '键盘快捷键' })).not.toBeInTheDocument();
+
+    fireEvent.keyDown(window, { key: '?', code: 'Slash', shiftKey: true });
+
+    const dialog = screen.getByRole('dialog', { name: '键盘快捷键' });
+    expect(dialog).toBeInTheDocument();
+    expect(within(dialog).getByText(/Space/)).toBeInTheDocument();
+
+    fireEvent.keyDown(dialog, { key: 'Escape', code: 'Escape' });
+    expect(screen.queryByRole('dialog', { name: '键盘快捷键' })).not.toBeInTheDocument();
+  });
+
+  it('does not toggle playback with Space while keyboard help is open', async () => {
+    renderWithRouter(<AppRouter />, { routerProps: { initialEntries: ['/studio'] } });
+
+    fireEvent.keyDown(window, { key: '?', code: 'Slash', shiftKey: true });
+    fireEvent.keyDown(window, { key: ' ', code: 'Space' });
+
+    expect(resumeMock).not.toHaveBeenCalled();
+  });
+
   it('cancels an active sleep timer', () => {
     renderWithRouter(<AppRouter />, { routerProps: { initialEntries: ['/studio'] } });
 

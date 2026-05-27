@@ -1,6 +1,7 @@
 import { useCallback, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { BottomDrawer } from '../components/BottomDrawer';
+import { KeyboardShortcutsDialog } from '../components/KeyboardShortcutsDialog';
 import { Slider } from '../components/Slider';
 import { AndroidNavDrawer } from '../layout/AndroidNavDrawer';
 import { useAppUpdate } from '../layout/UpdateContext';
@@ -56,6 +57,7 @@ export function StudioPage() {
     }
   }
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [keyboardHelpOpen, setKeyboardHelpOpen] = useState(false);
   const [presetName, setPresetName] = useState('');
   const [sharePaste, setSharePaste] = useState('');
   const [navOpen, setNavOpen] = useState(false);
@@ -71,9 +73,17 @@ export function StudioPage() {
     announcePlayback(formatPlayToggleAnnouncement(nextPlaying));
   }, [announcePlayback, handlePlayToggle, mixer.isPlaying]);
 
-  useStudioKeyboardShortcuts({ drawerOpen, navOpen }, () => {
-    void handlePlayToggleWithAnnouncement();
-  });
+  useStudioKeyboardShortcuts(
+    { drawerOpen, navOpen, keyboardHelpOpen },
+    {
+      onTogglePlayback: () => {
+        void handlePlayToggleWithAnnouncement();
+      },
+      onToggleKeyboardHelp: () => {
+        setKeyboardHelpOpen((open) => !open);
+      }
+    }
+  );
 
   function handleLayerToggle(soundId: string, soundTitle: string) {
     const wasSelected = mixer.layers.some((layer) => layer.soundId === soundId);
@@ -181,7 +191,10 @@ export function StudioPage() {
 
       {android ? <AndroidNavDrawer open={navOpen} onClose={() => setNavOpen(false)} /> : null}
 
+      <KeyboardShortcutsDialog open={keyboardHelpOpen} onClose={() => setKeyboardHelpOpen(false)} />
+
       <BottomDrawer open={drawerOpen} title="混音与导入" onClose={() => setDrawerOpen(false)}>
+        <p className="drawer-hint drawer-hint--muted">桌面端按 <kbd>?</kbd> 可查看键盘快捷键。</p>
         <section className="drawer-section" aria-labelledby="drawer-import-title">
           <h3 id="drawer-import-title">添加到本机</h3>
           <p className="drawer-hint">从底部抽屉导入音频，混音台与轨道调节都在此完成。</p>

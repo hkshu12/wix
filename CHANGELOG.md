@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.17.0] - 2026-05-27
+
+### Added
+
+- Studio keyboard shortcuts help: press **?** to open a short reference (Space play/pause, Esc close); a hint appears in the mixer drawer on desktop.
+
 ## [1.16.0] - 2026-05-27
 
 ### Added

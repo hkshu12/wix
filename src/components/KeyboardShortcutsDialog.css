@@ -1,0 +1,103 @@
+.keyboard-shortcuts-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  border: none;
+  padding: 0;
+  margin: 0;
+  background: rgb(0 0 0 / 45%);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.keyboard-shortcuts-scrim.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.keyboard-shortcuts-dialog {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  z-index: 91;
+  width: min(420px, calc(100% - 32px));
+  max-height: min(80dvh, 480px);
+  transform: translate(-50%, -50%) scale(0.96);
+  opacity: 0;
+  pointer-events: none;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: var(--panel-bg);
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
+}
+
+.keyboard-shortcuts-dialog.open {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.keyboard-shortcuts-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 18px 8px;
+}
+
+.keyboard-shortcuts-header h2 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.keyboard-shortcuts-close {
+  border: none;
+  background: transparent;
+  color: var(--accent);
+  font-weight: 600;
+  cursor: pointer;
+  padding: 6px 8px;
+}
+
+.keyboard-shortcuts-list {
+  list-style: none;
+  margin: 0;
+  padding: 8px 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.keyboard-shortcuts-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  font-size: 0.92rem;
+  color: var(--text);
+}
+
+.keyboard-shortcuts-list kbd {
+  flex-shrink: 0;
+  min-width: 3.5rem;
+  text-align: center;
+  padding: 4px 8px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .keyboard-shortcuts-scrim,
+  .keyboard-shortcuts-dialog {
+    transition-duration: 0s;
+  }
+}
