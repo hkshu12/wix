@@ -1,11 +1,18 @@
+import { readFileSync } from 'node:fs';
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
 
 const base = process.env.VITE_BASE_PATH ?? '/';
+const packageJson = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf8')) as { version: string };
+const githubRepo = process.env.VITE_GITHUB_REPO ?? 'hkshu12/wix';
 
 export default defineConfig({
   base,
+  define: {
+    __APP_VERSION__: JSON.stringify(packageJson.version),
+    __GITHUB_REPO__: JSON.stringify(githubRepo)
+  },
   plugins: [
     react(),
     VitePWA({

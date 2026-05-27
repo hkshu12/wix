@@ -1,0 +1,139 @@
+.app-chrome {
+  width: min(720px, 100%);
+  margin: 0 auto;
+  min-height: calc(100dvh - var(--safe-top) - var(--safe-bottom));
+  padding: 12px 20px calc(24px + var(--safe-bottom));
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.app-chrome__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: var(--panel-bg);
+  box-shadow: var(--shadow);
+}
+
+.app-chrome__start {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.app-chrome__back {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.app-chrome__header h1 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.app-chrome__header p {
+  margin: 4px 0 0;
+  color: var(--text-muted);
+  font-size: 0.86rem;
+}
+
+.app-chrome__main {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.app-page-card {
+  padding: 16px 18px;
+  border-radius: 18px;
+  border: 1px solid var(--border);
+  background: var(--panel-bg);
+  box-shadow: var(--shadow);
+}
+
+.app-page-card h2 {
+  margin: 0 0 8px;
+  font-size: 1rem;
+}
+
+.app-page-card p,
+.app-page-card li {
+  color: var(--text-muted);
+  line-height: 1.55;
+}
+
+.app-page-card ul {
+  margin: 0;
+  padding-left: 1.1rem;
+}
+
+.app-page-card code {
+  font-size: 0.86em;
+  padding: 0.1em 0.35em;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--text) 8%, transparent);
+}
+
+.app-page-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.app-page-btn {
+  border: 0;
+  border-radius: 999px;
+  padding: 10px 16px;
+  font-weight: 700;
+  color: var(--text);
+  background: color-mix(in srgb, var(--text) 8%, transparent);
+  border: 1px solid var(--border);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.app-page-btn--primary {
+  background: var(--accent-gradient);
+  color: #fff;
+  border-color: transparent;
+}
+
+.app-page-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.app-page-status {
+  margin: 10px 0 0;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+.app-page-status--error {
+  color: #f87171;
+}
+
+.app-page-progress {
+  margin-top: 10px;
+  height: 8px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--text) 10%, transparent);
+  overflow: hidden;
+}
+
+.app-page-progress > span {
+  display: block;
+  height: 100%;
+  background: var(--accent-gradient);
+  transition: width 180ms ease;
+}

@@ -2,6 +2,9 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { BottomDrawer } from '../components/BottomDrawer';
 import { Slider } from '../components/Slider';
+import { AndroidNavDrawer } from '../layout/AndroidNavDrawer';
+import { useAppUpdate } from '../layout/UpdateContext';
+import { isAndroidApp } from '../lib/platform';
 import {
   setGlobalPlaybackRate,
   setLayerControl,
@@ -37,6 +40,9 @@ export function StudioPage() {
   } = useStudio();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [presetName, setPresetName] = useState('');
+  const [navOpen, setNavOpen] = useState(false);
+  const { updateAvailable } = useAppUpdate();
+  const android = isAndroidApp();
 
   const activeCount = mixer.layers.length;
 
@@ -51,9 +57,26 @@ export function StudioPage() {
           </div>
         </div>
         <div className="studio-topbar-actions">
-          <Link className="studio-btn studio-btn--ghost" to="/" state={{ fromIntro: true }}>
-            介绍
-          </Link>
+          {android ? (
+            <button
+              className="studio-btn studio-btn--ghost studio-menu-btn"
+              type="button"
+              aria-expanded={navOpen}
+              onClick={() => setNavOpen(true)}
+            >
+              菜单
+              {updateAvailable ? <span className="studio-menu-btn__badge" aria-hidden /> : null}
+            </button>
+          ) : (
+            <>
+              <Link className="studio-btn studio-btn--ghost" to="/" state={{ fromIntro: true }}>
+                介绍
+              </Link>
+              <Link className="studio-btn studio-btn--ghost" to="/settings">
+                设置
+              </Link>
+            </>
+          )}
           <ThemeToggle />
         </div>
       </header>
@@ -108,6 +131,8 @@ export function StudioPage() {
           {activeCount > 0 ? <span className="studio-dock-badge">{activeCount}</span> : null}
         </button>
       </footer>
+
+      {android ? <AndroidNavDrawer open={navOpen} onClose={() => setNavOpen(false)} /> : null}
 
       <BottomDrawer open={drawerOpen} title="混音与导入" onClose={() => setDrawerOpen(false)}>
         <section className="drawer-section" aria-labelledby="drawer-import-title">

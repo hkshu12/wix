@@ -26,6 +26,7 @@ import {
 } from '../storage/mixerPresets';
 import { useSleepTimerController } from '../hooks/useSleepTimerController';
 import { StudioProvider, type StudioContextValue } from './StudioContext';
+import { UpdateProvider } from './UpdateContext';
 
 export function AppLayout() {
   const [mixer, setMixer] = useState<MixerState>(() => hydrateMixerState(readMixerSnapshot()));
@@ -196,8 +197,10 @@ export function AppLayout() {
   };
 
   return (
-    <StudioProvider value={studioValue}>
-      <Outlet />
-    </StudioProvider>
+    <UpdateProvider>
+      <StudioProvider value={studioValue}>
+        <Outlet />
+      </StudioProvider>
+    </UpdateProvider>
   );
 }

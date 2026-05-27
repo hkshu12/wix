@@ -29,7 +29,9 @@
   "homepage": "https://github.com/hkshu12/wix#readme",
   "dependencies": {
     "@capacitor/android": "^8.3.4",
+    "@capacitor/app": "^8.1.0",
     "@capacitor/core": "^8.3.4",
+    "@capacitor/filesystem": "^8.1.2",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
     "react-router-dom": "^7.15.1"
@@ -46,8 +48,8 @@
     "eslint": "^10.4.0",
     "fake-indexeddb": "^6.2.5",
     "globals": "^17.6.0",
-    "sharp": "^0.34.5",
     "jsdom": "^29.1.1",
+    "sharp": "^0.34.5",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.59.4",
     "vite": "^8.0.14",
