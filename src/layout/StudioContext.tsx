@@ -26,6 +26,7 @@ export interface StudioContextValue {
   loadMixerPreset: (id: string) => void;
   deleteMixerPreset: (id: string) => void;
   copyMixerShare: () => Promise<void>;
+  copyMixerShareLink: () => Promise<void>;
   pasteMixerShareFromClipboard: () => Promise<string | null>;
   importMixerShare: (text: string) => void;
 }
