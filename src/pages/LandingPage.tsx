@@ -41,6 +41,9 @@ export function LandingPage() {
             <li>多轨叠加内置环境声与导入的本地音乐</li>
             <li>每轨独立调节音量、声像与播放速度，支持静音</li>
             <li>主音量、立体声宽度与全局播放速度一键控制</li>
+            <li>睡眠定时（15–60 分钟）：到时主音量渐弱并自动暂停，刷新页面后倒计时仍可继续</li>
+            <li>命名场景预设：保存最多 12 组混音，一键切换专注、睡眠等固定搭配</li>
+            <li>混音组合与主音量在刷新后自动恢复（需再次点击播放）</li>
             <li>导入 MP3、WAV、M4A 等格式，保存在本机音频库</li>
           </ul>
         </section>
@@ -48,9 +51,9 @@ export function LandingPage() {
         <section className="landing-section" aria-labelledby="how-title">
           <h2 id="how-title">怎么用</h2>
           <ol className="landing-steps">
-            <li>选择一种或多种声音</li>
-            <li>在混音台调节各轨与整体参数</li>
-            <li>点击播放，沉浸在你的声景里</li>
+            <li>选择一种或多种声音，或从预设加载常用搭配</li>
+            <li>在混音台调节各轨与整体参数，需要时可设定睡眠定时</li>
+            <li>点击播放；下次打开会记住你的混音设置</li>
           </ol>
           <StartButton className="landing-cta landing-cta--secondary" />
         </section>
