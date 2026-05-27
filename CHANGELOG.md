@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.18.0] - 2026-05-27
+
+### Added
+
+- Web Media Session API on supported browsers and PWAs: lock-screen and system media controls show the current mix title and artwork, with play/pause wired to the studio mixer (including active sleep-timer countdown in the subtitle).
+
 ## [1.17.0] - 2026-05-27
 
 ### Added

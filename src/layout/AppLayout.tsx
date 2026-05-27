@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import { AudioEngine } from '../audio/AudioEngine';
 import type { PlayableSound } from '../audio/audioGraphPlan';
@@ -26,6 +26,7 @@ import {
   type MixerPreset
 } from '../storage/mixerPresets';
 import { formatFileReadPercent } from '../lib/readFileWithProgress';
+import { useMediaSessionSync } from '../hooks/useMediaSessionSync';
 import { useSleepTimerController } from '../hooks/useSleepTimerController';
 import { StudioProvider, type StudioContextValue } from './StudioContext';
 import { UpdateProvider } from './UpdateContext';
@@ -138,13 +139,42 @@ export function AppLayout() {
     replaceCustomTracks(await listCustomTracks());
   }
 
-  async function handlePlayToggle() {
+  const handlePlayToggle = useCallback(async () => {
     if (!mixer.isPlaying) {
       await getAudioEngine().resume();
     }
 
     setMixer((state) => setPlaying(state, !state.isPlaying));
-  }
+  }, [mixer.isPlaying]);
+
+  const mediaSessionTrackTitles = useMemo(
+    () => selectedLayers.map(({ sound }) => sound.title),
+    [selectedLayers]
+  );
+
+  const mediaSessionSleepLabel = sleepTimerController.isActive
+    ? sleepTimerController.remainingLabel
+    : null;
+
+  const handleMediaSessionPlay = useCallback(() => {
+    if (!mixer.isPlaying) {
+      void handlePlayToggle();
+    }
+  }, [handlePlayToggle, mixer.isPlaying]);
+
+  const handleMediaSessionPause = useCallback(() => {
+    if (mixer.isPlaying) {
+      void handlePlayToggle();
+    }
+  }, [handlePlayToggle, mixer.isPlaying]);
+
+  useMediaSessionSync({
+    isPlaying: mixer.isPlaying,
+    trackTitles: mediaSessionTrackTitles,
+    sleepTimerLabel: mediaSessionSleepLabel,
+    onPlay: handleMediaSessionPlay,
+    onPause: handleMediaSessionPause
+  });
 
   function refreshMixerPresets() {
     setMixerPresets(readMixerPresets());
