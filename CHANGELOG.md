@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.8.0] - 2026-05-27
+
+### Added
+
+- Built-in and custom audio loading retries transient network and server errors (up to 3 attempts with exponential backoff) before playback fails; 404 responses are not retried.
+
 ## [1.7.0] - 2026-05-27
 
 ### Added
