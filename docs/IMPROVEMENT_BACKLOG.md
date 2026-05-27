@@ -21,7 +21,7 @@
 | ~~PWA `start_url` 与 Pages 子路径~~ | GitHub Pages 子目录安装 PWA | — | 已完成 v1.6.0 |
 | ~~音频加载失败重试~~ | 弱网或 OGG 短暂不可用 | — | 已完成 v1.8.0 |
 | **减少动效（`prefers-reduced-motion`）** | 前庭敏感用户 | 无媒体查询适配 | CSS/JS 缩短或关闭过渡 |
-| **底部抽屉焦点陷阱** | 键盘/读屏用户 | 有 `role="dialog"` 但无 focus trap | `focus-trap` 或自管 Tab 循环 |
+| ~~底部抽屉焦点陷阱~~ | 键盘/读屏用户 | — | 已完成 v1.9.0 |
 | ~~睡眠定时持久化~~ | 睡前设好定时后刷新页面 | — | 已完成 v1.7.0 |
 
 ### P2
@@ -52,20 +52,21 @@
 
 - GitHub Issues：当前无 open issue。
 - 近期 CHANGELOG：v1.7.0 睡眠定时持久化——**避免重复**。
-- 同类 App 常见能力：后台播放、分享配方、减少动效——下一项优先 **`prefers-reduced-motion`** 或 **抽屉焦点陷阱**（小 diff、可访问性）。
+- 同类 App 常见能力：后台播放、分享配方、减少动效——下一项优先 **`prefers-reduced-motion`** 或 **落地页功能文案**（小 diff）。
 
 ## 本次选中项
 
-**音频加载失败重试（P1）**
+**混音台底部抽屉焦点陷阱（P1）**
 
-- **理由**：内置 OGG 与自定义 blob 均经 `fetch` + `decodeAudioData`；弱网或 CDN 抖动时单次失败会直接停播；与 `AudioEngine` 单点集成，可单测、无原生依赖。
-- **范围**：`loadAudioWithRetry.ts`（最多 3 次、200ms 起指数退避）；404 不重试；`AppLayout` 错误文案说明已重试。
+- **理由**：`BottomDrawer` 已具备 `role="dialog"` 与 Escape 关闭，但 Tab 会落到背后 Studio 控件；键盘与读屏用户难以安全操作抽屉内滑块与预设；纯前端、无原生依赖，可单元测试。
+- **范围**：`focusTrap.ts` + `useFocusTrap`；打开时聚焦首控件、Tab 循环、关闭后还原触发按钮焦点；遮罩层移出 Tab 顺序。
 
 ## 历史已完成
 
 | 日期 | 项 | 引用 |
 | --- | --- | --- |
-| 2026-05-27 | 音频 fetch/decode 失败重试 | v1.8.0（本次） |
+| 2026-05-27 | 混音台底部抽屉焦点陷阱 | v1.9.0（本次） |
+| 2026-05-27 | 音频 fetch/decode 失败重试 | [v1.8.0](https://github.com/hkshu12/wix/releases/tag/v1.8.0) |
 | 2026-05-27 | 睡眠定时跨刷新持久化 | [PR #18](https://github.com/hkshu12/wix/pull/18), [v1.7.0](https://github.com/hkshu12/wix/releases/tag/v1.7.0) |
 | 2026-05-27 | PWA manifest 与 Pages 子路径对齐 | [PR #16](https://github.com/hkshu12/wix/pull/16), [v1.6.0](https://github.com/hkshu12/wix/releases/tag/v1.6.0) |
 | 2026-05-27 | Android 自动更新与应用菜单 | [PR #14](https://github.com/hkshu12/wix/pull/14), [v1.5.0](https://github.com/hkshu12/wix/releases/tag/v1.5.0) |

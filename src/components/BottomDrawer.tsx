@@ -1,4 +1,5 @@
-import { useEffect, useId, type ReactNode } from 'react';
+import { useEffect, useId, useRef, type ReactNode } from 'react';
+import { useFocusTrap } from '../hooks/useFocusTrap';
 import './BottomDrawer.css';
 
 interface BottomDrawerProps {
@@ -10,6 +11,9 @@ interface BottomDrawerProps {
 
 export function BottomDrawer({ open, title, onClose, children }: BottomDrawerProps) {
   const titleId = useId();
+  const panelRef = useRef<HTMLElement>(null);
+
+  useFocusTrap(panelRef, { active: open });
 
   useEffect(() => {
     if (!open) {
@@ -38,11 +42,12 @@ export function BottomDrawer({ open, title, onClose, children }: BottomDrawerPro
       <button
         aria-hidden={!open}
         className={`bottom-drawer-scrim ${open ? 'open' : ''}`}
-        tabIndex={open ? 0 : -1}
+        tabIndex={-1}
         type="button"
         onClick={onClose}
       />
       <section
+        ref={panelRef}
         aria-labelledby={titleId}
         aria-modal="true"
         className={`bottom-drawer ${open ? 'open' : ''}`}

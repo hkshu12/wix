@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.9.0] - 2026-05-27
+
+### Added
+
+- Mixer bottom drawer traps keyboard focus while open: Tab cycles inside the panel, Escape closes and restores focus to the control that opened the drawer; scrim is no longer in the tab order.
+
 ## [1.8.0] - 2026-05-27
 
 ### Added
