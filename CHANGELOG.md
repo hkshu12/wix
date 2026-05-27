@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.14.0] - 2026-05-27
+
+### Added
+
+- Studio landscape layout: wider ambience grids on tablets, a right-side play/mixer rail on short landscape phones, and PWA install orientation set to **any** so home-screen apps can rotate.
+
 ## [1.13.0] - 2026-05-27
 
 ### Added
