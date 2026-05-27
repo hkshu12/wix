@@ -46,6 +46,7 @@ export function StudioPage() {
     loadMixerPreset,
     deleteMixerPreset,
     copyMixerShare,
+    copyMixerShareLink,
     pasteMixerShareFromClipboard,
     importMixerShare
   } = useStudio();
@@ -281,9 +282,17 @@ export function StudioPage() {
         <section className="drawer-section" aria-labelledby="drawer-share-title">
           <h3 id="drawer-share-title">分享混音</h3>
           <p className="drawer-hint">
-            复制当前声轨组合与主音量等设置为 JSON 分享码；好友粘贴导入即可还原（仅内置环境声，自定义音频需各自导入）。
+            复制分享链接或 JSON 分享码即可还原当前混音（仅内置环境声；自定义音频需各自导入）。打开带
+            <code>?share=</code> 的链接会自动导入。
           </p>
           <div className="mixer-share-actions">
+            <button
+              className="studio-btn studio-btn--secondary"
+              type="button"
+              onClick={() => void copyMixerShareLink()}
+            >
+              复制分享链接
+            </button>
             <button
               className="studio-btn studio-btn--secondary"
               type="button"

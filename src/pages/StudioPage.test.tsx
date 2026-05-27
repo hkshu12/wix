@@ -1,5 +1,8 @@
 import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { createInitialMixerState, toggleLayer } from '../domain/mixer';
+import { encodeMixerShareForUrl } from '../domain/mixerShareUrl';
+import { serializeMixerShare } from '../domain/mixerShare';
 import { AppRouter } from '../router/AppRouter';
 import { renderWithRouter } from '../test/renderWithRouter';
 
@@ -99,6 +102,25 @@ describe('StudioPage', () => {
     expect(within(activePanel).queryByText('海边')).not.toBeInTheDocument();
   });
 
+  it('imports a mix from a ?share= deep link on studio load', async () => {
+    let state = createInitialMixerState();
+    state = toggleLayer(state, 'rain');
+    state = toggleLayer(state, 'ocean');
+    const shareParam = encodeMixerShareForUrl(serializeMixerShare(state));
+
+    renderWithRouter(<AppRouter />, {
+      routerProps: { initialEntries: [`/studio?share=${shareParam}`] }
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText(/已导入混音（2 轨）/)).toBeInTheDocument();
+    });
+
+    const activePanel = screen.getByLabelText('当前混音轨道');
+    expect(within(activePanel).getByText('雨声')).toBeInTheDocument();
+    expect(within(activePanel).getByText('海边')).toBeInTheDocument();
+  });
+
   it('imports a mixer share code from the drawer', () => {
     const writeText = vi.fn().mockResolvedValue(undefined);
     Object.defineProperty(navigator, 'clipboard', {
@@ -113,9 +135,14 @@ describe('StudioPage', () => {
     fireEvent.click(screen.getByRole('button', { name: /混音与导入/ }));
 
     fireEvent.click(screen.getByRole('button', { name: '复制分享码' }));
-    expect(writeText).toHaveBeenCalledTimes(1);
+    expect(writeText).toHaveBeenCalled();
+    const shareCodeCall = writeText.mock.calls.find((call) => {
+      const text = call[0] as string;
+      return text.includes('wix-mixer-share');
+    });
+    expect(shareCodeCall).toBeDefined();
 
-    const shareCode = writeText.mock.calls[0]?.[0] as string;
+    const shareCode = shareCodeCall?.[0] as string;
     expect(shareCode).toContain('wix-mixer-share');
 
     fireEvent.click(screen.getByRole('button', { name: /雨声/ }));

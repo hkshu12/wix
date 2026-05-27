@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { AudioEngine } from '../audio/AudioEngine';
 import type { PlayableSound } from '../audio/audioGraphPlan';
 import {
@@ -10,6 +10,8 @@ import {
 } from '../storage/mixerSnapshot';
 import { applyMixerPreset } from '../domain/applyMixerPreset';
 import { parseMixerShare, serializeMixerShare } from '../domain/mixerShare';
+import { buildMixerShareUrl } from '../domain/mixerShareUrl';
+import { useMixerShareDeepLink } from '../hooks/useMixerShareDeepLink';
 import { setPlaying, type MixerState } from '../domain/mixer';
 import { BUILT_IN_SOUNDS } from '../domain/sounds';
 import {
@@ -32,8 +34,11 @@ import { StudioProvider, type StudioContextValue } from './StudioContext';
 import { UpdateProvider } from './UpdateContext';
 
 export function AppLayout() {
+  const location = useLocation();
+  const navigate = useNavigate();
   const [mixer, setMixer] = useState<MixerState>(() => hydrateMixerState(readMixerSnapshot()));
   const [customTracks, setCustomTracks] = useState<CustomTrack[]>([]);
+  const [customTracksReady, setCustomTracksReady] = useState(false);
   const [importStatus, setImportStatus] = useState('支持 MP3、WAV、M4A 等浏览器可解码音频');
   const [importProgress, setImportProgress] = useState<number | null>(null);
   const [mixerPresets, setMixerPresets] = useState<MixerPreset[]>(() => readMixerPresets());
@@ -70,9 +75,15 @@ export function AppLayout() {
             ...tracks.map((track) => track.id)
           ]);
           setMixer((state) => filterMixerLayersToSounds(state, allowedSoundIds));
+          setCustomTracksReady(true);
         }
       })
-      .catch(() => setImportStatus('无法读取已导入音频，请检查浏览器存储权限。'));
+      .catch(() => {
+        setImportStatus('无法读取已导入音频，请检查浏览器存储权限。');
+        if (!cancelled) {
+          setCustomTracksReady(true);
+        }
+      });
 
     return () => {
       cancelled = true;
@@ -247,42 +258,75 @@ export function AppLayout() {
     setImportStatus('无法写入剪贴板，请手动复制下方分享码。');
   }
 
-  function handleImportMixerShare(text: string) {
-    const result = parseMixerShare(text);
-    if (!result.ok) {
-      const messages: Record<typeof result.reason, string> = {
-        empty: '请粘贴混音分享码后再导入。',
-        'invalid-json': '分享码不是有效的 JSON，请检查后重试。',
-        'wrong-type': '不是白噪音混音器的分享码。',
-        'unsupported-version': '分享码版本过新，请更新应用后再导入。',
-        'invalid-payload': '分享码内容无效或已损坏。'
-      };
-      setImportStatus(messages[result.reason]);
-      return;
+  const handleImportMixerShare = useCallback(
+    (text: string) => {
+      const result = parseMixerShare(text);
+      if (!result.ok) {
+        const messages: Record<typeof result.reason, string> = {
+          empty: '请粘贴混音分享码后再导入。',
+          'invalid-json': '分享码不是有效的 JSON，请检查后重试。',
+          'wrong-type': '不是白噪音混音器的分享码。',
+          'unsupported-version': '分享码版本过新，请更新应用后再导入。',
+          'invalid-payload': '分享码内容无效或已损坏。'
+        };
+        setImportStatus(messages[result.reason]);
+        return;
+      }
+
+      const allowedSoundIds = new Set(allSounds.map((sound) => sound.id));
+      const requestedCount = result.snapshot.layers.length;
+      setMixer((current) => {
+        const next = applyMixerPreset(current, result.snapshot, allowedSoundIds);
+        const appliedCount = next.layers.length;
+        const skipped = requestedCount - appliedCount;
+
+        if (appliedCount === 0) {
+          setImportStatus(
+            skipped > 0
+              ? '已导入，但分享码中的声轨在本机不可用（多为自定义音频），未添加任何轨道。'
+              : '已导入空的混音配方。'
+          );
+          return next;
+        }
+
+        setImportStatus(
+          skipped > 0
+            ? `已导入混音（${appliedCount} 轨）；${skipped} 轨因本机无对应音频已跳过。`
+            : `已导入混音（${appliedCount} 轨）。`
+        );
+        return next;
+      });
+    },
+    [allSounds]
+  );
+
+  useMixerShareDeepLink({
+    pathname: location.pathname,
+    search: location.search,
+    navigate,
+    ready: customTracksReady,
+    onImportShare: handleImportMixerShare
+  });
+
+  async function handleCopyMixerShareLink() {
+    const text = serializeMixerShare(mixer);
+    const url = buildMixerShareUrl({
+      origin: window.location.origin,
+      basePath: import.meta.env.BASE_URL,
+      shareJson: text
+    });
+
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(url);
+        setImportStatus('分享链接已复制，好友打开即可导入混音。');
+        return;
+      }
+    } catch {
+      // fall through
     }
 
-    const allowedSoundIds = new Set(allSounds.map((sound) => sound.id));
-    const requestedCount = result.snapshot.layers.length;
-    const next = applyMixerPreset(mixer, result.snapshot, allowedSoundIds);
-    const appliedCount = next.layers.length;
-    const skipped = requestedCount - appliedCount;
-
-    setMixer(next);
-
-    if (appliedCount === 0) {
-      setImportStatus(
-        skipped > 0
-          ? '已导入，但分享码中的声轨在本机不可用（多为自定义音频），未添加任何轨道。'
-          : '已导入空的混音配方。'
-      );
-      return;
-    }
-
-    setImportStatus(
-      skipped > 0
-        ? `已导入混音（${appliedCount} 轨）；${skipped} 轨因本机无对应音频已跳过。`
-        : `已导入混音（${appliedCount} 轨）。`
-    );
+    setImportStatus('无法写入剪贴板，请手动复制浏览器地址栏中的分享链接。');
   }
 
   const studioValue: StudioContextValue = {
@@ -306,6 +350,7 @@ export function AppLayout() {
     loadMixerPreset: handleLoadMixerPreset,
     deleteMixerPreset: handleDeleteMixerPreset,
     copyMixerShare: handleCopyMixerShare,
+    copyMixerShareLink: handleCopyMixerShareLink,
     pasteMixerShareFromClipboard: handlePasteMixerShareFromClipboard,
     importMixerShare: handleImportMixerShare
   };

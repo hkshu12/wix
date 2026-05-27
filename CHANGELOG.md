@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.19.0] - 2026-05-27
+
+### Added
+
+- Mixer share deep links: copy a `/studio?share=…` URL from the mixer drawer, or open a friend’s link to import built-in ambience layers and master settings automatically (custom tracks still require local import).
+
 ## [1.18.0] - 2026-05-27
 
 ### Added
