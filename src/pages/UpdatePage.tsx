@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { useRegisterSW } from 'virtual:pwa-register/react';
+import { MarkdownContent } from '../components/MarkdownContent';
 import { GITHUB_RELEASES_URL } from '../lib/appMeta';
 import { isAndroidApp } from '../lib/platform';
 import { useAppUpdate } from '../layout/UpdateContext';
@@ -12,6 +13,15 @@ export function UpdatePage() {
   }
 
   return <WebUpdatePanel />;
+}
+
+function ReleaseNotes({ notes }: { notes: string }) {
+  return (
+    <details className="app-release-notes">
+      <summary>更新说明</summary>
+      <MarkdownContent source={notes} />
+    </details>
+  );
 }
 
 function AndroidUpdatePanel() {
@@ -31,9 +41,9 @@ function AndroidUpdatePanel() {
   const statusText = useMemo(() => {
     switch (phase) {
       case 'checking':
-        return '正在检查 GitHub Release…';
+        return '正在检查新版本…';
       case 'downloading':
-        return `正在下载 APK${downloadProgress != null ? `（${downloadProgress}%）` : ''}…`;
+        return `正在下载更新包${downloadProgress != null ? `（${downloadProgress}%）` : ''}…`;
       case 'installing':
         return '正在打开系统安装程序…';
       case 'error':
@@ -48,13 +58,13 @@ function AndroidUpdatePanel() {
   return (
     <>
       <section className="app-page-card" aria-labelledby="update-android-title">
-        <h2 id="update-android-title">Android 应用更新</h2>
+        <h2 id="update-android-title">应用更新</h2>
         <p>
           当前版本 <strong>{currentVersion || '…'}</strong>
           {latestRelease ? (
             <>
               {' '}
-              · 最新 Release <strong>{latestRelease.version}</strong>
+              · 最新版本 <strong>{latestRelease.version}</strong>
             </>
           ) : null}
         </p>
@@ -79,7 +89,7 @@ function AndroidUpdatePanel() {
             disabled={!updateAvailable || phase === 'downloading' || phase === 'checking'}
             onClick={() => void downloadUpdate()}
           >
-            下载 APK
+            下载更新
           </button>
           <button
             className="app-page-btn app-page-btn--primary"
@@ -90,14 +100,7 @@ function AndroidUpdatePanel() {
             安装更新
           </button>
         </div>
-        {latestRelease?.releaseNotes ? (
-          <details style={{ marginTop: '12px' }}>
-            <summary>更新说明</summary>
-            <pre style={{ whiteSpace: 'pre-wrap', fontFamily: 'inherit', color: 'var(--text-muted)' }}>
-              {latestRelease.releaseNotes}
-            </pre>
-          </details>
-        ) : null}
+        {latestRelease?.releaseNotes ? <ReleaseNotes notes={latestRelease.releaseNotes} /> : null}
       </section>
 
       <section className="app-page-card">
@@ -105,11 +108,11 @@ function AndroidUpdatePanel() {
         <ul>
           <li>首次安装或更新前，请在系统设置中允许本应用「安装未知应用」。</li>
           <li>下载完成后点击「安装更新」，按系统向导完成覆盖安装。</li>
-          <li>Release APK 使用项目统一签名，可直接覆盖上一版正式包。</li>
+          <li>请始终通过本应用或官方发布页获取安装包，以保证版本连续可升级。</li>
         </ul>
         <div className="app-page-actions">
           <a className="app-page-btn" href={GITHUB_RELEASES_URL} rel="noreferrer" target="_blank">
-            在浏览器中打开 Release
+            在浏览器中查看发布页
           </a>
         </div>
       </section>
@@ -127,14 +130,14 @@ function WebUpdatePanel() {
   return (
     <>
       <section className="app-page-card" aria-labelledby="update-web-title">
-        <h2 id="update-web-title">Web / PWA 更新</h2>
+        <h2 id="update-web-title">网页版更新</h2>
         <p>
-          当前构建版本 <strong>{currentVersion || '…'}</strong>。站点由 Service Worker 缓存，有新版本时会自动在后台下载。
+          当前版本 <strong>{currentVersion || '…'}</strong>。有新版本时会在后台准备好，无需手动下载安装包。
         </p>
         {needRefresh ? (
-          <p className="app-page-status">检测到新版本已就绪，点击下方按钮立即启用。</p>
+          <p className="app-page-status">新版本已就绪，点击下方按钮即可立即使用。</p>
         ) : (
-          <p className="app-page-status">若长时间未更新，可尝试强制刷新页面（Ctrl/Cmd + Shift + R）。</p>
+          <p className="app-page-status">若页面长时间未变化，可尝试强制刷新（Ctrl/Cmd + Shift + R）。</p>
         )}
         <div className="app-page-actions">
           <button
@@ -143,27 +146,30 @@ function WebUpdatePanel() {
             disabled={!needRefresh}
             onClick={() => void updateServiceWorker(true)}
           >
-            应用更新并刷新
+            立即更新并刷新
           </button>
         </div>
       </section>
 
       <section className="app-page-card" aria-labelledby="update-android-download-title">
         <h2 id="update-android-download-title">Android 安装包</h2>
-        <p>移动设备安装请下载 GitHub Release 中的 APK（命名格式 <code>wix-v*.*.*-android.apk</code>）。</p>
+        <p>在手机上使用完整功能，请下载官方 Android 安装包并安装到设备。</p>
         <div className="app-page-actions">
           <button className="app-page-btn" type="button" disabled={phase === 'checking'} onClick={() => void checkForUpdates()}>
-            查询最新 Release
+            查询最新版本
           </button>
           <a className="app-page-btn app-page-btn--primary" href={GITHUB_RELEASES_URL} rel="noreferrer" target="_blank">
             前往下载页面
           </a>
         </div>
         {latestRelease ? (
-          <p className="app-page-status">
-            最新 <strong>{latestRelease.version}</strong>
-            {updateAvailable ? '（高于当前 Web 构建版本）' : '（与当前构建一致或无法比较）'}
-          </p>
+          <>
+            <p className="app-page-status">
+              最新 <strong>{latestRelease.version}</strong>
+              {updateAvailable ? '（高于当前网页版）' : '（与当前网页版一致或无法比较）'}
+            </p>
+            {latestRelease.releaseNotes ? <ReleaseNotes notes={latestRelease.releaseNotes} /> : null}
+          </>
         ) : null}
       </section>
     </>
