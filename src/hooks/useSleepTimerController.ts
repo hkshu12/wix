@@ -11,6 +11,16 @@ import {
   type SleepTimerPresetMinutes,
   type SleepTimerState
 } from '../domain/sleepTimer';
+import {
+  clearSleepTimerSnapshot,
+  hydrateSleepTimerSnapshot,
+  readSleepTimerSnapshot,
+  writeSleepTimerSnapshot
+} from '../storage/sleepTimerSnapshot';
+
+function readInitialSleepTimer(): { timer: SleepTimerState; preFadeMasterVolume: number | null } {
+  return hydrateSleepTimerSnapshot(readSleepTimerSnapshot(), Date.now());
+}
 
 interface UseSleepTimerControllerOptions {
   mixer: MixerState;
@@ -27,12 +37,18 @@ export interface SleepTimerController {
 }
 
 export function useSleepTimerController({ mixer, setMixer }: UseSleepTimerControllerOptions): SleepTimerController {
-  const [sleepTimer, setSleepTimer] = useState<SleepTimerState>(() => clearSleepTimer());
-  const [remainingMs, setRemainingMs] = useState(0);
+  const initialSleepTimer = useRef(readInitialSleepTimer());
+  const [sleepTimer, setSleepTimer] = useState<SleepTimerState>(() => initialSleepTimer.current.timer);
+  const [remainingMs, setRemainingMs] = useState(() =>
+    getSleepTimerRemainingMs(initialSleepTimer.current.timer, Date.now())
+  );
   const [isFading, setIsFading] = useState(false);
-  const preFadeMasterVolumeRef = useRef(mixer.masterVolume);
+  const preFadeMasterVolumeRef = useRef(
+    initialSleepTimer.current.preFadeMasterVolume ?? mixer.masterVolume
+  );
 
   function cancel() {
+    clearSleepTimerSnapshot();
     setSleepTimer(clearSleepTimer());
     setIsFading(false);
     if (preFadeMasterVolumeRef.current !== undefined) {
@@ -42,7 +58,9 @@ export function useSleepTimerController({ mixer, setMixer }: UseSleepTimerContro
 
   function startPreset(minutes: SleepTimerPresetMinutes) {
     preFadeMasterVolumeRef.current = mixer.masterVolume;
-    setSleepTimer(startSleepTimer(Date.now(), minutes));
+    const timer = startSleepTimer(Date.now(), minutes);
+    writeSleepTimerSnapshot(timer, preFadeMasterVolumeRef.current);
+    setSleepTimer(timer);
     setIsFading(false);
   }
 
@@ -58,6 +76,7 @@ export function useSleepTimerController({ mixer, setMixer }: UseSleepTimerContro
       setRemainingMs(getSleepTimerRemainingMs(sleepTimer, now));
 
       if (shouldFinishSleepTimer(sleepTimer, now)) {
+        clearSleepTimerSnapshot();
         setSleepTimer(clearSleepTimer());
         setIsFading(false);
         if (mixer.isPlaying) {
