@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.13.0] - 2026-05-27
+
+### Added
+
+- Mixer share codes: copy the current mix as JSON from the studio drawer, or paste a friend’s code to restore built-in ambience layers and master settings (custom imported tracks are skipped on the recipient device).
+
 ## [1.12.0] - 2026-05-27
 
 ### Added

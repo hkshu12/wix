@@ -9,6 +9,7 @@ import {
   filterMixerLayersToSounds
 } from '../storage/mixerSnapshot';
 import { applyMixerPreset } from '../domain/applyMixerPreset';
+import { parseMixerShare, serializeMixerShare } from '../domain/mixerShare';
 import { setPlaying, type MixerState } from '../domain/mixer';
 import { BUILT_IN_SOUNDS } from '../domain/sounds';
 import {
@@ -175,6 +176,76 @@ export function AppLayout() {
     }
   }
 
+  async function handlePasteMixerShareFromClipboard(): Promise<string | null> {
+    try {
+      if (navigator.clipboard?.readText) {
+        const text = await navigator.clipboard.readText();
+        if (text.trim()) {
+          setImportStatus('已从剪贴板填入分享码，点击导入混音即可。');
+          return text;
+        }
+      }
+    } catch {
+      // fall through
+    }
+
+    setImportStatus('无法读取剪贴板，请手动粘贴到下方输入框。');
+    return null;
+  }
+
+  async function handleCopyMixerShare() {
+    const text = serializeMixerShare(mixer);
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(text);
+        setImportStatus('混音配方已复制到剪贴板，可粘贴给好友导入。');
+        return;
+      }
+    } catch {
+      // fall through to manual copy hint
+    }
+
+    setImportStatus('无法写入剪贴板，请手动复制下方分享码。');
+  }
+
+  function handleImportMixerShare(text: string) {
+    const result = parseMixerShare(text);
+    if (!result.ok) {
+      const messages: Record<typeof result.reason, string> = {
+        empty: '请粘贴混音分享码后再导入。',
+        'invalid-json': '分享码不是有效的 JSON，请检查后重试。',
+        'wrong-type': '不是白噪音混音器的分享码。',
+        'unsupported-version': '分享码版本过新，请更新应用后再导入。',
+        'invalid-payload': '分享码内容无效或已损坏。'
+      };
+      setImportStatus(messages[result.reason]);
+      return;
+    }
+
+    const allowedSoundIds = new Set(allSounds.map((sound) => sound.id));
+    const requestedCount = result.snapshot.layers.length;
+    const next = applyMixerPreset(mixer, result.snapshot, allowedSoundIds);
+    const appliedCount = next.layers.length;
+    const skipped = requestedCount - appliedCount;
+
+    setMixer(next);
+
+    if (appliedCount === 0) {
+      setImportStatus(
+        skipped > 0
+          ? '已导入，但分享码中的声轨在本机不可用（多为自定义音频），未添加任何轨道。'
+          : '已导入空的混音配方。'
+      );
+      return;
+    }
+
+    setImportStatus(
+      skipped > 0
+        ? `已导入混音（${appliedCount} 轨）；${skipped} 轨因本机无对应音频已跳过。`
+        : `已导入混音（${appliedCount} 轨）。`
+    );
+  }
+
   const studioValue: StudioContextValue = {
     mixer,
     setMixer,
@@ -193,7 +264,10 @@ export function AppLayout() {
     mixerPresets,
     saveMixerPreset: handleSaveMixerPreset,
     loadMixerPreset: handleLoadMixerPreset,
-    deleteMixerPreset: handleDeleteMixerPreset
+    deleteMixerPreset: handleDeleteMixerPreset,
+    copyMixerShare: handleCopyMixerShare,
+    pasteMixerShareFromClipboard: handlePasteMixerShareFromClipboard,
+    importMixerShare: handleImportMixerShare
   };
 
   return (

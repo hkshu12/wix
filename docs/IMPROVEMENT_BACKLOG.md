@@ -28,7 +28,7 @@
 
 | 项 | 场景 | 当前不足 | 建议方案 |
 | --- | --- | --- | --- |
-| **导出/分享混音配置** | 向朋友分享「雨+篝火」配方 | 无序列化 | JSON 导出/导入或 URL 编码 |
+| ~~导出/分享混音配置~~ | 向朋友分享「雨+篝火」配方 | — | 已完成 v1.13.0 |
 | **横屏与安全区细化** | 平板横屏 | 主要为竖屏远程式布局 | 横屏 `@media` 调整网格与 dock |
 | **新内置环境声** | 风扇、咖啡馆、列车等 | 8 轨 CC0 集 | 扩展 `sounds.ts` + `sounds:download` |
 | **大文件导入进度** | 长播客/长环境录音 | 仅状态文案 | `FileReader` 进度或分块提示 |
@@ -49,26 +49,28 @@
 | 前庭敏感 | 减少 UI 动效 | 系统「减少动态效果」下抽屉/导航瞬时切换（v1.10.0） |
 | 新用户认知 | 落地页了解 Studio 能力 | v1.11.0 补充定时/预设/持久化文案 |
 | 读屏用户 | 播放/加轨状态播报 | v1.12.0 混音台 `role="status"` live 区域 |
+| 社交分享 | 把配方发给朋友 | v1.13.0 JSON 分享码复制/粘贴导入 |
 | 自定义内容 | 导入本地音频 | IndexedDB + 混音层可恢复 |
 
 ### 外部信号
 
 - GitHub Issues：当前无 open issue（2026-05-27）。
-- 近期 CHANGELOG：v1.10.0 减少动效已合入 main——**避免重复**。
-- 同类 App 常见能力：后台播放、分享配方、能力说明页——落地页已更新；下一项建议 **导出混音 JSON** 或 **Android 后台播放**。
+- 近期 CHANGELOG：v1.12.0 ARIA 播报已发布——**避免重复**。
+- 同类 App 常见能力：后台播放、分享配方、横屏布局——分享已完成；下一项建议 **Android 后台播放** 或 **横屏布局**。
 
 ## 本次选中项
 
-**混音播放 ARIA live 播报（P2）**
+**导出/分享混音配置（P2）**
 
-- **理由**：睡眠定时已有 `aria-live`，但播放/暂停与环境声加轨对读屏用户仍静默；纯前端、单文件域逻辑 + Studio 接线，无 Android 依赖，适合单 PR。
-- **范围**：`playbackAnnouncement` 文案、`usePlaybackAnnouncer`、Studio 播放与声卡 `role="status"` 区域；域单测 + Studio 集成测。
+- **理由**：场景预设仅本机有效；用户常想分享「雨+篝火」等固定搭配。JSON 分享码复用 `applyMixerPreset` 与现有层校验，无 Android 依赖，单 PR 可交付复制/粘贴导入。
+- **范围**：`mixerShare` 域模块、混音抽屉「分享混音」区、剪贴板复制与导入反馈、域单测 + Studio 集成测。
 
 ## 历史已完成
 
 | 日期 | 项 | 引用 |
 | --- | --- | --- |
-| 2026-05-27 | 混音播放 ARIA live 播报 | v1.12.0（本次） |
+| 2026-05-27 | 导出/分享混音配置 | v1.13.0（本次） |
+| 2026-05-27 | 混音播放 ARIA live 播报 | [v1.12.0](https://github.com/hkshu12/wix/releases/tag/v1.12.0) |
 | 2026-05-27 | 落地页功能列表更新 | [v1.11.0](https://github.com/hkshu12/wix/releases/tag/v1.11.0) |
 | 2026-05-27 | 减少动效（prefers-reduced-motion） | [PR #21](https://github.com/hkshu12/wix/pull/21), [v1.10.0](https://github.com/hkshu12/wix/releases/tag/v1.10.0) |
 | 2026-05-27 | 混音台底部抽屉焦点陷阱 | [PR #20](https://github.com/hkshu12/wix/pull/20), [v1.9.0](https://github.com/hkshu12/wix/releases/tag/v1.9.0) |
