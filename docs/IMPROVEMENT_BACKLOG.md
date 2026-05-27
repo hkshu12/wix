@@ -30,6 +30,7 @@
 | 项 | 场景 | 当前不足 | 建议方案 |
 | --- | --- | --- | --- |
 | ~~导出/分享混音配置~~ | 向朋友分享「雨+篝火」配方 | — | 已完成 v1.13.0 |
+| ~~混音分享 URL 深链~~ | 点开链接即导入配方 | — | 已完成 v1.19.0 |
 | ~~横屏与安全区细化~~ | 平板/手机横屏 | — | 已完成 v1.14.0 |
 | **新内置环境声** | 风扇、咖啡馆、列车等 | 8 轨 CC0 集 | 扩展 `sounds.ts` + `sounds:download` |
 | ~~大文件导入进度~~ | 长播客/长环境录音 | — | v1.16.0 |
@@ -38,7 +39,6 @@
 | ~~桌面键盘快捷键~~ | 办公专注时免鼠标 | — | 已完成 v1.15.0（Space 播放/暂停） |
 | ~~快捷键帮助（`?`）~~ | 发现 Space 等快捷键 | — | 已完成 v1.17.0 |
 | **自定义睡眠定时时长** | 90 分钟午睡等非 15–60 预设 | 仅四档预设 | `sleepTimer.ts` 增加数字输入或滑块 |
-| **混音分享 URL 深链** | 点开链接即导入配方 | 仅剪贴板 JSON | `?share=` 查询参数 + `mixerShare` |
 | **更多键盘快捷键** | `M` 开抽屉、`+/-` 主音量 | 仅 Space / `?` | 扩展 `studioKeyboard` |
 
 ### 体验场景与缺口（摘要）
@@ -55,37 +55,38 @@
 | 前庭敏感 | 减少 UI 动效 | 系统「减少动态效果」（v1.10.0） |
 | 新用户认知 | 落地页了解 Studio 能力 | v1.11.0 |
 | 读屏用户 | 播放/加轨状态播报 | v1.12.0 live 区域 |
-| 社交分享 | 把配方发给朋友 | v1.13.0 JSON 分享码 |
+| 社交分享 | 把配方发给朋友 | v1.13.0 JSON + v1.19.0 深链 URL |
 | 平板横屏 | 一屏多看环境声 | v1.14.0 |
 | 自定义内容 | 导入本地音频 | IndexedDB + 导入进度（v1.16.0） |
 | PWA 锁屏/通知栏 | 系统级播放/暂停 | v1.18.0 Media Session（Web）；Android 原生仍缺 |
 
-### 代码与架构备注（2026-05-27 五次挖掘）
+### 代码与架构备注（2026-05-27 六次挖掘）
 
-- **分层清晰**：`domain/` / `storage/` / `audio/` / `AppLayout` 编排；`AppLayout` 仍偏大。
+- **分层清晰**：`domain/` / `storage/` / `audio/` / `AppLayout` 编排；分享深链在 `mixerShareUrl` + `useMixerShareDeepLink`。
 - **键盘**：`studioKeyboard` + `useStudioKeyboardShortcuts` + `KeyboardShortcutsDialog`。
-- **系统媒体**：`mediaSessionCopy`（文案）+ `audio/mediaSession` + `useMediaSessionSync`（v1.18.0）。
-- **Android**：Capacitor 8；后台音频仍为最大平台缺口（P1），Web Media Session 在部分 WebView 可用但非完整方案。
-- **测试**：域函数 + `mediaSession` mock；`StudioPage` 集成测覆盖快捷键与分享。
+- **系统媒体**：`mediaSessionCopy` + `audio/mediaSession` + `useMediaSessionSync`（v1.18.0）。
+- **Android**：Capacitor 8；后台音频仍为最大平台缺口（P1），需原生 foreground service 或插件。
+- **测试**：`mixerShareUrl` 单测 + `StudioPage` 深链集成测。
 
 ### 外部信号
 
 - GitHub Issues：无 open issue（2026-05-27）。
-- 近期 CHANGELOG：v1.17.0 快捷键帮助——**避免重复**。
-- 同类 App：后台播放、更多环境声、锁屏控制——下一项建议 **Android 原生后台（P1）** 或 **新内置声（P2）**。
+- 近期 CHANGELOG：v1.18.0 Media Session——**避免重复**。
+- 同类 App：后台播放、更多环境声、自定义定时——下一项建议 **Android 原生后台（P1）** 或 **自定义睡眠定时（P2）**。
 
 ## 本次选中项
 
-**Web Media Session API（P1）**
+**混音分享 URL 深链（P2）**
 
-- **理由**：v1.17.0 已补齐键盘可发现性；Android 原生后台需插件调研，单次 PR 风险高。PWA/桌面用户在锁屏、通知中心、耳机键上期望播放/暂停，Media Session 为标准 Web API、无密钥、与现有 `handlePlayToggle` 自然衔接。
-- **范围**：`mediaSessionCopy`、`mediaSession`、`useMediaSessionSync`、`AppLayout` 接线；单元测试；不含 Android foreground service。
+- **理由**：v1.18.0 已覆盖 Web 锁屏控制；Android 原生后台单次 PR 风险高。社交场景下「发链接即导入」比纯 JSON 剪贴板更自然，且复用现有 `mixerShare` 编解码，改动集中在 URL 封装与 `AppLayout` 启动导入。
+- **范围**：`mixerShareUrl`、`useMixerShareDeepLink`、抽屉「复制分享链接」、单测与集成测；不含 Android 原生分享 intent。
 
 ## 历史已完成
 
 | 日期 | 项 | 引用 |
 | --- | --- | --- |
-| 2026-05-27 | Web Media Session（PWA/桌面锁屏） | v1.18.0（本次） |
+| 2026-05-27 | 混音分享 URL 深链 | v1.19.0（本次） |
+| 2026-05-27 | Web Media Session（PWA/桌面锁屏） | [v1.18.0](https://github.com/hkshu12/wix/releases/tag/v1.18.0) |
 | 2026-05-27 | 快捷键帮助（`?`） | [v1.17.0](https://github.com/hkshu12/wix/releases/tag/v1.17.0) |
 | 2026-05-27 | 大文件导入进度条 | [PR #27](https://github.com/hkshu12/wix/pull/27), [v1.16.0](https://github.com/hkshu12/wix/releases/tag/v1.16.0) |
 | 2026-05-27 | 桌面键盘快捷键（Space） | [PR #26](https://github.com/hkshu12/wix/pull/26), [v1.15.0](https://github.com/hkshu12/wix/releases/tag/v1.15.0) |
