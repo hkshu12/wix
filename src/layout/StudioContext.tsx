@@ -24,6 +24,9 @@ export interface StudioContextValue {
   saveMixerPreset: (name: string) => void;
   loadMixerPreset: (id: string) => void;
   deleteMixerPreset: (id: string) => void;
+  copyMixerShare: () => Promise<void>;
+  pasteMixerShareFromClipboard: () => Promise<string | null>;
+  importMixerShare: (text: string) => void;
 }
 
 const StudioContext = createContext<StudioContextValue | null>(null);

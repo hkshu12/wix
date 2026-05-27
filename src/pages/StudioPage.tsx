@@ -41,10 +41,21 @@ export function StudioPage() {
     mixerPresets,
     saveMixerPreset,
     loadMixerPreset,
-    deleteMixerPreset
+    deleteMixerPreset,
+    copyMixerShare,
+    pasteMixerShareFromClipboard,
+    importMixerShare
   } = useStudio();
+
+  async function handlePasteShareFromClipboard() {
+    const text = await pasteMixerShareFromClipboard();
+    if (text !== null) {
+      setSharePaste(text);
+    }
+  }
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [presetName, setPresetName] = useState('');
+  const [sharePaste, setSharePaste] = useState('');
   const [navOpen, setNavOpen] = useState(false);
   const { updateAvailable } = useAppUpdate();
   const android = isAndroidApp();
@@ -234,6 +245,50 @@ export function StudioPage() {
           ) : (
             <p className="drawer-hint drawer-hint--muted">尚无预设，调好混音后点击保存。</p>
           )}
+        </section>
+
+        <section className="drawer-section" aria-labelledby="drawer-share-title">
+          <h3 id="drawer-share-title">分享混音</h3>
+          <p className="drawer-hint">
+            复制当前声轨组合与主音量等设置为 JSON 分享码；好友粘贴导入即可还原（仅内置环境声，自定义音频需各自导入）。
+          </p>
+          <div className="mixer-share-actions">
+            <button
+              className="studio-btn studio-btn--secondary"
+              type="button"
+              onClick={() => void copyMixerShare()}
+            >
+              复制分享码
+            </button>
+            <button
+              className="studio-btn studio-btn--secondary"
+              type="button"
+              onClick={() => void handlePasteShareFromClipboard()}
+            >
+              从剪贴板粘贴
+            </button>
+          </div>
+          <label className="mixer-share-paste-label">
+            分享码
+            <textarea
+              aria-label="混音分享码"
+              className="mixer-share-paste"
+              placeholder='{"type":"wix-mixer-share",...}'
+              rows={4}
+              value={sharePaste}
+              onChange={(event) => setSharePaste(event.target.value)}
+            />
+          </label>
+          <button
+            className="studio-btn studio-btn--secondary"
+            type="button"
+            onClick={() => {
+              importMixerShare(sharePaste);
+              setSharePaste('');
+            }}
+          >
+            导入混音
+          </button>
         </section>
 
         <section className="drawer-section" aria-labelledby="drawer-sleep-timer-title">

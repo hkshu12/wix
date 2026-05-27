@@ -99,6 +99,39 @@ describe('StudioPage', () => {
     expect(within(activePanel).queryByText('海边')).not.toBeInTheDocument();
   });
 
+  it('imports a mixer share code from the drawer', () => {
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, 'clipboard', {
+      configurable: true,
+      value: { writeText, readText: vi.fn() }
+    });
+
+    renderWithRouter(<AppRouter />, { routerProps: { initialEntries: ['/studio'] } });
+
+    fireEvent.click(screen.getByRole('button', { name: /雨声/ }));
+    fireEvent.click(screen.getByRole('button', { name: /海边/ }));
+    fireEvent.click(screen.getByRole('button', { name: /混音与导入/ }));
+
+    fireEvent.click(screen.getByRole('button', { name: '复制分享码' }));
+    expect(writeText).toHaveBeenCalledTimes(1);
+
+    const shareCode = writeText.mock.calls[0]?.[0] as string;
+    expect(shareCode).toContain('wix-mixer-share');
+
+    fireEvent.click(screen.getByRole('button', { name: /雨声/ }));
+    fireEvent.click(screen.getByRole('button', { name: /海边/ }));
+
+    const activePanel = screen.getByLabelText('当前混音轨道');
+    expect(within(activePanel).queryByText('雨声')).not.toBeInTheDocument();
+
+    fireEvent.change(screen.getByLabelText('混音分享码'), { target: { value: shareCode } });
+    fireEvent.click(screen.getByRole('button', { name: '导入混音' }));
+
+    expect(screen.getByText(/已导入混音（2 轨）/)).toBeInTheDocument();
+    expect(within(activePanel).getByText('雨声')).toBeInTheDocument();
+    expect(within(activePanel).getByText('海边')).toBeInTheDocument();
+  });
+
   it('cancels an active sleep timer', () => {
     renderWithRouter(<AppRouter />, { routerProps: { initialEntries: ['/studio'] } });
 
