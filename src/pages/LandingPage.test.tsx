@@ -8,10 +8,11 @@ describe('LandingPage', () => {
   it('lists sleep timer, presets, and mix persistence in features', () => {
     renderWithRouter(<AppRouter />, { routerProps: { initialEntries: ['/'] } });
 
-    expect(screen.getByRole('heading', { name: '能做什么' })).toBeInTheDocument();
-    expect(screen.getByText(/睡眠定时/)).toBeInTheDocument();
-    expect(screen.getByText(/场景预设/)).toBeInTheDocument();
-    expect(screen.getByText(/刷新后自动恢复/)).toBeInTheDocument();
+    const features = screen.getByRole('region', { name: '能做什么' });
+
+    expect(features).toHaveTextContent(/睡眠定时（15–60 分钟）/);
+    expect(features).toHaveTextContent(/命名场景预设/);
+    expect(features).toHaveTextContent(/刷新后自动恢复/);
   });
 
   it('marks entered studio and navigates on 开始使用', async () => {
