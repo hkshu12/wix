@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.6.0] - 2026-05-27
+
+### Fixed
+
+- PWA manifest `start_url`, `scope`, and icon paths now follow `VITE_BASE_PATH`, so Add to Home Screen works on GitHub Pages subdirectory deployments.
+
 ## [1.5.0] - 2026-05-27
 
 ### Added
