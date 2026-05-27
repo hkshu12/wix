@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.10.0] - 2026-05-27
+
+### Added
+
+- UI motion respects the system **Reduce motion** setting: drawer, Android nav panel, and update progress transitions use zero duration when `prefers-reduced-motion: reduce` is enabled (audio fade-out unchanged).
+
 ## [1.9.0] - 2026-05-27
 
 ### Added
