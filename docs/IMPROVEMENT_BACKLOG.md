@@ -18,11 +18,11 @@
 | --- | --- | --- | --- |
 | ~~场景预设（收藏组合）~~ | 专注/睡眠/旅行固定搭配 | — | 已完成 v1.4.0 |
 | **Android 后台播放与锁屏控制** | 锁屏/切 App 继续听 | 纯 WebView，无 Media Session | Capacitor 插件或原生 foreground service |
-| ~~PWA `start_url` 与 Pages 子路径~~ | GitHub Pages 子目录安装 PWA | — | 本次实现（v1.6.0） |
+| ~~PWA `start_url` 与 Pages 子路径~~ | GitHub Pages 子目录安装 PWA | — | 已完成 v1.6.0 |
 | **音频加载失败重试** | 弱网或 OGG 缺失 | `fetch` 失败直接抛错 | 指数退避重试 + 用户可见错误态 |
 | **减少动效（`prefers-reduced-motion`）** | 前庭敏感用户 | 无媒体查询适配 | CSS/JS 缩短或关闭过渡 |
 | **底部抽屉焦点陷阱** | 键盘/读屏用户 | 有 `role="dialog"` 但无 focus trap | `focus-trap` 或自管 Tab 循环 |
-| **睡眠定时持久化** | 睡前设好定时后刷新页面 | 定时器仅存内存 | 可选写入 `localStorage` 并在恢复时校验剩余时间 |
+| ~~睡眠定时持久化~~ | 睡前设好定时后刷新页面 | — | 本次实现（v1.7.0） |
 
 ### P2
 
@@ -32,40 +32,41 @@
 | **横屏与安全区细化** | 平板横屏 | 主要为竖屏远程式布局 | 横屏 `@media` 调整网格与 dock |
 | **新内置环境声** | 风扇、咖啡馆、列车等 | 8 轨 CC0 集 | 扩展 `sounds.ts` + `sounds:download` |
 | **大文件导入进度** | 长播客/长环境录音 | 仅状态文案 | `FileReader` 进度或分块提示 |
-| **混音 ARIA 实时区域** | 读屏知播放/定时状态 | 部分控件有 label | `aria-live` 播报播放与定时 |
-| **落地页功能列表更新** | 新用户了解能力 | 未提及定时、预设、Android 更新 | 补充 Studio 已有功能文案 |
+| **混音 ARIA 实时区域** | 读屏知播放/定时状态 | 定时已有 live；播放无 | `aria-live` 播报播放切换 |
+| **落地页功能列表更新** | 新用户了解能力 | 未提及定时持久化、预设等 | 补充 Studio 已有功能文案 |
 
 ### 体验场景与缺口（摘要）
 
 | 场景 | 典型需求 | 现状 |
 | --- | --- | --- |
-| 睡眠 | 定时、渐出、低亮度 UI | 定时+渐出已有；主题可深色 |
+| 睡眠 | 定时、渐出、低亮度 UI | 定时+渐出+刷新后恢复倒计时（v1.7.0） |
 | 专注 | 预设、快速恢复 | 命名预设 + 混音快照恢复 |
 | 冥想 | 慢速播放、简单组合 | 有全局/ per-track 速度 |
 | 哄娃 | 长时间稳定循环 | 定时渐出可用 |
 | 屏蔽噪音 | 粉/棕噪 + 雨声 | 内置齐全 |
-| 旅行/办公 | 离线 PWA、子路径安装 | v1.6.0 起 manifest 与 `VITE_BASE_PATH` 对齐 |
+| 旅行/办公 | 离线 PWA、子路径安装 | v1.6.0 manifest 对齐 |
 | 自定义内容 | 导入本地音频 | IndexedDB + 混音层可恢复 |
 
 ### 外部信号
 
 - GitHub Issues：当前无 open issue。
-- 近期 CHANGELOG：v1.5.0 Android 更新、v1.4.0 场景预设——**避免重复**。
-- 同类 App 常见能力：后台播放、分享配方、PWA 子路径——与剩余 P1/P2 一致。
+- 近期 CHANGELOG：v1.6.0 PWA 子路径、v1.5.0 Android 更新——**避免重复**。
+- 同类 App 常见能力：后台播放、分享配方、定时跨会话——下一项优先 **音频重试** 或 **减少动效**（小 diff）。
 
 ## 本次选中项
 
-**PWA `start_url` 与 GitHub Pages 子路径对齐（P1）**
+**睡眠定时持久化（P1）**
 
-- **理由**：CI/Pages 构建使用 `VITE_BASE_PATH=/{repo}/`，但 manifest 固定 `start_url: '/'` 与根路径图标，导致「添加到主屏幕」在子路径部署时打开错误 URL 或图标 404；改动集中在 `vite.config.ts` + 可测 helper，单 PR 可交付。
-- **范围**：根据 `VITE_BASE_PATH` 注入 manifest 的 `start_url`、`scope` 与图标路径；单元测试覆盖根路径与子路径。
+- **理由**：睡前设好 30/60 分钟定时后若误触刷新或 PWA 被系统回收，倒计时会丢失；与已有混音快照模式一致，改动集中在 `storage/sleepTimerSnapshot.ts` + `useSleepTimerController`，单 PR 可测可交付。
+- **范围**：持久化 `endsAt` / `fadeStartsAt` / 渐出前主音量；过期或取消时清除；单元测试覆盖读写与 hook 恢复。
 
 ## 历史已完成
 
 | 日期 | 项 | 引用 |
 | --- | --- | --- |
-| 2026-05-27 | PWA manifest 与 Pages 子路径对齐 | v1.6.0（本次） |
-| 2026-05-27 | Android 自动更新与应用菜单（设置/关于/更新） | [PR #14](https://github.com/hkshu12/wix/pull/14), [v1.5.0](https://github.com/hkshu12/wix/releases/tag/v1.5.0) |
+| 2026-05-27 | 睡眠定时跨刷新持久化 | v1.7.0（本次） |
+| 2026-05-27 | PWA manifest 与 Pages 子路径对齐 | [PR #16](https://github.com/hkshu12/wix/pull/16), [v1.6.0](https://github.com/hkshu12/wix/releases/tag/v1.6.0) |
+| 2026-05-27 | Android 自动更新与应用菜单 | [PR #14](https://github.com/hkshu12/wix/pull/14), [v1.5.0](https://github.com/hkshu12/wix/releases/tag/v1.5.0) |
 | 2026-05-27 | 场景预设（收藏组合） | [PR #15](https://github.com/hkshu12/wix/pull/15), [v1.4.0](https://github.com/hkshu12/wix/releases/tag/v1.4.0) |
 | 2026-05-27 | 混音状态持久化 | [PR #13](https://github.com/hkshu12/wix/pull/13), [v1.3.0](https://github.com/hkshu12/wix/releases/tag/v1.3.0) |
 | 2026-05-27 | 睡眠定时 + 渐出停止 | [PR #12](https://github.com/hkshu12/wix/pull/12), [v1.2.0](https://github.com/hkshu12/wix/releases/tag/v1.2.0) |

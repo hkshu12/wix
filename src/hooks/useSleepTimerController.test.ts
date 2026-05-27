@@ -2,11 +2,13 @@ import { act, renderHook } from '@testing-library/react';
 import { useState } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createInitialMixerState, setPlaying } from '../domain/mixer';
-import { SLEEP_TIMER_FADE_SECONDS, type SleepTimerPresetMinutes } from '../domain/sleepTimer';
+import { SLEEP_TIMER_FADE_SECONDS, startSleepTimer, type SleepTimerPresetMinutes } from '../domain/sleepTimer';
+import { writeSleepTimerSnapshot } from '../storage/sleepTimerSnapshot';
 import { useSleepTimerController } from './useSleepTimerController';
 
 describe('useSleepTimerController', () => {
   beforeEach(() => {
+    localStorage.clear();
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-05-27T12:00:00Z'));
   });
@@ -50,5 +52,26 @@ describe('useSleepTimerController', () => {
     expect(result.current.controller.isActive).toBe(false);
     expect(result.current.mixer.isPlaying).toBe(false);
     expect(result.current.mixer.masterVolume).toBe(initialVolume);
+  });
+
+  it('restores an active timer from localStorage on mount', () => {
+    const now = Date.now();
+    const timer = startSleepTimer(now, 30);
+    writeSleepTimerSnapshot(timer, 0.65);
+
+    const { result } = renderHook(() => {
+      const [mixer, setMixer] = useState(createInitialMixerState);
+      const controller = useSleepTimerController({ mixer, setMixer });
+      return { controller };
+    });
+
+    expect(result.current.controller.isActive).toBe(true);
+    expect(result.current.controller.remainingLabel).toBe('30:00');
+
+    act(() => {
+      result.current.controller.cancel();
+    });
+
+    expect(result.current.controller.isActive).toBe(false);
   });
 });

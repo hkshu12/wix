@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.7.0] - 2026-05-27
+
+### Added
+
+- Sleep timer survives page refresh: remaining countdown and fade-out master volume restore from local storage until the timer ends or you cancel it.
+
 ## [1.6.0] - 2026-05-27
 
 ### Fixed
