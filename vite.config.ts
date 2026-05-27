@@ -27,7 +27,7 @@ export default defineConfig({
         theme_color: '#07111f',
         background_color: '#07111f',
         display: 'standalone',
-        orientation: 'portrait',
+        orientation: 'any',
         start_url: pwaScope.start_url,
         scope: pwaScope.scope,
         icons: [

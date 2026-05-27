@@ -511,3 +511,83 @@ p {
     grid-column: 1 / -1;
   }
 }
+
+/* Landscape tablets / wide screens: denser ambience grid */
+@media (orientation: landscape) and (min-width: 641px) {
+  .studio-page {
+    width: min(1120px, 100%);
+    padding-inline: max(20px, var(--safe-left)) max(20px, var(--safe-right));
+  }
+
+  .sound-grid--remote {
+    grid-template-columns: repeat(auto-fill, minmax(128px, 1fr));
+  }
+
+  .sound-card--remote {
+    min-height: 96px;
+    padding: 12px;
+  }
+
+  .sound-icon {
+    width: 46px;
+    height: 46px;
+    font-size: 1.45rem;
+  }
+}
+
+/* Short landscape (phones): move dock to right rail so the grid keeps vertical space */
+@media (orientation: landscape) and (max-height: 520px) {
+  .studio-page {
+    padding-bottom: calc(12px + var(--safe-bottom));
+    padding-right: calc(min(11.5rem, 32vw) + 20px + var(--safe-right));
+    padding-left: max(14px, var(--safe-left));
+  }
+
+  .studio-stage {
+    padding-bottom: 0;
+  }
+
+  .sound-grid--remote {
+    grid-template-columns: repeat(auto-fill, minmax(112px, 1fr));
+  }
+
+  .sound-card--remote {
+    min-height: 88px;
+    padding: 10px;
+  }
+
+  .studio-dock {
+    left: auto;
+    top: var(--safe-top);
+    right: 0;
+    bottom: var(--safe-bottom);
+    width: min(11.5rem, 32vw);
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 8px;
+    border-top: 0;
+    border-left: 1px solid var(--border);
+    padding: 10px calc(10px + var(--safe-right)) 10px 10px;
+  }
+
+  .studio-dock:has(.studio-dock-timer) {
+    grid-template-rows: auto 1fr 1fr;
+  }
+
+  .studio-dock-timer {
+    grid-column: 1;
+    font-size: 0.75rem;
+  }
+
+  .studio-dock-play,
+  .studio-dock-mixer {
+    min-height: 46px;
+    font-size: 0.92rem;
+  }
+}
+
+@media (orientation: landscape) and (max-width: 640px) and (max-height: 520px) {
+  .sound-grid--remote {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
