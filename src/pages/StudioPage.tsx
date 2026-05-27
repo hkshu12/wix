@@ -29,9 +29,14 @@ export function StudioPage() {
     sleepTimerActive,
     sleepTimerFading,
     startSleepTimer,
-    cancelSleepTimer
+    cancelSleepTimer,
+    mixerPresets,
+    saveMixerPreset,
+    loadMixerPreset,
+    deleteMixerPreset
   } = useStudio();
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [presetName, setPresetName] = useState('');
 
   const activeCount = mixer.layers.length;
 
@@ -118,6 +123,62 @@ export function StudioPage() {
             />
           </label>
           <p className="studio-import-status">{importStatus}</p>
+        </section>
+
+        <section className="drawer-section" aria-labelledby="drawer-presets-title">
+          <h3 id="drawer-presets-title">场景预设</h3>
+          <p className="drawer-hint">保存当前声轨组合与主音量，一键切换专注、睡眠等固定搭配。</p>
+          <div className="mixer-preset-save">
+            <label className="mixer-preset-name-label">
+              预设名称
+              <input
+                aria-label="预设名称"
+                className="mixer-preset-name-input"
+                maxLength={40}
+                placeholder="例如：雨夜专注"
+                type="text"
+                value={presetName}
+                onChange={(event) => setPresetName(event.target.value)}
+              />
+            </label>
+            <button
+              className="studio-btn studio-btn--secondary"
+              type="button"
+              onClick={() => {
+                saveMixerPreset(presetName);
+                setPresetName('');
+              }}
+            >
+              保存当前混音
+            </button>
+          </div>
+          {mixerPresets.length > 0 ? (
+            <ul className="mixer-preset-list" aria-label="已保存的场景预设">
+              {mixerPresets.map((preset) => (
+                <li className="mixer-preset-item" key={preset.id}>
+                  <button
+                    aria-label={`加载预设 ${preset.name}`}
+                    className="mixer-preset-load studio-btn studio-btn--secondary"
+                    type="button"
+                    onClick={() => loadMixerPreset(preset.id)}
+                  >
+                    {preset.name}
+                    <span className="mixer-preset-meta">{preset.layers.length} 轨</span>
+                  </button>
+                  <button
+                    aria-label={`删除预设 ${preset.name}`}
+                    className="ghost-button mixer-preset-delete"
+                    type="button"
+                    onClick={() => deleteMixerPreset(preset.id)}
+                  >
+                    删除
+                  </button>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="drawer-hint drawer-hint--muted">尚无预设，调好混音后点击保存。</p>
+          )}
         </section>
 
         <section className="drawer-section" aria-labelledby="drawer-sleep-timer-title">
