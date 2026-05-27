@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.5.0] - 2026-05-27
+
+### Added
+
+- Android GitHub Release APK auto-check on launch; download and install from the Update screen (`ApkInstaller` native plugin).
+- Platform-specific **Settings**, **About**, and **Update** routes; Android side drawer menu (Web uses top tabs + studio links).
+- Android skips the marketing landing page and opens the studio directly.
+
 ## [1.4.0] - 2026-05-27
 
 ### Added
