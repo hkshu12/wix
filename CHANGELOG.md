@@ -1,5 +1,16 @@
 # Changelog
 
+## [Unreleased]
+
+### Fixed
+
+- Android update check and APK download use native HTTP (`CapacitorHttp`) and `Filesystem.downloadFile`, fixing spurious “Failed to fetch” errors in the WebView.
+- Release notes on the Update screen render as Markdown inside a scrollable area instead of raw text overflowing the layout.
+
+### Changed
+
+- Settings, About, and Update pages use product-oriented copy instead of implementation details (WebView, IndexedDB, Service Worker, etc.).
+
 ## [1.6.0] - 2026-05-27
 
 ### Fixed

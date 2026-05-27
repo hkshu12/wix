@@ -2,6 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState, t
 import { downloadAndroidApk, installDownloadedApk } from '../lib/androidApkUpdate';
 import { fetchLatestRelease, type LatestReleaseInfo } from '../lib/githubRelease';
 import { getAppVersionInfo } from '../lib/appMeta';
+import { formatNetworkError } from '../lib/networkError';
 import { isAndroidApp } from '../lib/platform';
 
 export type UpdatePhase = 'idle' | 'checking' | 'ready' | 'downloading' | 'installing' | 'error';
@@ -45,7 +46,7 @@ export function UpdateProvider({ children }: { children: ReactNode }) {
       setPhase(release.isUpdateAvailable ? 'ready' : 'idle');
     } catch (error) {
       setPhase('error');
-      setErrorMessage(error instanceof Error ? error.message : '检查更新失败');
+      setErrorMessage(formatNetworkError(error, '检查更新失败'));
     }
   }, []);
 
@@ -71,7 +72,7 @@ export function UpdateProvider({ children }: { children: ReactNode }) {
       setPhase('ready');
     } catch (error) {
       setPhase('error');
-      setErrorMessage(error instanceof Error ? error.message : '下载更新失败');
+      setErrorMessage(formatNetworkError(error, '下载更新失败'));
       setDownloadProgress(null);
     }
   }, [latestRelease]);

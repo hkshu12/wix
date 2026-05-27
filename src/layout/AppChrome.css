@@ -137,3 +137,76 @@
   background: var(--accent-gradient);
   transition: width 180ms ease;
 }
+
+.app-release-notes {
+  margin-top: 12px;
+}
+
+.app-release-notes > summary {
+  cursor: pointer;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.app-markdown {
+  margin: 10px 0 0;
+  max-height: min(40dvh, 320px);
+  overflow: auto;
+  padding-right: 4px;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  line-height: 1.55;
+}
+
+.app-markdown > :first-child {
+  margin-top: 0;
+}
+
+.app-markdown > :last-child {
+  margin-bottom: 0;
+}
+
+.app-markdown h1,
+.app-markdown h2,
+.app-markdown h3 {
+  margin: 0.75em 0 0.35em;
+  font-size: 0.95rem;
+  color: var(--text);
+}
+
+.app-markdown p,
+.app-markdown ul,
+.app-markdown ol {
+  margin: 0.45em 0;
+}
+
+.app-markdown ul,
+.app-markdown ol {
+  padding-left: 1.2rem;
+}
+
+.app-markdown a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.app-markdown code {
+  font-size: 0.86em;
+  padding: 0.1em 0.35em;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--text) 8%, transparent);
+}
+
+.app-markdown pre {
+  margin: 0.5em 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  overflow: auto;
+  background: color-mix(in srgb, var(--text) 6%, transparent);
+}
+
+.app-markdown pre code {
+  padding: 0;
+  background: transparent;
+}
