@@ -1,15 +1,37 @@
 import { useEffect } from 'react';
-import { shouldTogglePlaybackWithSpace, type StudioKeyboardOverlayState } from '../domain/studioKeyboard';
+import {
+  shouldToggleKeyboardHelp,
+  shouldTogglePlaybackWithSpace,
+  type StudioKeyboardOverlayState
+} from '../domain/studioKeyboard';
+
+export interface StudioKeyboardShortcutHandlers {
+  onTogglePlayback: () => void;
+  onToggleKeyboardHelp: () => void;
+}
 
 export function useStudioKeyboardShortcuts(
   overlay: StudioKeyboardOverlayState,
-  onTogglePlayback: () => void
+  handlers: StudioKeyboardShortcutHandlers
 ): void {
-  const { drawerOpen, navOpen } = overlay;
+  const { drawerOpen, navOpen, keyboardHelpOpen } = overlay;
+  const { onTogglePlayback, onToggleKeyboardHelp } = handlers;
 
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
-      if (!shouldTogglePlaybackWithSpace(event, { drawerOpen, navOpen }, event.target)) {
+      if (shouldToggleKeyboardHelp(event, { drawerOpen, navOpen }, event.target)) {
+        event.preventDefault();
+        onToggleKeyboardHelp();
+        return;
+      }
+
+      if (
+        !shouldTogglePlaybackWithSpace(
+          event,
+          { drawerOpen, navOpen, keyboardHelpOpen },
+          event.target
+        )
+      ) {
         return;
       }
 
@@ -19,5 +41,5 @@ export function useStudioKeyboardShortcuts(
 
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [drawerOpen, navOpen, onTogglePlayback]);
+  }, [drawerOpen, keyboardHelpOpen, navOpen, onToggleKeyboardHelp, onTogglePlayback]);
 }
