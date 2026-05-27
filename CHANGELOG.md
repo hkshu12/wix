@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.4.0] - 2026-05-27
+
+### Added
+
+- Named mixer presets: save the current layer mix and master settings (up to 12), load with one tap, or delete from the mixer drawer.
+
 ## [1.3.0] - 2026-05-27
 
 ### Added

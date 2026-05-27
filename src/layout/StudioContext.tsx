@@ -3,6 +3,7 @@ import type { PlayableSound } from '../audio/audioGraphPlan';
 import type { MixerState } from '../domain/mixer';
 import type { SleepTimerPresetMinutes } from '../domain/sleepTimer';
 import type { CustomTrack } from '../storage/customLibrary';
+import type { MixerPreset } from '../storage/mixerPresets';
 
 export interface StudioContextValue {
   mixer: MixerState;
@@ -19,6 +20,10 @@ export interface StudioContextValue {
   sleepTimerFading: boolean;
   startSleepTimer: (minutes: SleepTimerPresetMinutes) => void;
   cancelSleepTimer: () => void;
+  mixerPresets: MixerPreset[];
+  saveMixerPreset: (name: string) => void;
+  loadMixerPreset: (id: string) => void;
+  deleteMixerPreset: (id: string) => void;
 }
 
 const StudioContext = createContext<StudioContextValue | null>(null);

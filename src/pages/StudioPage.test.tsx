@@ -62,6 +62,25 @@ describe('StudioPage', () => {
     expect(screen.getByText(/剩余 30:00/)).toBeInTheDocument();
   });
 
+  it('saves and loads a named mixer preset from the drawer', () => {
+    renderWithRouter(<AppRouter />, { routerProps: { initialEntries: ['/studio'] } });
+
+    fireEvent.click(screen.getByRole('button', { name: /雨声/ }));
+    fireEvent.click(screen.getByRole('button', { name: /混音与导入/ }));
+
+    fireEvent.change(screen.getByLabelText('预设名称'), { target: { value: '雨夜专注' } });
+    fireEvent.click(screen.getByRole('button', { name: '保存当前混音' }));
+
+    expect(screen.getByText(/已保存预设「雨夜专注」/)).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: /海边/ }));
+    fireEvent.click(screen.getByRole('button', { name: '加载预设 雨夜专注' }));
+
+    const activePanel = screen.getByLabelText('当前混音轨道');
+    expect(within(activePanel).getByText('雨声')).toBeInTheDocument();
+    expect(within(activePanel).queryByText('海边')).not.toBeInTheDocument();
+  });
+
   it('cancels an active sleep timer', () => {
     renderWithRouter(<AppRouter />, { routerProps: { initialEntries: ['/studio'] } });
 

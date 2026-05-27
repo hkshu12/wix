@@ -196,6 +196,70 @@ p {
   color: var(--accent);
 }
 
+.mixer-preset-save {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.mixer-preset-name-label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.mixer-preset-name-input {
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: color-mix(in srgb, var(--text) 6%, transparent);
+  color: var(--text);
+  font: inherit;
+}
+
+.mixer-preset-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.mixer-preset-item {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+}
+
+.mixer-preset-load {
+  flex: 1;
+  justify-content: space-between;
+  text-align: left;
+}
+
+.mixer-preset-meta {
+  font-size: 0.78rem;
+  font-weight: 600;
+  opacity: 0.75;
+}
+
+.mixer-preset-delete {
+  flex-shrink: 0;
+  align-self: center;
+}
+
+.drawer-hint--muted {
+  margin-bottom: 0;
+  opacity: 0.85;
+}
+
 .sleep-timer-presets {
   display: flex;
   flex-wrap: wrap;
