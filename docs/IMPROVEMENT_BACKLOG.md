@@ -32,8 +32,8 @@
 | **横屏与安全区细化** | 平板横屏 | 主要为竖屏远程式布局 | 横屏 `@media` 调整网格与 dock |
 | **新内置环境声** | 风扇、咖啡馆、列车等 | 8 轨 CC0 集 | 扩展 `sounds.ts` + `sounds:download` |
 | **大文件导入进度** | 长播客/长环境录音 | 仅状态文案 | `FileReader` 进度或分块提示 |
-| **混音 ARIA 实时区域** | 读屏知播放/定时状态 | 定时已有 live；播放切换无播报 | `aria-live` + 仅在状态变化时更新文案 |
-| ~~落地页功能列表更新~~ | 新用户了解能力 | — | 本次 v1.11.0 |
+| ~~混音 ARIA 实时区域~~ | 读屏知播放/定时状态 | — | 已完成 v1.12.0 |
+| ~~落地页功能列表更新~~ | 新用户了解能力 | — | 已完成 v1.11.0 |
 
 ### 体验场景与缺口（摘要）
 
@@ -48,26 +48,28 @@
 | 弱网/首次加载 | 内置 OGG 偶发失败 | fetch+decode 指数退避重试（v1.8.0） |
 | 前庭敏感 | 减少 UI 动效 | 系统「减少动态效果」下抽屉/导航瞬时切换（v1.10.0） |
 | 新用户认知 | 落地页了解 Studio 能力 | v1.11.0 补充定时/预设/持久化文案 |
+| 读屏用户 | 播放/加轨状态播报 | v1.12.0 混音台 `role="status"` live 区域 |
 | 自定义内容 | 导入本地音频 | IndexedDB + 混音层可恢复 |
 
 ### 外部信号
 
 - GitHub Issues：当前无 open issue（2026-05-27）。
 - 近期 CHANGELOG：v1.10.0 减少动效已合入 main——**避免重复**。
-- 同类 App 常见能力：后台播放、分享配方、能力说明页——本次落地页；下一项建议 **混音播放 ARIA live** 或 **导出混音 JSON**。
+- 同类 App 常见能力：后台播放、分享配方、能力说明页——落地页已更新；下一项建议 **导出混音 JSON** 或 **Android 后台播放**。
 
 ## 本次选中项
 
-**落地页功能列表更新（P2）**
+**混音播放 ARIA live 播报（P2）**
 
-- **理由**：Studio 已具备睡眠定时、场景预设、混音/定时持久化，但落地页「能做什么」仍像初版功能集，新用户与 PWA 安装前无法感知差异化能力；纯文案 + 单测，无原生依赖，单 PR 可交付。
-- **范围**：`LandingPage.tsx` 功能列表与使用步骤；`LandingPage.test.tsx` 断言关键能力文案。
+- **理由**：睡眠定时已有 `aria-live`，但播放/暂停与环境声加轨对读屏用户仍静默；纯前端、单文件域逻辑 + Studio 接线，无 Android 依赖，适合单 PR。
+- **范围**：`playbackAnnouncement` 文案、`usePlaybackAnnouncer`、Studio 播放与声卡 `role="status"` 区域；域单测 + Studio 集成测。
 
 ## 历史已完成
 
 | 日期 | 项 | 引用 |
 | --- | --- | --- |
-| 2026-05-27 | 落地页功能列表更新 | v1.11.0（本次） |
+| 2026-05-27 | 混音播放 ARIA live 播报 | v1.12.0（本次） |
+| 2026-05-27 | 落地页功能列表更新 | [v1.11.0](https://github.com/hkshu12/wix/releases/tag/v1.11.0) |
 | 2026-05-27 | 减少动效（prefers-reduced-motion） | [PR #21](https://github.com/hkshu12/wix/pull/21), [v1.10.0](https://github.com/hkshu12/wix/releases/tag/v1.10.0) |
 | 2026-05-27 | 混音台底部抽屉焦点陷阱 | [PR #20](https://github.com/hkshu12/wix/pull/20), [v1.9.0](https://github.com/hkshu12/wix/releases/tag/v1.9.0) |
 | 2026-05-27 | 音频 fetch/decode 失败重试 | [v1.8.0](https://github.com/hkshu12/wix/releases/tag/v1.8.0) |

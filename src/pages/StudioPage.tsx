@@ -12,6 +12,11 @@ import {
   setStereoWidth,
   toggleLayer
 } from '../domain/mixer';
+import {
+  formatLayerToggleAnnouncement,
+  formatPlayToggleAnnouncement
+} from '../domain/playbackAnnouncement';
+import { usePlaybackAnnouncer } from '../hooks/usePlaybackAnnouncer';
 import { assetUrl } from '../lib/assetUrl';
 import { SLEEP_TIMER_PRESETS_MINUTES } from '../domain/sleepTimer';
 import { useStudio } from '../layout/StudioContext';
@@ -43,11 +48,36 @@ export function StudioPage() {
   const [navOpen, setNavOpen] = useState(false);
   const { updateAvailable } = useAppUpdate();
   const android = isAndroidApp();
+  const { message: playbackAnnouncement, announce: announcePlayback } = usePlaybackAnnouncer();
 
   const activeCount = mixer.layers.length;
 
+  async function handlePlayToggleWithAnnouncement() {
+    const nextPlaying = !mixer.isPlaying;
+    await handlePlayToggle();
+    announcePlayback(formatPlayToggleAnnouncement(nextPlaying));
+  }
+
+  function handleLayerToggle(soundId: string, soundTitle: string) {
+    const wasSelected = mixer.layers.some((layer) => layer.soundId === soundId);
+    const nextSelected = !wasSelected;
+    const nextCount = nextSelected ? mixer.layers.length + 1 : mixer.layers.length - 1;
+
+    setMixer((state) => toggleLayer(state, soundId));
+    announcePlayback(formatLayerToggleAnnouncement(soundTitle, nextSelected, nextCount));
+  }
+
   return (
     <main className="studio-page studio-remote">
+      <p
+        className="sr-only"
+        role="status"
+        aria-label="混音播放状态"
+        aria-live="polite"
+        aria-atomic="true"
+      >
+        {playbackAnnouncement}
+      </p>
       <header className="studio-topbar">
         <div className="studio-topbar-start">
           <img className="studio-mark" src={assetUrl('icon.svg')} alt="" width={28} height={28} />
@@ -101,7 +131,7 @@ export function StudioPage() {
                 style={{ '--accent': accent } as React.CSSProperties}
                 type="button"
                 aria-pressed={selected}
-                onClick={() => setMixer((state) => toggleLayer(state, sound.id))}
+                onClick={() => handleLayerToggle(sound.id, sound.title)}
               >
                 <span className="sound-icon">{icon}</span>
                 <span className="sound-card-copy">
@@ -120,7 +150,7 @@ export function StudioPage() {
             {sleepTimerFading ? '渐出中' : '定时'} · {sleepTimerRemainingLabel}
           </p>
         ) : null}
-        <button className="studio-dock-play" type="button" onClick={() => void handlePlayToggle()}>
+        <button className="studio-dock-play" type="button" onClick={() => void handlePlayToggleWithAnnouncement()}>
           <span className="studio-dock-play-icon" aria-hidden>
             {mixer.isPlaying ? '❚❚' : '▶'}
           </span>
