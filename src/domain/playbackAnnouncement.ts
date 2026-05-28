@@ -32,6 +32,18 @@ export function formatSleepTimerCompleteAnnouncement(): string {
   return '睡眠定时已到，播放已暂停';
 }
 
+export function formatWakeTimerStartAnnouncement(minutes: number): string {
+  return `已设置唤醒定时 ${minutes} 分钟`;
+}
+
+export function formatWakeTimerCancelAnnouncement(): string {
+  return '已取消唤醒定时';
+}
+
+export function formatWakeTimerCompleteAnnouncement(): string {
+  return '唤醒定时已到，主音量已渐强';
+}
+
 export function formatMasterVolumeAnnouncement(masterVolume: number): string {
   const percent = Math.round(masterVolume * 100);
   return `主音量 ${percent}%`;
