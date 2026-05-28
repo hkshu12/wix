@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.45.0] - 2026-05-28
+
+### Fixed
+
+- **Android share link copy**: copying a mixer share link from the APK now uses the public GitHub Pages URL (`https://hkshu12.github.io/wix/studio?share=…`) instead of `https://localhost/…`, so links work for friends in the browser and via the app deep link.
+
 ## [1.44.0] - 2026-05-28
 
 ### Added

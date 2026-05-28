@@ -16,8 +16,35 @@ function normalizeBasePath(basePath: string): string {
   return basePath.endsWith('/') ? basePath.slice(0, -1) : basePath;
 }
 
+/** Public origin for mixer share links copied from the Android APK. */
+export const GITHUB_PAGES_ORIGIN = 'https://hkshu12.github.io';
+
 /** GitHub Pages deploy path when the APK was built with `BASE_URL=/`. */
 export const GITHUB_PAGES_REPO_BASE = '/wix';
+
+export interface MixerShareLinkBuildTarget {
+  origin: string;
+  basePath: string;
+}
+
+/**
+ * Android serves the WebView from `https://localhost`; share links must use the
+ * GitHub Pages origin and `/wix` base so friends can open them in a browser or app.
+ */
+export function resolveMixerShareLinkBuildTarget(options: {
+  windowOrigin: string;
+  appBasePath: string;
+  isAndroidApp: boolean;
+}): MixerShareLinkBuildTarget {
+  if (!options.isAndroidApp) {
+    return { origin: options.windowOrigin, basePath: options.appBasePath };
+  }
+
+  return {
+    origin: GITHUB_PAGES_ORIGIN,
+    basePath: `${GITHUB_PAGES_REPO_BASE}/`
+  };
+}
 
 function isStudioPath(pathname: string, basePath: string): boolean {
   const normalized = pathname.replace(/\/$/, '') || '/';
