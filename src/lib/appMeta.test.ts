@@ -19,7 +19,7 @@ describe('githubApiHeaders', () => {
     }
   });
 
-  it('identifies the app with an ASCII user agent slug', () => {
-    expect(githubApiHeaders()['User-Agent']).toMatch(/^white-noise-mixer\//);
+  it('identifies the app in the user agent', () => {
+    expect(githubApiHeaders()['User-Agent']).toMatch(/^wix\//);
   });
 });

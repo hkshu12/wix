@@ -326,7 +326,7 @@ export function AppLayout() {
         const messages: Record<typeof result.reason, string> = {
           empty: '请粘贴混音分享码后再导入。',
           'invalid-json': '分享码不是有效的 JSON，请检查后重试。',
-          'wrong-type': '不是白噪音混音器的分享码。',
+          'wrong-type': '不是 wix 的分享码。',
           'unsupported-version': '分享码版本过新，请更新应用后再导入。',
           'invalid-payload': '分享码内容无效或已损坏。'
         };

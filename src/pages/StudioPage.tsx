@@ -20,6 +20,7 @@ import {
 import { usePlaybackAnnouncer } from '../hooks/usePlaybackAnnouncer';
 import { adjustMasterVolumeStep } from '../domain/studioKeyboard';
 import { useStudioKeyboardShortcuts } from '../hooks/useStudioKeyboardShortcuts';
+import { APP_DISPLAY_NAME } from '../lib/appMeta';
 import { assetUrl } from '../lib/assetUrl';
 import {
   clampSleepTimerMinutes,
@@ -149,7 +150,7 @@ export function StudioPage() {
         <div className="studio-topbar-start">
           <img className="studio-mark" src={assetUrl('icon.svg')} alt="" width={28} height={28} />
           <div>
-            <span className="studio-title">白噪音混音器</span>
+            <span className="studio-title">{APP_DISPLAY_NAME}</span>
             <p className="studio-subtitle">远程声景 · 点选即播</p>
           </div>
         </div>
