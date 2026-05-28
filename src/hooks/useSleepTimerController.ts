@@ -15,10 +15,11 @@ import {
   clearSleepTimerSnapshot,
   hydrateSleepTimerSnapshot,
   readSleepTimerSnapshot,
-  writeSleepTimerSnapshot
+  writeSleepTimerSnapshot,
+  type HydratedSleepTimerSnapshot
 } from '../storage/sleepTimerSnapshot';
 
-function readInitialSleepTimer(): { timer: SleepTimerState; preFadeMasterVolume: number | null } {
+function readInitialSleepTimer(): HydratedSleepTimerSnapshot {
   return hydrateSleepTimerSnapshot(readSleepTimerSnapshot(), Date.now());
 }
 
