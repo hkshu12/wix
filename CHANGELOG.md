@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.36.0] - 2026-05-28
+
+### Added
+
+- Built-in **办公室** ambience loop (CC0 machine/HVAC recording) for office focus, remote work, and masking environmental noise.
+
 ## [1.35.0] - 2026-05-28
 
 ### Fixed

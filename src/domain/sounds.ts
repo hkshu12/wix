@@ -11,7 +11,8 @@ export type BuiltInSoundId =
   | 'cafe'
   | 'train'
   | 'highway'
-  | 'airplane';
+  | 'airplane'
+  | 'office';
 
 export interface BuiltInSound {
   id: BuiltInSoundId;
@@ -141,6 +142,15 @@ export const BUILT_IN_SOUNDS: BuiltInSound[] = [
     icon: '✈️',
     accent: '#0ea5e9',
     src: 'sounds/airplane.ogg'
+  },
+  {
+    id: 'office',
+    kind: 'built-in',
+    title: '办公室',
+    subtitle: '空调与低频嗡鸣，适合办公专注与屏蔽环境噪音',
+    icon: '🏢',
+    accent: '#6b7280',
+    src: 'sounds/office.ogg'
   }
 ];
 
