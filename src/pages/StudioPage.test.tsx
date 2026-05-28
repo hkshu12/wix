@@ -39,6 +39,22 @@ describe('StudioPage', () => {
     expect(screen.getByLabelText(/导入自定义音乐/)).toBeInTheDocument();
   });
 
+  it('filters sound cards by search query', () => {
+    renderWithRouter(<AppRouter />, { routerProps: { initialEntries: ['/studio'] } });
+
+    expect(screen.getByRole('button', { name: /雨声/ })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /海边/ })).toBeInTheDocument();
+
+    fireEvent.change(screen.getByLabelText('搜索环境声'), { target: { value: '雨' } });
+
+    expect(screen.getByRole('button', { name: /雨声/ })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /海边/ })).not.toBeInTheDocument();
+
+    fireEvent.change(screen.getByLabelText('搜索环境声'), { target: { value: '不存在的关键词' } });
+    expect(screen.getByText(/没有匹配/)).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /雨声/ })).not.toBeInTheDocument();
+  });
+
   it('selects multiple sounds and exposes per-layer volume controls in the mixer drawer', () => {
     renderWithRouter(<AppRouter />, { routerProps: { initialEntries: ['/studio'] } });
 

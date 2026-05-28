@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { BottomDrawer } from '../components/BottomDrawer';
 import { KeyboardShortcutsDialog } from '../components/KeyboardShortcutsDialog';
@@ -22,6 +22,7 @@ import {
   formatSleepTimerStartAnnouncement
 } from '../domain/playbackAnnouncement';
 import { usePlaybackAnnouncer } from '../hooks/usePlaybackAnnouncer';
+import { filterSoundsByQuery } from '../domain/soundSearch';
 import { adjustMasterVolumeStep } from '../domain/studioKeyboard';
 import { useStudioKeyboardShortcuts } from '../hooks/useStudioKeyboardShortcuts';
 import { APP_DISPLAY_NAME } from '../lib/appMeta';
@@ -82,6 +83,7 @@ export function StudioPage() {
       setSharePaste(text);
     }
   }
+  const [soundSearchQuery, setSoundSearchQuery] = useState('');
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [keyboardHelpOpen, setKeyboardHelpOpen] = useState(false);
   const [presetName, setPresetName] = useState('');
@@ -96,6 +98,11 @@ export function StudioPage() {
   const sleepTimerCancelledByUserRef = useRef(false);
 
   const activeCount = mixer.layers.length;
+  const visibleSounds = useMemo(
+    () => filterSoundsByQuery(allSounds, soundSearchQuery),
+    [allSounds, soundSearchQuery]
+  );
+  const soundSearchActive = soundSearchQuery.trim().length > 0;
 
   const handleStartSleepTimer = useCallback(
     (minutes: number) => {
@@ -230,9 +237,25 @@ export function StudioPage() {
         <div className="studio-stage-heading">
           <h2 id="remote-sounds-title">选择环境声</h2>
           <p>像遥控器一样叠加远处声景，无需在页面间来回切换。</p>
+          <label className="studio-sound-search">
+            <span className="sr-only">搜索环境声</span>
+            <input
+              aria-label="搜索环境声"
+              className="studio-sound-search-input"
+              placeholder="搜索名称或描述…"
+              type="search"
+              value={soundSearchQuery}
+              onChange={(event) => setSoundSearchQuery(event.target.value)}
+            />
+          </label>
         </div>
+        {soundSearchActive && visibleSounds.length === 0 ? (
+          <p className="studio-sound-search-empty" aria-live="polite">
+            没有匹配「{soundSearchQuery.trim()}」的环境声，请换个关键词。
+          </p>
+        ) : null}
         <div className="sound-grid sound-grid--remote">
-          {allSounds.map((sound) => {
+          {visibleSounds.map((sound) => {
             const selected = mixer.layers.some((layer) => layer.soundId === sound.id);
             const accent = sound.kind === 'built-in' ? sound.accent : '#a78bfa';
             const icon = sound.kind === 'built-in' ? sound.icon : '🎵';

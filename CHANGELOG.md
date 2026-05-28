@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.38.0] - 2026-05-28
+
+### Added
+
+- **Sound search on Studio**: filter built-in ambiences and imported tracks by title, description, or file name so you can find the right layer quickly as the library grows.
+
 ## [1.37.0] - 2026-05-28
 
 ### Added
