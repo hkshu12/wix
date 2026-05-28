@@ -90,6 +90,19 @@ describe('StudioPage', () => {
     expect(screen.getByText(/剩余 30:00/)).toBeInTheDocument();
   });
 
+  it('announces sleep timer start and cancel in the playback status region', async () => {
+    renderWithRouter(<AppRouter />, { routerProps: { initialEntries: ['/studio'] } });
+
+    const status = screen.getByLabelText('混音播放状态');
+
+    fireEvent.click(screen.getByRole('button', { name: /混音与导入/ }));
+    fireEvent.click(screen.getByRole('button', { name: '30 分钟' }));
+    await waitFor(() => expect(status).toHaveTextContent('已设置睡眠定时 30 分钟'));
+
+    fireEvent.click(screen.getByRole('button', { name: '取消定时' }));
+    await waitFor(() => expect(status).toHaveTextContent('已取消睡眠定时'));
+  });
+
   it('saves and loads a named mixer preset from the drawer', () => {
     renderWithRouter(<AppRouter />, { routerProps: { initialEntries: ['/studio'] } });
 

@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.34.0] - 2026-05-28
+
+### Added
+
+- **Sleep timer screen-reader announcements**: starting, cancelling, or finishing a sleep timer is announced in the shared playback status region (alongside play/pause and layer toggles), so assistive tech users hear timer events without relying only on the drawer countdown.
+
 ## [1.33.0] - 2026-05-28
 
 ### Added
