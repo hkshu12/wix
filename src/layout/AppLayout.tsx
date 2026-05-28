@@ -11,6 +11,7 @@ import {
 import { applyMixerPreset } from '../domain/applyMixerPreset';
 import { parseMixerShare, serializeMixerShare } from '../domain/mixerShare';
 import { buildMixerShareUrl } from '../domain/mixerShareUrl';
+import { resolveMixerShareLinkBuildTarget } from '../domain/androidAppUrl';
 import { useAndroidMixerShareDeepLink } from '../hooks/useAndroidMixerShareDeepLink';
 import { useMixerShareDeepLink } from '../hooks/useMixerShareDeepLink';
 import { createInitialMixerState, setPlaying, type MixerState } from '../domain/mixer';
@@ -29,6 +30,7 @@ import {
   type MixerPreset
 } from '../storage/mixerPresets';
 import { formatFileReadPercent } from '../lib/readFileWithProgress';
+import { isAndroidApp } from '../lib/platform';
 import { useAutoplay } from '../hooks/useAutoplay';
 import { useAudioContextResume } from '../hooks/useAudioContextResume';
 import { useMediaSessionSync } from '../hooks/useMediaSessionSync';
@@ -476,9 +478,14 @@ export function AppLayout() {
 
   async function handleCopyMixerShareLink() {
     const text = serializeMixerShare(mixer);
+    const { origin, basePath } = resolveMixerShareLinkBuildTarget({
+      windowOrigin: window.location.origin,
+      appBasePath: import.meta.env.BASE_URL,
+      isAndroidApp: isAndroidApp()
+    });
     const url = buildMixerShareUrl({
-      origin: window.location.origin,
-      basePath: import.meta.env.BASE_URL,
+      origin,
+      basePath,
       shareJson: text
     });
 
