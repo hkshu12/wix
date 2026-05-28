@@ -1,6 +1,6 @@
 {
   "name": "white-noise-mixer",
-  "version": "1.39.0",
+  "version": "1.40.0",
   "description": "Cross-platform white noise mixer for Web, PWA, and Android.",
   "type": "module",
   "scripts": {
