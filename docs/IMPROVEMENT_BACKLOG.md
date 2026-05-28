@@ -44,7 +44,7 @@
 | ~~内置咖啡馆/列车/公路/飞机舱~~ | 旅途与办公氛围 | — | v1.24–1.27.0 |
 | ~~可配置睡眠渐出时长~~ | 哄娃/睡眠不同渐弱 | — | 已完成 v1.30.0 |
 | ~~设置页清除全部数据~~ | 换机/隐私重置 | — | 已完成 v1.31.0 |
-| **播放渐入** | 睡眠/婴儿场景避免突兀起播 | 起播约 40ms 斜坡 | 可选 2–10 秒主音量渐入 |
+| ~~播放渐入~~ | 睡眠/婴儿场景避免突兀起播 | — | 已完成 v1.32.0 |
 | **睡眠定时读屏播报** | 开始/取消/结束定时 | 仅抽屉内倒计时 live | 扩展 `playbackAnnouncement` |
 | **自定义音轨库导出** | 换机备份导入的音频 | 仅 IndexedDB 存取 | 导出 zip 或单文件 |
 | **唤醒定时** | 早晨渐强叫醒 | 无 | 定时主音量渐强 + 可选起播 |
@@ -54,39 +54,40 @@
 
 | 场景 | 典型需求 | 现状 |
 | --- | --- | --- |
-| 睡眠 | 定时、渐出、自定义时长、风扇白噪 | 渐出 10–120 秒；定时+刷新恢复 |
+| 睡眠 | 定时、渐出、渐入、自定义时长、风扇白噪 | 渐出 10–120 秒；渐入 0/2/4/6/8 秒可选 |
 | 专注 | 预设、咖啡馆氛围、键盘控制 | 预设+快照；快捷键 v1.21.0 |
 | 隐私/换机 | 一键清除本机数据 | v1.31.0 设置页两步确认 |
 | 弱网 | 内置 OGG 偶发失败 | 自动重试 + 按轨重试 v1.28.0 |
 | 读屏 | 播放/加轨播报 | v1.12.0；定时开始/结束仍可增强 |
 | Android 原生 | 后台播放 | 仍为 P1 最大缺口 |
 
-### 代码与架构备注（2026-05-28 第九次挖掘）
+### 代码与架构备注（2026-05-28 第十次挖掘）
 
-- **`clearAllAppData`**：`storage/clearAppData.ts` 集中列出 localStorage 键并 `deleteDatabase` 自定义库；清除后 `location.reload()` 重置 React/主题。
-- **睡眠定时**：渐出偏好 `wix.sleepTimerFadeSeconds`（v1.30.0）。
+- **播放渐入**：`AudioEngine.applyMasterVolume` 在 `sync(..., { fadeInSeconds })` 时用 `linearRampToValueAtTime`；`AppLayout` 仅在 `!wasPlaying → isPlaying` 时传入；偏好 `wix.playbackFadeInSeconds`（默认关）。
+- **`clearAllAppData`**：已含播放渐入键。
 - **内置声库**：13 轨；下一内容向：办公室 HVAC（P2）。
 - **Android**：仍无 foreground service（P1）。
-- **版本**：当前 **1.31.0**；下一项宜 **播放渐入**、**办公室环境声** 或 **Wake Lock**。
+- **版本**：当前 **1.32.0**；下一项宜 **Wake Lock**、**办公室环境声** 或 **睡眠定时读屏播报**。
 
 ### 外部信号
 
 - GitHub Issues：无 open issue（2026-05-28）。
-- 近期 CHANGELOG：v1.30.0 可配置渐出、v1.29.0 Android 更新——**避免重复**。
-- 同类 App：数据重置、播放渐入、原生后台仍常见缺口。
+- 近期 CHANGELOG：v1.31.0 清除数据、v1.30.0 渐出——**避免重复**。
+- 同类 App：原生后台、Wake Lock、办公室白噪仍常见缺口。
 
 ## 本次选中项
 
-**设置页清除全部本机数据（P2）**
+**可选播放渐入（P2）**
 
-- **理由**：backlog 明确列出且 v1.30.0 已交付；换机/隐私场景常见；单 PR、无原生依赖；与现有 `storage/` 模块一致。
-- **范围**：`clearAppData.ts`、`clearCustomLibrary`、`AppLayout` 编排、`SettingsPage` 两步确认、测试；版本 **1.31.0**。
+- **理由**：backlog 明确列出；睡眠/哄娃场景用户可感知；单 PR、纯 Web Audio、无原生依赖；与睡眠渐出互补且默认关闭不改变现有行为。
+- **范围**：`domain/playbackFadeIn`、`storage/playbackFadeInPreferences`、`AudioEngine` 主音量 ramp、`AppLayout`/`StudioPage` UI、测试；版本 **1.32.0**。
 
 ## 历史已完成
 
 | 日期 | 项 | 引用 |
 | --- | --- | --- |
-| 2026-05-28 | 设置页清除全部本机数据 | v1.31.0（本次） |
+| 2026-05-28 | 可选播放渐入（2/4/6/8 秒） | v1.32.0（本次） |
+| 2026-05-28 | 设置页清除全部本机数据 | [v1.31.0](https://github.com/hkshu12/wix/releases/tag/v1.31.0) |
 | 2026-05-28 | 可配置睡眠渐出时长 | [v1.30.0](https://github.com/hkshu12/wix/releases/tag/v1.30.0) |
 | 2026-05-28 | 手动重试加载失败音轨 | [v1.28.0](https://github.com/hkshu12/wix/releases/tag/v1.28.0) |
 | 2026-05-28 | 内置飞机舱环境声 | [v1.27.0](https://github.com/hkshu12/wix/releases/tag/v1.27.0) |

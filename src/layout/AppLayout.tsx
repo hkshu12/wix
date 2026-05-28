@@ -29,7 +29,12 @@ import {
 } from '../storage/mixerPresets';
 import { formatFileReadPercent } from '../lib/readFileWithProgress';
 import { useMediaSessionSync } from '../hooks/useMediaSessionSync';
+import { clampPlaybackFadeInSeconds } from '../domain/playbackFadeIn';
 import { useSleepTimerController } from '../hooks/useSleepTimerController';
+import {
+  readPlaybackFadeInSeconds,
+  writePlaybackFadeInSeconds
+} from '../storage/playbackFadeInPreferences';
 import { clearAllAppData as clearPersistedAppData } from '../storage/clearAppData';
 import { StudioProvider, type StudioContextValue } from './StudioContext';
 import { UpdateProvider } from './UpdateContext';
@@ -46,8 +51,16 @@ export function AppLayout() {
   const [failedSoundIds, setFailedSoundIds] = useState<string[]>([]);
   const engineRef = useRef<AudioEngine | null>(null);
   const customTracksRef = useRef<CustomTrack[]>([]);
+  const wasPlayingRef = useRef(mixer.isPlaying);
+  const [playbackFadeInSeconds, setPlaybackFadeInSecondsState] = useState(readPlaybackFadeInSeconds);
 
   const sleepTimerController = useSleepTimerController({ mixer, setMixer });
+
+  function setPlaybackFadeInSeconds(seconds: number) {
+    const clamped = clampPlaybackFadeInSeconds(seconds);
+    writePlaybackFadeInSeconds(clamped);
+    setPlaybackFadeInSecondsState(clamped);
+  }
 
   const allSounds = useMemo<PlayableSound[]>(() => [...BUILT_IN_SOUNDS, ...customTracks], [customTracks]);
   const selectedLayers = mixer.layers
@@ -99,8 +112,12 @@ export function AppLayout() {
       getAudioEngine();
     }
 
+    const fadeInSeconds =
+      mixer.isPlaying && !wasPlayingRef.current && playbackFadeInSeconds > 0 ? playbackFadeInSeconds : 0;
+    wasPlayingRef.current = mixer.isPlaying;
+
     void engineRef.current
-      ?.sync(mixer, allSounds)
+      ?.sync(mixer, allSounds, { fadeInSeconds })
       .then((result) => {
         if (!result) {
           return;
@@ -134,7 +151,7 @@ export function AppLayout() {
         engineRef.current?.stop();
       }
     };
-  }, [allSounds, mixer]);
+  }, [allSounds, mixer, playbackFadeInSeconds]);
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
@@ -420,6 +437,8 @@ export function AppLayout() {
     sleepTimerFading: sleepTimerController.isFading,
     sleepTimerFadeSeconds: sleepTimerController.fadeSeconds,
     setSleepTimerFadeSeconds: sleepTimerController.setFadeSeconds,
+    playbackFadeInSeconds,
+    setPlaybackFadeInSeconds,
     startSleepTimer: sleepTimerController.start,
     cancelSleepTimer: sleepTimerController.cancel,
     mixerPresets,

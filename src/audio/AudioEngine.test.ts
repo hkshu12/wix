@@ -95,6 +95,50 @@ describe('AudioEngine lifecycle', () => {
     engine.invalidateCachedBuffer(failingSound);
     vi.unstubAllGlobals();
   });
+
+  it('ramps master gain from silence when fadeInSeconds is set', async () => {
+    const context = new FakeAudioContext({ immediateDecode: true });
+    const engine = new AudioEngine(context as unknown as AudioContext);
+    const customSound: CustomTrack = {
+      id: 'custom-1',
+      kind: 'custom',
+      title: 'custom',
+      fileName: 'custom.mp3',
+      mimeType: 'audio/mpeg',
+      size: 4,
+      createdAt: 1,
+      objectUrl: 'blob:custom-1'
+    };
+
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: true,
+        arrayBuffer: () => Promise.resolve(new ArrayBuffer(4))
+      })
+    );
+
+    await engine.sync(
+      {
+        isPlaying: true,
+        masterVolume: 0.8,
+        stereoWidth: 1,
+        playbackRate: 1,
+        layers: [{ soundId: 'custom-1', volume: 1, pan: 0, playbackRate: 1, muted: false }]
+      },
+      [customSound],
+      { fadeInSeconds: 4 }
+    );
+
+    const master = context.masterGain!;
+    expect(master.gain.scheduled).toEqual([
+      { type: 'cancel', time: 0 },
+      { type: 'set', time: 0, value: 0 },
+      { type: 'linearRamp', time: 4, value: 0.8 }
+    ]);
+
+    vi.unstubAllGlobals();
+  });
 });
 
 async function waitForPendingDecode(context: FakeAudioContext): Promise<void> {
@@ -119,8 +163,27 @@ function createState(isPlaying: boolean): MixerState {
   };
 }
 
+type GainScheduleStep =
+  | { type: 'cancel'; time: number }
+  | { type: 'set'; time: number; value: number }
+  | { type: 'linearRamp'; time: number; value: number };
+
 class FakeAudioParam {
   value = 0;
+  scheduled: GainScheduleStep[] = [];
+
+  cancelScheduledValues(time: number): void {
+    this.scheduled.push({ type: 'cancel', time });
+  }
+
+  setValueAtTime(value: number, time: number): void {
+    this.scheduled.push({ type: 'set', time, value });
+    this.value = value;
+  }
+
+  linearRampToValueAtTime(value: number, time: number): void {
+    this.scheduled.push({ type: 'linearRamp', time, value });
+  }
 
   setTargetAtTime(value: number): void {
     this.value = value;
@@ -171,6 +234,7 @@ class FakeAudioContext {
   currentTime = 0;
   destination = new FakeAudioNode();
   sources: FakeAudioBufferSourceNode[] = [];
+  masterGain: FakeGainNode | null = null;
   private pendingDecode: ((buffer: FakeAudioBuffer) => void) | null = null;
   private readonly immediateDecode: boolean;
 
@@ -179,7 +243,11 @@ class FakeAudioContext {
   }
 
   createGain(): FakeGainNode {
-    return new FakeGainNode();
+    const gain = new FakeGainNode();
+    if (!this.masterGain) {
+      this.masterGain = gain;
+    }
+    return gain;
   }
 
   createStereoPanner(): FakeStereoPannerNode {

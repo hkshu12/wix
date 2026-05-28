@@ -22,6 +22,10 @@ import { adjustMasterVolumeStep } from '../domain/studioKeyboard';
 import { useStudioKeyboardShortcuts } from '../hooks/useStudioKeyboardShortcuts';
 import { assetUrl } from '../lib/assetUrl';
 import {
+  PLAYBACK_FADE_IN_OFF,
+  PLAYBACK_FADE_IN_PRESETS_SECONDS
+} from '../domain/playbackFadeIn';
+import {
   clampSleepTimerMinutes,
   SLEEP_TIMER_FADE_PRESETS_SECONDS,
   SLEEP_TIMER_MAX_MINUTES,
@@ -48,6 +52,8 @@ export function StudioPage() {
     sleepTimerFading,
     sleepTimerFadeSeconds,
     setSleepTimerFadeSeconds,
+    playbackFadeInSeconds,
+    setPlaybackFadeInSeconds,
     startSleepTimer,
     cancelSleepTimer,
     mixerPresets,
@@ -368,6 +374,33 @@ export function StudioPage() {
           >
             导入混音
           </button>
+        </section>
+
+        <section className="drawer-section" aria-labelledby="drawer-playback-fade-title">
+          <h3 id="drawer-playback-fade-title">播放渐入</h3>
+          <p className="drawer-hint">
+            开始播放时主音量从静音渐强，适合睡眠、哄娃等避免突然起声的场景（默认关闭，与睡眠定时渐出无关）。
+          </p>
+          <p className="drawer-hint sleep-timer-fade-label" id="playback-fade-in-label">
+            渐入时长
+          </p>
+          <div
+            className="sleep-timer-presets sleep-timer-fade-presets"
+            role="group"
+            aria-labelledby="playback-fade-in-label"
+          >
+            {PLAYBACK_FADE_IN_PRESETS_SECONDS.map((seconds) => (
+              <button
+                key={seconds}
+                aria-pressed={playbackFadeInSeconds === seconds}
+                className="studio-btn studio-btn--secondary sleep-timer-preset"
+                type="button"
+                onClick={() => setPlaybackFadeInSeconds(seconds)}
+              >
+                {seconds === PLAYBACK_FADE_IN_OFF ? '关' : `${seconds} 秒`}
+              </button>
+            ))}
+          </div>
         </section>
 
         <section className="drawer-section" aria-labelledby="drawer-sleep-timer-title">

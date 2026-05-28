@@ -23,6 +23,8 @@ function createStudioStub(overrides: Partial<StudioContextValue> = {}): StudioCo
     sleepTimerFading: false,
     sleepTimerFadeSeconds: 30,
     setSleepTimerFadeSeconds: vi.fn(),
+    playbackFadeInSeconds: 0,
+    setPlaybackFadeInSeconds: vi.fn(),
     startSleepTimer: vi.fn(() => true),
     cancelSleepTimer: vi.fn(),
     mixerPresets: [],

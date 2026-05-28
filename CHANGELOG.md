@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.32.0] - 2026-05-28
+
+### Added
+
+- Optional **playback fade-in**: choose off or 2/4/6/8 seconds in the mixer drawer so master volume ramps from silence when you press play—gentler for sleep and baby-soothing (preference is remembered).
+
 ## [1.31.0] - 2026-05-28
 
 ### Added
