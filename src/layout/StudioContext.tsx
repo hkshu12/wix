@@ -20,6 +20,8 @@ export interface StudioContextValue {
   sleepTimerFading: boolean;
   sleepTimerFadeSeconds: number;
   setSleepTimerFadeSeconds: (seconds: number) => void;
+  playbackFadeInSeconds: number;
+  setPlaybackFadeInSeconds: (seconds: number) => void;
   startSleepTimer: (minutes: number) => boolean;
   cancelSleepTimer: () => void;
   mixerPresets: MixerPreset[];

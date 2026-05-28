@@ -10,6 +10,11 @@ interface ActiveLayer {
   panner: StereoPannerNode | null;
 }
 
+export interface AudioSyncOptions {
+  /** When > 0, ramps master gain from silence to {@link MixerState.masterVolume} over this many seconds. */
+  fadeInSeconds?: number;
+}
+
 export interface AudioSyncResult {
   /** Sound IDs that could not be loaded or decoded during this sync. */
   failedSoundIds: string[];
@@ -21,6 +26,7 @@ export class AudioEngine {
   private readonly activeLayers = new Map<string, ActiveLayer>();
   private readonly bufferCache = new Map<string, AudioBuffer>();
   private syncVersion = 0;
+  private masterFadeEndsAt: number | null = null;
 
   constructor(context: AudioContext = new AudioContext()) {
     this.context = context;
@@ -34,9 +40,13 @@ export class AudioEngine {
     }
   }
 
-  async sync(state: MixerState, sounds: PlayableSound[]): Promise<AudioSyncResult> {
+  async sync(
+    state: MixerState,
+    sounds: PlayableSound[],
+    options: AudioSyncOptions = {}
+  ): Promise<AudioSyncResult> {
     const syncVersion = (this.syncVersion += 1);
-    this.master.gain.value = state.masterVolume;
+    this.applyMasterVolume(state.masterVolume, options.fadeInSeconds ?? 0);
 
     if (!state.isPlaying || state.layers.length === 0) {
       this.stop();
@@ -81,9 +91,34 @@ export class AudioEngine {
 
   stop(): void {
     this.syncVersion += 1;
+    this.clearMasterFade();
     for (const soundId of [...this.activeLayers.keys()]) {
       this.stopLayer(soundId);
     }
+  }
+
+  private applyMasterVolume(targetVolume: number, fadeInSeconds: number): void {
+    const now = this.context.currentTime;
+
+    if (fadeInSeconds > 0) {
+      this.master.gain.cancelScheduledValues(now);
+      this.master.gain.setValueAtTime(0, now);
+      this.master.gain.linearRampToValueAtTime(targetVolume, now + fadeInSeconds);
+      this.masterFadeEndsAt = now + fadeInSeconds;
+      return;
+    }
+
+    if (this.masterFadeEndsAt !== null && now < this.masterFadeEndsAt) {
+      return;
+    }
+
+    this.clearMasterFade();
+    this.master.gain.cancelScheduledValues(now);
+    this.master.gain.setValueAtTime(targetVolume, now);
+  }
+
+  private clearMasterFade(): void {
+    this.masterFadeEndsAt = null;
   }
 
   private async startLayer(layer: AudioGraphLayer, syncVersion: number): Promise<ActiveLayer | null> {
