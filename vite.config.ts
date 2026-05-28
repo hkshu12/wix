@@ -22,9 +22,9 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['icon.svg', 'favicon-32.png', 'icon-192.png', 'icon-512.png', 'apple-touch-icon.png'],
       manifest: {
-        name: '白噪音混音器',
-        short_name: '白噪音',
-        description: '多轨白噪音与自定义音乐混音器',
+        name: 'wix',
+        short_name: 'wix',
+        description: '多轨环境声与自定义音乐混音',
         theme_color: '#07111f',
         background_color: '#07111f',
         display: 'standalone',

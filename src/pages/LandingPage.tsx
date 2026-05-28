@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import { APP_DISPLAY_NAME } from '../lib/appMeta';
 import { markEnteredStudio } from '../storage/onboarding';
 import { ThemeToggle } from '../theme/ThemeToggle';
 import './LandingPage.css';
@@ -24,13 +25,13 @@ export function LandingPage() {
   return (
     <div className="landing-page">
       <header className="landing-header">
-        <span className="landing-brand">白噪音混音器</span>
+        <span className="landing-brand">{APP_DISPLAY_NAME}</span>
         <ThemeToggle />
       </header>
 
       <main>
         <section className="landing-hero">
-          <h1>白噪音混音器</h1>
+          <h1>{APP_DISPLAY_NAME}</h1>
           <p className="landing-lead">
             叠加雨声、风扇、粉棕噪音与自定义音乐，打造属于你的专注、睡眠与放松声景。
           </p>

@@ -1,7 +1,7 @@
 import { App } from '@capacitor/app';
 import { isAndroidApp } from './platform';
 
-export const APP_DISPLAY_NAME = '白噪音混音器';
+export const APP_DISPLAY_NAME = 'wix';
 export const GITHUB_REPO = __GITHUB_REPO__;
 export const APP_VERSION = __APP_VERSION__;
 export const GITHUB_RELEASES_URL = `https://github.com/${GITHUB_REPO}/releases`;
