@@ -7,12 +7,16 @@ import { AppRouter } from '../router/AppRouter';
 import { renderWithRouter } from '../test/renderWithRouter';
 
 const resumeMock = vi.fn().mockResolvedValue(undefined);
+let mockSyncResult: { failedSoundIds: string[] } = { failedSoundIds: [] };
+const syncMock = vi.fn().mockImplementation(async () => mockSyncResult);
+const invalidateCachedBufferMock = vi.fn();
 
 vi.mock('../audio/AudioEngine', () => ({
   AudioEngine: vi.fn().mockImplementation(function MockAudioEngine() {
     return {
       resume: resumeMock,
-      sync: vi.fn().mockResolvedValue(undefined),
+      sync: syncMock,
+      invalidateCachedBuffer: invalidateCachedBufferMock,
       stop: vi.fn()
     };
   })
@@ -21,6 +25,9 @@ vi.mock('../audio/AudioEngine', () => ({
 describe('StudioPage', () => {
   beforeEach(() => {
     resumeMock.mockClear();
+    syncMock.mockClear();
+    invalidateCachedBufferMock.mockClear();
+    mockSyncResult = { failedSoundIds: [] };
     localStorage.clear();
   });
 
@@ -250,6 +257,28 @@ describe('StudioPage', () => {
     fireEvent.keyDown(presetInput, { key: 'm', code: 'KeyM' });
 
     expect(screen.getByRole('dialog', { name: '混音与导入' })).toBeInTheDocument();
+  });
+
+  it('shows per-layer retry when a track fails to load during playback', async () => {
+    mockSyncResult = { failedSoundIds: ['rain'] };
+
+    renderWithRouter(<AppRouter />, { routerProps: { initialEntries: ['/studio'] } });
+
+    fireEvent.click(screen.getByRole('button', { name: /雨声/ }));
+    fireEvent.click(screen.getByRole('button', { name: '播放' }));
+
+    fireEvent.click(screen.getByRole('button', { name: /混音与导入/ }));
+
+    const activePanel = screen.getByLabelText('当前混音轨道');
+    await waitFor(() => {
+      expect(within(activePanel).getByText(/该轨道未能加载/)).toBeInTheDocument();
+    });
+
+    mockSyncResult = { failedSoundIds: [] };
+    fireEvent.click(within(activePanel).getByRole('button', { name: '重试加载' }));
+
+    await waitFor(() => expect(invalidateCachedBufferMock).toHaveBeenCalled());
+    await waitFor(() => expect(syncMock.mock.calls.length).toBeGreaterThanOrEqual(2));
   });
 
   it('cancels an active sleep timer', () => {

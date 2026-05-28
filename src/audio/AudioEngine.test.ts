@@ -36,6 +36,65 @@ describe('AudioEngine lifecycle', () => {
     expect(context.sources.every((source) => !source.started)).toBe(true);
     vi.unstubAllGlobals();
   });
+
+  it('reports failed sound ids when one layer cannot load and keeps other layers playing', async () => {
+    const context = new FakeAudioContext({ immediateDecode: true });
+    const engine = new AudioEngine(context as unknown as AudioContext);
+    const customSound: CustomTrack = {
+      id: 'custom-ok',
+      kind: 'custom',
+      title: 'ok',
+      fileName: 'ok.mp3',
+      mimeType: 'audio/mpeg',
+      size: 4,
+      createdAt: 1,
+      objectUrl: 'blob:custom-ok'
+    };
+    const failingSound: CustomTrack = {
+      id: 'custom-fail',
+      kind: 'custom',
+      title: 'fail',
+      fileName: 'fail.mp3',
+      mimeType: 'audio/mpeg',
+      size: 4,
+      createdAt: 2,
+      objectUrl: 'blob:custom-fail'
+    };
+
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockImplementation((url: string) => {
+        if (url.includes('custom-fail')) {
+          return Promise.reject(new Error('network'));
+        }
+
+        return Promise.resolve({
+          ok: true,
+          arrayBuffer: () => Promise.resolve(new ArrayBuffer(4))
+        });
+      })
+    );
+
+    const result = await engine.sync(
+      {
+        isPlaying: true,
+        masterVolume: 1,
+        stereoWidth: 1,
+        playbackRate: 1,
+        layers: [
+          { soundId: 'custom-ok', volume: 1, pan: 0, playbackRate: 1, muted: false },
+          { soundId: 'custom-fail', volume: 1, pan: 0, playbackRate: 1, muted: false }
+        ]
+      },
+      [customSound, failingSound]
+    );
+
+    expect(result.failedSoundIds).toEqual(['custom-fail']);
+    expect(context.sources.filter((source) => source.started)).toHaveLength(1);
+
+    engine.invalidateCachedBuffer(failingSound);
+    vi.unstubAllGlobals();
+  });
 });
 
 async function waitForPendingDecode(context: FakeAudioContext): Promise<void> {
@@ -113,6 +172,11 @@ class FakeAudioContext {
   destination = new FakeAudioNode();
   sources: FakeAudioBufferSourceNode[] = [];
   private pendingDecode: ((buffer: FakeAudioBuffer) => void) | null = null;
+  private readonly immediateDecode: boolean;
+
+  constructor(options: { immediateDecode?: boolean } = {}) {
+    this.immediateDecode = options.immediateDecode ?? false;
+  }
 
   createGain(): FakeGainNode {
     return new FakeGainNode();
@@ -133,6 +197,10 @@ class FakeAudioContext {
   }
 
   decodeAudioData(): Promise<FakeAudioBuffer> {
+    if (this.immediateDecode) {
+      return Promise.resolve(new FakeAudioBuffer());
+    }
+
     return new Promise((resolve) => {
       this.pendingDecode = resolve;
     });

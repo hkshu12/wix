@@ -28,6 +28,8 @@ export interface StudioContextValue {
   copyMixerShareLink: () => Promise<void>;
   pasteMixerShareFromClipboard: () => Promise<string | null>;
   importMixerShare: (text: string) => void;
+  failedSoundIds: string[];
+  retryLayerLoad: (soundId: string) => void;
 }
 
 const StudioContext = createContext<StudioContextValue | null>(null);

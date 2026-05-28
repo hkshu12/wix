@@ -42,6 +42,7 @@ export function AppLayout() {
   const [importStatus, setImportStatus] = useState('支持 MP3、WAV、M4A 等浏览器可解码音频');
   const [importProgress, setImportProgress] = useState<number | null>(null);
   const [mixerPresets, setMixerPresets] = useState<MixerPreset[]>(() => readMixerPresets());
+  const [failedSoundIds, setFailedSoundIds] = useState<string[]>([]);
   const engineRef = useRef<AudioEngine | null>(null);
   const customTracksRef = useRef<CustomTrack[]>([]);
 
@@ -97,10 +98,35 @@ export function AppLayout() {
       getAudioEngine();
     }
 
-    void engineRef.current?.sync(mixer, allSounds).catch(() => {
-      setMixer((state) => setPlaying(state, false));
-      setImportStatus('音频加载失败（已自动重试），请检查网络后重新播放或更换文件。');
-    });
+    void engineRef.current
+      ?.sync(mixer, allSounds)
+      .then((result) => {
+        if (!result) {
+          return;
+        }
+
+        setFailedSoundIds(result.failedSoundIds);
+        if (result.failedSoundIds.length === 0) {
+          return;
+        }
+
+        const allLayersFailed =
+          mixer.layers.length > 0 &&
+          mixer.layers.every((layer) => result.failedSoundIds.includes(layer.soundId));
+
+        if (allLayersFailed && mixer.isPlaying) {
+          setMixer((state) => setPlaying(state, false));
+          setImportStatus('环境声加载失败（已自动重试），可在混音台点击「重试」或检查网络。');
+          return;
+        }
+
+        setImportStatus('部分环境声加载失败，可在混音台为对应轨道点击「重试」。');
+      })
+      .catch(() => {
+        setFailedSoundIds([]);
+        setMixer((state) => setPlaying(state, false));
+        setImportStatus('音频加载失败，请检查网络后重新播放或更换文件。');
+      });
 
     return () => {
       if (!mixer.isPlaying) {
@@ -157,6 +183,40 @@ export function AppLayout() {
 
     setMixer((state) => setPlaying(state, !state.isPlaying));
   }, [mixer.isPlaying]);
+
+  const retryLayerLoad = useCallback(
+    (soundId: string) => {
+      const sound = allSounds.find((entry) => entry.id === soundId);
+      if (!sound) {
+        return;
+      }
+
+      getAudioEngine().invalidateCachedBuffer(sound);
+
+      if (!mixer.isPlaying) {
+        setImportStatus(`已清除缓存，开始播放时将重新加载「${sound.title}」。`);
+        return;
+      }
+
+      setImportStatus(`正在重新加载「${sound.title}」…`);
+
+      void getAudioEngine()
+        .sync(mixer, allSounds)
+        .then((result) => {
+          setFailedSoundIds(result.failedSoundIds);
+          if (result.failedSoundIds.includes(soundId)) {
+            setImportStatus(`「${sound.title}」仍无法加载，请检查网络后重试。`);
+            return;
+          }
+
+          setImportStatus(`「${sound.title}」已重新加载。`);
+        })
+        .catch(() => {
+          setImportStatus(`「${sound.title}」加载失败，请稍后重试。`);
+        });
+    },
+    [allSounds, mixer]
+  );
 
   const mediaSessionTrackTitles = useMemo(
     () => selectedLayers.map(({ sound }) => sound.title),
@@ -352,7 +412,9 @@ export function AppLayout() {
     copyMixerShare: handleCopyMixerShare,
     copyMixerShareLink: handleCopyMixerShareLink,
     pasteMixerShareFromClipboard: handlePasteMixerShareFromClipboard,
-    importMixerShare: handleImportMixerShare
+    importMixerShare: handleImportMixerShare,
+    failedSoundIds,
+    retryLayerLoad
   };
 
   return (
