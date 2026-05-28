@@ -343,7 +343,7 @@ export function AppLayout() {
     sleepTimerRemainingLabel: sleepTimerController.remainingLabel,
     sleepTimerActive: sleepTimerController.isActive,
     sleepTimerFading: sleepTimerController.isFading,
-    startSleepTimer: sleepTimerController.startPreset,
+    startSleepTimer: sleepTimerController.start,
     cancelSleepTimer: sleepTimerController.cancel,
     mixerPresets,
     saveMixerPreset: handleSaveMixerPreset,

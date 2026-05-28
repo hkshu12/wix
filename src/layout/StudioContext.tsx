@@ -1,7 +1,6 @@
 import { createContext, useContext, type Dispatch, type ReactNode, type SetStateAction } from 'react';
 import type { PlayableSound } from '../audio/audioGraphPlan';
 import type { MixerState } from '../domain/mixer';
-import type { SleepTimerPresetMinutes } from '../domain/sleepTimer';
 import type { CustomTrack } from '../storage/customLibrary';
 import type { MixerPreset } from '../storage/mixerPresets';
 
@@ -19,7 +18,7 @@ export interface StudioContextValue {
   sleepTimerRemainingLabel: string;
   sleepTimerActive: boolean;
   sleepTimerFading: boolean;
-  startSleepTimer: (minutes: SleepTimerPresetMinutes) => void;
+  startSleepTimer: (minutes: number) => boolean;
   cancelSleepTimer: () => void;
   mixerPresets: MixerPreset[];
   saveMixerPreset: (name: string) => void;

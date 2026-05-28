@@ -2,7 +2,7 @@ import { act, renderHook } from '@testing-library/react';
 import { useState } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createInitialMixerState, setPlaying } from '../domain/mixer';
-import { SLEEP_TIMER_FADE_SECONDS, startSleepTimer, type SleepTimerPresetMinutes } from '../domain/sleepTimer';
+import { SLEEP_TIMER_FADE_SECONDS, startSleepTimer } from '../domain/sleepTimer';
 import { writeSleepTimerSnapshot } from '../storage/sleepTimerSnapshot';
 import { useSleepTimerController } from './useSleepTimerController';
 
@@ -24,29 +24,33 @@ describe('useSleepTimerController', () => {
       return { mixer, controller };
     });
 
+    const startTime = Date.now();
     act(() => {
-      result.current.controller.startPreset(1 as SleepTimerPresetMinutes);
+      result.current.controller.start(5);
     });
 
     const fadeMs = SLEEP_TIMER_FADE_SECONDS * 1000;
-    const endMs = 60 * 1000;
+    const endMs = 5 * 60 * 1000;
     const initialVolume = result.current.mixer.masterVolume;
 
     act(() => {
-      vi.advanceTimersByTime(endMs - fadeMs - 1);
+      vi.setSystemTime(startTime + endMs - fadeMs - 5_000);
+      vi.advanceTimersByTime(250);
     });
 
     expect(result.current.controller.isFading).toBe(false);
 
     act(() => {
-      vi.advanceTimersByTime(fadeMs / 2);
+      vi.setSystemTime(startTime + endMs - fadeMs / 2);
+      vi.advanceTimersByTime(250);
     });
 
     expect(result.current.controller.isFading).toBe(true);
     expect(result.current.mixer.masterVolume).toBeLessThan(initialVolume);
 
     act(() => {
-      vi.advanceTimersByTime(fadeMs / 2 + 500);
+      vi.setSystemTime(startTime + endMs + 500);
+      vi.advanceTimersByTime(250);
     });
 
     expect(result.current.controller.isActive).toBe(false);
@@ -73,5 +77,22 @@ describe('useSleepTimerController', () => {
     });
 
     expect(result.current.controller.isActive).toBe(false);
+  });
+
+  it('rejects out-of-range custom durations', () => {
+    const { result } = renderHook(() => {
+      const [mixer, setMixer] = useState(createInitialMixerState);
+      const controller = useSleepTimerController({ mixer, setMixer });
+      return { controller };
+    });
+
+    let started = false;
+    act(() => {
+      expect(result.current.controller.start(4)).toBe(false);
+      started = result.current.controller.start(90);
+    });
+    expect(started).toBe(true);
+    expect(result.current.controller.isActive).toBe(true);
+    expect(result.current.controller.remainingLabel).toBe('1:30:00');
   });
 });

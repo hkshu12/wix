@@ -6,6 +6,25 @@ export const SLEEP_TIMER_PRESETS_MINUTES = [15, 30, 45, 60] as const;
 
 export type SleepTimerPresetMinutes = (typeof SLEEP_TIMER_PRESETS_MINUTES)[number];
 
+/** Inclusive bounds for custom sleep timer duration (minutes). */
+export const SLEEP_TIMER_MIN_MINUTES = 5;
+export const SLEEP_TIMER_MAX_MINUTES = 480;
+
+export function isValidSleepTimerMinutes(minutes: number): boolean {
+  return (
+    Number.isFinite(minutes) &&
+    Number.isInteger(minutes) &&
+    minutes >= SLEEP_TIMER_MIN_MINUTES &&
+    minutes <= SLEEP_TIMER_MAX_MINUTES
+  );
+}
+
+/** Rounds to an integer and clamps to the allowed sleep timer range. */
+export function clampSleepTimerMinutes(minutes: number): number {
+  const rounded = Math.round(minutes);
+  return Math.min(SLEEP_TIMER_MAX_MINUTES, Math.max(SLEEP_TIMER_MIN_MINUTES, rounded));
+}
+
 export interface SleepTimerState {
   /** Wall-clock time (ms) when playback should begin fading out. */
   fadeStartsAt: number | null;

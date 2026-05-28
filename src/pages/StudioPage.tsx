@@ -20,7 +20,12 @@ import {
 import { usePlaybackAnnouncer } from '../hooks/usePlaybackAnnouncer';
 import { useStudioKeyboardShortcuts } from '../hooks/useStudioKeyboardShortcuts';
 import { assetUrl } from '../lib/assetUrl';
-import { SLEEP_TIMER_PRESETS_MINUTES } from '../domain/sleepTimer';
+import {
+  clampSleepTimerMinutes,
+  SLEEP_TIMER_MAX_MINUTES,
+  SLEEP_TIMER_MIN_MINUTES,
+  SLEEP_TIMER_PRESETS_MINUTES
+} from '../domain/sleepTimer';
 import { useStudio } from '../layout/StudioContext';
 import { ThemeToggle } from '../theme/ThemeToggle';
 import './StudioPage.css';
@@ -61,6 +66,8 @@ export function StudioPage() {
   const [keyboardHelpOpen, setKeyboardHelpOpen] = useState(false);
   const [presetName, setPresetName] = useState('');
   const [sharePaste, setSharePaste] = useState('');
+  const [customSleepMinutes, setCustomSleepMinutes] = useState('90');
+  const [customSleepError, setCustomSleepError] = useState<string | null>(null);
   const [navOpen, setNavOpen] = useState(false);
   const { updateAvailable } = useAppUpdate();
   const android = isAndroidApp();
@@ -85,6 +92,24 @@ export function StudioPage() {
       }
     }
   );
+
+  function handleStartCustomSleepTimer() {
+    const parsed = Number.parseInt(customSleepMinutes.trim(), 10);
+    if (!Number.isFinite(parsed)) {
+      setCustomSleepError(`请输入 ${SLEEP_TIMER_MIN_MINUTES}–${SLEEP_TIMER_MAX_MINUTES} 之间的整数分钟`);
+      return;
+    }
+
+    const minutes = clampSleepTimerMinutes(parsed);
+    const started = startSleepTimer(minutes);
+    if (!started) {
+      setCustomSleepError(`请输入 ${SLEEP_TIMER_MIN_MINUTES}–${SLEEP_TIMER_MAX_MINUTES} 之间的整数分钟`);
+      return;
+    }
+
+    setCustomSleepMinutes(String(minutes));
+    setCustomSleepError(null);
+  }
 
   function handleLayerToggle(soundId: string, soundTitle: string) {
     const wasSelected = mixer.layers.some((layer) => layer.soundId === soundId);
@@ -340,12 +365,54 @@ export function StudioPage() {
                 key={minutes}
                 className="studio-btn studio-btn--secondary sleep-timer-preset"
                 type="button"
-                onClick={() => startSleepTimer(minutes)}
+                onClick={() => {
+                  setCustomSleepError(null);
+                  startSleepTimer(minutes);
+                }}
               >
                 {minutes} 分钟
               </button>
             ))}
           </div>
+          <form
+            className="sleep-timer-custom"
+            onSubmit={(event) => {
+              event.preventDefault();
+              handleStartCustomSleepTimer();
+            }}
+          >
+            <label className="sleep-timer-custom-label" htmlFor="sleep-timer-custom-minutes">
+              自定义时长（分钟）
+            </label>
+            <div className="sleep-timer-custom-row">
+              <input
+                aria-describedby={customSleepError ? 'sleep-timer-custom-error' : 'sleep-timer-custom-hint'}
+                aria-invalid={customSleepError ? true : undefined}
+                className="sleep-timer-custom-input"
+                id="sleep-timer-custom-minutes"
+                inputMode="numeric"
+                max={SLEEP_TIMER_MAX_MINUTES}
+                min={SLEEP_TIMER_MIN_MINUTES}
+                type="number"
+                value={customSleepMinutes}
+                onChange={(event) => {
+                  setCustomSleepMinutes(event.target.value);
+                  setCustomSleepError(null);
+                }}
+              />
+              <button className="studio-btn studio-btn--secondary" type="submit">
+                开始
+              </button>
+            </div>
+            <p className="drawer-hint" id="sleep-timer-custom-hint">
+              支持 {SLEEP_TIMER_MIN_MINUTES}–{SLEEP_TIMER_MAX_MINUTES} 分钟，例如午睡 90 分钟或哄娃 120 分钟。
+            </p>
+            {customSleepError ? (
+              <p className="sleep-timer-custom-error" id="sleep-timer-custom-error" role="alert">
+                {customSleepError}
+              </p>
+            ) : null}
+          </form>
           {sleepTimerActive ? (
             <div className="sleep-timer-active">
               <p aria-live="polite">

@@ -318,6 +318,49 @@ p {
   min-width: 7rem;
 }
 
+.sleep-timer-custom {
+  margin-bottom: 12px;
+}
+
+.sleep-timer-custom-label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.sleep-timer-custom-row {
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+}
+
+.sleep-timer-custom-input {
+  flex: 1;
+  min-width: 0;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+}
+
+.sleep-timer-custom-input:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.sleep-timer-custom .drawer-hint {
+  margin-top: 6px;
+}
+
+.sleep-timer-custom-error {
+  margin: 6px 0 0;
+  color: var(--danger, #f87171);
+  font-size: 0.9rem;
+}
+
 .sleep-timer-active {
   display: flex;
   flex-wrap: wrap;
