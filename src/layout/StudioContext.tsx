@@ -32,6 +32,7 @@ export interface StudioContextValue {
   importMixerShare: (text: string) => void;
   failedSoundIds: string[];
   retryLayerLoad: (soundId: string) => void;
+  clearAllAppData: () => Promise<void>;
 }
 
 const StudioContext = createContext<StudioContextValue | null>(null);

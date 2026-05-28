@@ -21,7 +21,8 @@ interface StoredCustomTrack extends Omit<CustomTrack, 'objectUrl'> {
 }
 
 const STORE_NAME = 'tracks';
-const DEFAULT_DATABASE = 'white-noise-mixer';
+export const CUSTOM_LIBRARY_DATABASE_NAME = 'white-noise-mixer';
+const DEFAULT_DATABASE = CUSTOM_LIBRARY_DATABASE_NAME;
 
 export async function saveCustomTrack(file: File, options: CustomLibraryOptions = {}): Promise<CustomTrack> {
   const db = await openDatabase(options.databaseName);
@@ -56,6 +57,15 @@ export async function deleteCustomTrack(id: string, options: CustomLibraryOption
 
   await writeToStore(db, 'readwrite', (store) => store.delete(id));
   db.close();
+}
+
+export function clearCustomLibrary(databaseName = DEFAULT_DATABASE): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.deleteDatabase(databaseName);
+    request.onerror = () => reject(request.error ?? new Error('Failed to delete custom library database'));
+    request.onsuccess = () => resolve();
+    request.onblocked = () => resolve();
+  });
 }
 
 export function revokeCustomTrackUrls(tracks: Array<Pick<CustomTrack, 'objectUrl'>>): void {
