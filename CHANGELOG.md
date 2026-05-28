@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.24.0] - 2026-05-28
+
+### Added
+
+- Built-in **咖啡馆** ambience loop (CC0 night-cafe recording) for focus, reading, and remote-work background noise.
+
 ## [1.23.0] - 2026-05-28
 
 ### Changed

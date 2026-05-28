@@ -7,7 +7,8 @@ export type BuiltInSoundId =
   | 'forest'
   | 'brown-noise'
   | 'pink-noise'
-  | 'fan';
+  | 'fan'
+  | 'cafe';
 
 export interface BuiltInSound {
   id: BuiltInSoundId;
@@ -101,6 +102,15 @@ export const BUILT_IN_SOUNDS: BuiltInSound[] = [
     icon: '🌀',
     accent: '#94a3b8',
     src: 'sounds/fan.ogg'
+  },
+  {
+    id: 'cafe',
+    kind: 'built-in',
+    title: '咖啡馆',
+    subtitle: '店内氛围底噪，适合专注、阅读与远程办公',
+    icon: '☕',
+    accent: '#d97706',
+    src: 'sounds/cafe.ogg'
   }
 ];
 
