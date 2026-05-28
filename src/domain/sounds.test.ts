@@ -4,7 +4,17 @@ import { BUILT_IN_SOUNDS, getSoundById } from './sounds';
 describe('built-in sound catalog', () => {
   it('ships the requested default ambience sounds', () => {
     expect(BUILT_IN_SOUNDS.map((sound) => sound.id)).toEqual(
-      expect.arrayContaining(['campfire', 'rain', 'ocean', 'fireplace', 'fan', 'cafe', 'train', 'highway'])
+      expect.arrayContaining([
+        'campfire',
+        'rain',
+        'ocean',
+        'fireplace',
+        'fan',
+        'cafe',
+        'train',
+        'highway',
+        'airplane'
+      ])
     );
   });
 
@@ -21,6 +31,7 @@ describe('built-in sound catalog', () => {
     expect(getSoundById('cafe')?.title).toBe('咖啡馆');
     expect(getSoundById('train')?.title).toBe('列车');
     expect(getSoundById('highway')?.title).toBe('公路');
+    expect(getSoundById('airplane')?.title).toBe('飞机舱');
     expect(getSoundById('missing')).toBeUndefined();
   });
 });

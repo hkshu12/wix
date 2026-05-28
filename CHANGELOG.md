@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.27.0] - 2026-05-28
+
+### Added
+
+- Built-in **飞机舱** ambience loop (CC0 cabin hum recording) for long flights, focus, and masking environmental noise.
+
 ## [1.26.0] - 2026-05-28
 
 ### Added
