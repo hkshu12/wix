@@ -16,6 +16,7 @@ import {
 import {
   formatLayerToggleAnnouncement,
   formatPlayToggleAnnouncement,
+  formatMasterVolumeAnnouncement,
   formatSleepTimerCancelAnnouncement,
   formatSleepTimerCompleteAnnouncement,
   formatSleepTimerStartAnnouncement
@@ -145,9 +146,11 @@ export function StudioPage() {
         setDrawerOpen((open) => !open);
       },
       onAdjustMasterVolume: (delta) => {
-        setMixer((state) =>
-          setMasterVolume(state, adjustMasterVolumeStep(state.masterVolume, delta))
-        );
+        setMixer((state) => {
+          const nextVolume = adjustMasterVolumeStep(state.masterVolume, delta);
+          announcePlayback(formatMasterVolumeAnnouncement(nextVolume));
+          return setMasterVolume(state, nextVolume);
+        });
       }
     }
   );

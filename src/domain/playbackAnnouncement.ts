@@ -31,3 +31,8 @@ export function formatSleepTimerCancelAnnouncement(): string {
 export function formatSleepTimerCompleteAnnouncement(): string {
   return '睡眠定时已到，播放已暂停';
 }
+
+export function formatMasterVolumeAnnouncement(masterVolume: number): string {
+  const percent = Math.round(masterVolume * 100);
+  return `主音量 ${percent}%`;
+}

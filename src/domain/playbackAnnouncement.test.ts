@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   formatLayerToggleAnnouncement,
   formatPlayToggleAnnouncement,
+  formatMasterVolumeAnnouncement,
   formatSleepTimerCancelAnnouncement,
   formatSleepTimerCompleteAnnouncement,
   formatSleepTimerStartAnnouncement
@@ -31,5 +32,14 @@ describe('formatSleepTimerAnnouncements', () => {
     expect(formatSleepTimerStartAnnouncement(30)).toBe('已设置睡眠定时 30 分钟');
     expect(formatSleepTimerCancelAnnouncement()).toBe('已取消睡眠定时');
     expect(formatSleepTimerCompleteAnnouncement()).toBe('睡眠定时已到，播放已暂停');
+  });
+});
+
+describe('formatMasterVolumeAnnouncement', () => {
+  it('announces rounded percent', () => {
+    expect(formatMasterVolumeAnnouncement(0.82)).toBe('主音量 82%');
+    expect(formatMasterVolumeAnnouncement(0.875)).toBe('主音量 88%');
+    expect(formatMasterVolumeAnnouncement(0)).toBe('主音量 0%');
+    expect(formatMasterVolumeAnnouncement(1)).toBe('主音量 100%');
   });
 });

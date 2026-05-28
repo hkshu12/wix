@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.37.0] - 2026-05-28
+
+### Added
+
+- **Keyboard master volume screen-reader announcements**: pressing **+** / **−** (or **=** / numpad) to adjust master volume is announced in the shared playback status region (e.g.「主音量 87%」), so assistive tech users hear volume changes without opening the mixer drawer.
+
 ## [1.36.0] - 2026-05-28
 
 ### Added

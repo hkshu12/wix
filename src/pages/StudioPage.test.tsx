@@ -261,6 +261,18 @@ describe('StudioPage', () => {
     expect(masterSlider).toHaveValue('82');
   });
 
+  it('announces master volume changes from +/− keys in the playback status region', async () => {
+    renderWithRouter(<AppRouter />, { routerProps: { initialEntries: ['/studio'] } });
+
+    const status = screen.getByLabelText('混音播放状态');
+
+    fireEvent.keyDown(window, { key: '=', code: 'Equal' });
+    await waitFor(() => expect(status).toHaveTextContent('主音量 87%'));
+
+    fireEvent.keyDown(window, { key: '-', code: 'Minus' });
+    await waitFor(() => expect(status).toHaveTextContent('主音量 82%'));
+  });
+
   it('does not toggle the mixer drawer with M while typing in the drawer', () => {
     renderWithRouter(<AppRouter />, { routerProps: { initialEntries: ['/studio'] } });
 
