@@ -5,14 +5,18 @@ import { getHasEnteredStudio } from '../storage/onboarding';
 import { renderWithRouter } from '../test/renderWithRouter';
 
 describe('LandingPage', () => {
-  it('lists sleep timer, presets, and mix persistence in features', () => {
+  it('lists current studio capabilities in features', () => {
     renderWithRouter(<AppRouter />, { routerProps: { initialEntries: ['/'] } });
 
     const features = screen.getByRole('region', { name: '能做什么' });
 
-    expect(features).toHaveTextContent(/睡眠定时（15–60 分钟）/);
+    expect(features).toHaveTextContent(/睡眠定时（5–480 分钟）/);
+    expect(features).toHaveTextContent(/九种内置环境声/);
     expect(features).toHaveTextContent(/命名场景预设/);
     expect(features).toHaveTextContent(/刷新后自动恢复/);
+    expect(features).toHaveTextContent(/\?share=/);
+    expect(features).toHaveTextContent(/键盘快捷键/);
+    expect(features).toHaveTextContent(/锁屏/);
   });
 
   it('marks entered studio and navigates on 开始使用', async () => {

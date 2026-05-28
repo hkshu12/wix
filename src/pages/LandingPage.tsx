@@ -31,19 +31,26 @@ export function LandingPage() {
       <main>
         <section className="landing-hero">
           <h1>白噪音混音器</h1>
-          <p className="landing-lead">叠加雨声、海浪与自定义音乐，打造属于你的专注与放松声景。</p>
+          <p className="landing-lead">
+            叠加雨声、风扇、粉棕噪音与自定义音乐，打造属于你的专注、睡眠与放松声景。
+          </p>
           <StartButton />
         </section>
 
         <section className="landing-section" aria-labelledby="features-title">
           <h2 id="features-title">能做什么</h2>
           <ul className="landing-list">
-            <li>多轨叠加内置环境声与导入的本地音乐</li>
+            <li>多轨叠加九种内置环境声（含风扇）与导入的本地音乐</li>
             <li>每轨独立调节音量、声像与播放速度，支持静音</li>
             <li>主音量、立体声宽度与全局播放速度一键控制</li>
-            <li>睡眠定时（15–60 分钟）：到时主音量渐弱并自动暂停，刷新页面后倒计时仍可继续</li>
+            <li>
+              睡眠定时（5–480 分钟）：预设或自定义时长，到时主音量渐弱并自动暂停，刷新后倒计时仍可继续
+            </li>
             <li>命名场景预设：保存最多 12 组混音，一键切换专注、睡眠等固定搭配</li>
             <li>混音组合与主音量在刷新后自动恢复（需再次点击播放）</li>
+            <li>分享混音链接或 JSON 分享码；打开带 <code>?share=</code> 的链接可自动导入配方</li>
+            <li>桌面键盘快捷键：Space 播放/暂停、M 混音抽屉、+/- 主音量、? 查看说明</li>
+            <li>支持的浏览器与 PWA 可在锁屏显示混音标题并控制播放/暂停</li>
             <li>导入 MP3、WAV、M4A 等格式，保存在本机音频库</li>
           </ul>
         </section>
@@ -52,8 +59,8 @@ export function LandingPage() {
           <h2 id="how-title">怎么用</h2>
           <ol className="landing-steps">
             <li>选择一种或多种声音，或从预设加载常用搭配</li>
-            <li>在混音台调节各轨与整体参数，需要时可设定睡眠定时</li>
-            <li>点击播放；下次打开会记住你的混音设置</li>
+            <li>在混音台调节各轨与整体参数；需要时可设定睡眠定时或复制分享链接</li>
+            <li>点击播放；下次打开会记住混音设置，也可把链接发给朋友一键导入</li>
           </ol>
           <StartButton className="landing-cta landing-cta--secondary" />
         </section>

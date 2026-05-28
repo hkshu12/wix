@@ -32,10 +32,10 @@
 | ~~导出/分享混音配置~~ | 向朋友分享「雨+篝火」配方 | — | 已完成 v1.13.0 |
 | ~~混音分享 URL 深链~~ | 点开链接即导入配方 | — | 已完成 v1.19.0 |
 | ~~横屏与安全区细化~~ | 平板/手机横屏 | — | 已完成 v1.14.0 |
-| **新内置环境声（续）** | 咖啡馆、列车、白噪音等 | 已有 9 轨（含风扇 v1.22.0） | 继续扩展 `sounds.ts` + `sounds:download` |
+| **新内置环境声（续）** | 咖啡馆、列车、白噪音等 | 已有 9 轨（含风扇 v1.22.0） | 扩展 `sounds.ts` + `sounds:download` |
 | ~~大文件导入进度~~ | 长播客/长环境录音 | — | v1.16.0 |
 | ~~混音 ARIA 实时区域~~ | 读屏知播放/定时状态 | — | 已完成 v1.12.0 |
-| **落地页功能列表更新** | 新用户了解分享链接、快捷键等 | 仍写 15–60 分钟定时、缺分享/快捷键 | 更新 `LandingPage` 文案与测试 |
+| ~~落地页功能列表更新~~ | 新用户了解分享链接、快捷键等 | — | 已完成 v1.23.0 |
 | ~~桌面键盘快捷键~~ | 办公专注时免鼠标 | — | 已完成 v1.15.0（Space 播放/暂停） |
 | ~~快捷键帮助（`?`）~~ | 发现 Space 等快捷键 | — | 已完成 v1.17.0 |
 | ~~自定义睡眠定时时长~~ | 90 分钟午睡等非 15–60 预设 | — | 已完成 v1.20.0 |
@@ -53,41 +53,42 @@
 | 旅行/办公 | 离线 PWA、子路径安装 | v1.6.0 manifest 对齐 |
 | 弱网/首次加载 | 内置 OGG 偶发失败 | fetch+decode 指数退避重试（v1.8.0） |
 | 前庭敏感 | 减少 UI 动效 | 系统「减少动态效果」（v1.10.0） |
-| 新用户认知 | 落地页了解 Studio 能力 | v1.11.0 部分更新；仍缺分享深链与快捷键说明 |
+| 新用户认知 | 落地页了解 Studio 能力 | v1.23.0 对齐定时/分享/快捷键/锁屏 |
 | 读屏用户 | 播放/加轨状态播报 | v1.12.0 live 区域 |
 | 社交分享 | 把配方发给朋友 | v1.13.0 JSON + v1.19.0 深链 URL |
 | 平板横屏 | 一屏多看环境声 | v1.14.0 |
 | 自定义内容 | 导入本地音频 | IndexedDB + 导入进度（v1.16.0） |
 | PWA 锁屏/通知栏 | 系统级播放/暂停 | v1.18.0 Media Session（Web）；Android 原生仍缺 |
 
-### 代码与架构备注（2026-05-28 挖掘）
+### 代码与架构备注（2026-05-28 二次挖掘）
 
 - **分层清晰**：`domain/` 纯逻辑、`storage/` 快照、`audio/` 引擎、`AppLayout` 编排；分享深链 `mixerShareUrl` + `useMixerShareDeepLink`。
-- **内置声库**：9 轨 CC0 OGG（`sounds.ts` + `public/sounds/` + `scripts/download-builtin-sounds.sh`）；旧分享码不含新轨时由 `applyMixerPreset` 丢弃未知 id。
-- **睡眠定时**：`sleepTimer.ts` + `useSleepTimerController`；5–480 分钟自定义（v1.20.0）。
+- **内置声库**：9 轨 CC0 OGG；下一批候选咖啡馆/列车（CC0 包检索 + `download-builtin-sounds.sh`）。
+- **睡眠定时**：5–480 分钟自定义（v1.20.0）；落地页曾写 15–60，v1.23.0 已修正。
 - **键盘**：`studioKeyboard` — Space / M / ± / `?`（v1.21.0）。
-- **Android**：Capacitor 8；后台音频仍为最大平台缺口（P1），需原生 foreground service，不宜与 Web 小功能同 PR。
-- **测试**：domain/hook/StudioPage 覆盖快捷键与深链；Android 原生后台待插件调研后单独立项。
-- **版本**：当前 `1.22.0`（本次）；下一项宜 **落地页文案**（P2，小）或 **Android 后台**（P1，大项）或 **咖啡馆/列车环境声**（P2）。
+- **Android**：Capacitor 8；后台音频仍为最大平台缺口（P1），需原生 foreground service，不宜与文案小改同 PR。
+- **测试**：domain/hook/StudioPage 覆盖快捷键与深链；`LandingPage.test` 覆盖功能列表关键词。
+- **版本**：当前实现目标 **1.23.0**；下一项宜 **咖啡馆/列车环境声**（P2）或 **Android 后台**（P1，大项）。
 
 ### 外部信号
 
 - GitHub Issues：无 open issue（2026-05-28）；draft PR #17 为 Android 更新修复（未合并）。
-- 近期 CHANGELOG：v1.21.0 键盘快捷键、v1.20.0 自定义定时——**避免重复**。
-- 同类 App：风扇/白噪音、后台播放、咖啡馆氛围；Web 功能已较完整，内容与 Android 原生后台为主要缺口。
+- 近期 CHANGELOG：v1.22.0 风扇、v1.21.0 快捷键——**避免重复**。
+- 同类 App：咖啡馆氛围、列车白噪、Android 后台播放；Web 功能已较完整，内容与 Android 原生后台为主要缺口。
 
 ## 本次选中项
 
-**新内置环境声：风扇（P2）**
+**落地页功能列表更新（P2）**
 
-- **理由**：睡眠与哄娃场景最常见需求之一，backlog 长期列出；CC0「Fans and Drones」包可单次 PR 完成（资源 + 目录 + 下载脚本 + 测试），不依赖 Android 原生。
-- **范围**：新增 `fan` 预设与 `fan.ogg`；更新 ATTRIBUTION 与 `sounds:download`；版本 **1.22.0**。
+- **理由**：v1.11.0 后 Studio 已增加自定义定时、分享深链、键盘快捷键、Media Session、风扇轨，但落地页仍写「15–60 分钟」且未提分享/快捷键，新用户认知缺口明显；纯文案+测试，单 PR 可完成。
+- **范围**：更新 `LandingPage` 与 `LandingPage.test`；版本 **1.23.0**。
 
 ## 历史已完成
 
 | 日期 | 项 | 引用 |
 | --- | --- | --- |
-| 2026-05-28 | 内置风扇环境声 | v1.22.0（本次） |
+| 2026-05-28 | 落地页功能列表更新 | v1.23.0（本次） |
+| 2026-05-28 | 内置风扇环境声 | [v1.22.0](https://github.com/hkshu12/wix/releases/tag/v1.22.0) |
 | 2026-05-28 | 更多键盘快捷键（M、+/-） | [v1.21.0](https://github.com/hkshu12/wix/releases/tag/v1.21.0) |
 | 2026-05-28 | 自定义睡眠定时时长 | [v1.20.0](https://github.com/hkshu12/wix/releases/tag/v1.20.0) |
 | 2026-05-27 | 混音分享 URL 深链 | [v1.19.0](https://github.com/hkshu12/wix/releases/tag/v1.19.0) |
@@ -98,7 +99,7 @@
 | 2026-05-27 | 横屏与安全区细化 | [v1.14.0](https://github.com/hkshu12/wix/releases/tag/v1.14.0) |
 | 2026-05-27 | 导出/分享混音配置 | [v1.13.0](https://github.com/hkshu12/wix/releases/tag/v1.13.0) |
 | 2026-05-27 | 混音播放 ARIA live 播报 | [v1.12.0](https://github.com/hkshu12/wix/releases/tag/v1.12.0) |
-| 2026-05-27 | 落地页功能列表更新 | [v1.11.0](https://github.com/hkshu12/wix/releases/tag/v1.11.0) |
+| 2026-05-27 | 落地页功能列表更新（首版） | [v1.11.0](https://github.com/hkshu12/wix/releases/tag/v1.11.0) |
 | 2026-05-27 | 减少动效（prefers-reduced-motion） | [PR #21](https://github.com/hkshu12/wix/pull/21), [v1.10.0](https://github.com/hkshu12/wix/releases/tag/v1.10.0) |
 | 2026-05-27 | 混音台底部抽屉焦点陷阱 | [PR #20](https://github.com/hkshu12/wix/pull/20), [v1.9.0](https://github.com/hkshu12/wix/releases/tag/v1.9.0) |
 | 2026-05-27 | 音频 fetch/decode 失败重试 | [v1.8.0](https://github.com/hkshu12/wix/releases/tag/v1.8.0) |

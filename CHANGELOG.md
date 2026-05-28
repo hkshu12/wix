@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.23.0] - 2026-05-28
+
+### Changed
+
+- Landing page feature list and steps now describe custom sleep timer (5–480 min), nine built-in ambiences including fan, mixer share links, keyboard shortcuts, and lock-screen media controls.
+
 ## [1.22.0] - 2026-05-28
 
 ### Added
