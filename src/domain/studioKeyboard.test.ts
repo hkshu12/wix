@@ -1,8 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import {
+  adjustMasterVolumeStep,
   isEditableKeyboardTarget,
   isQuestionMarkKey,
+  MASTER_VOLUME_KEYBOARD_STEP,
+  shouldAdjustMasterVolume,
   shouldToggleKeyboardHelp,
+  shouldToggleMixerDrawer,
   shouldTogglePlaybackWithSpace
 } from './studioKeyboard';
 
@@ -86,6 +90,56 @@ describe('studioKeyboard', () => {
         document.body
       )
     ).toBe(true);
+  });
+
+  it('allows M to toggle drawer when nav and help are closed', () => {
+    expect(
+      shouldToggleMixerDrawer(
+        { key: 'm', code: 'KeyM', ctrlKey: false, metaKey: false, altKey: false },
+        { navOpen: false, keyboardHelpOpen: false },
+        document.body
+      )
+    ).toBe(true);
+  });
+
+  it('blocks M when nav or keyboard help is open', () => {
+    expect(
+      shouldToggleMixerDrawer(
+        { key: 'm', code: 'KeyM', ctrlKey: false, metaKey: false, altKey: false },
+        { navOpen: true, keyboardHelpOpen: false },
+        document.body
+      )
+    ).toBe(false);
+    expect(
+      shouldToggleMixerDrawer(
+        { key: 'm', code: 'KeyM', ctrlKey: false, metaKey: false, altKey: false },
+        { navOpen: false, keyboardHelpOpen: true },
+        document.body
+      )
+    ).toBe(false);
+  });
+
+  it('allows +/− to adjust master volume outside text fields', () => {
+    expect(
+      shouldAdjustMasterVolume(
+        { key: '=', code: 'Equal', ctrlKey: false, metaKey: false, altKey: false },
+        { navOpen: false, keyboardHelpOpen: false },
+        document.body
+      )
+    ).toBe(true);
+    expect(
+      shouldAdjustMasterVolume(
+        { key: '-', code: 'Minus', ctrlKey: false, metaKey: false, altKey: false },
+        { navOpen: false, keyboardHelpOpen: false },
+        document.body
+      )
+    ).toBe(true);
+  });
+
+  it('steps master volume in 5% increments with clamping', () => {
+    expect(adjustMasterVolumeStep(0.82, 1)).toBeCloseTo(0.82 + MASTER_VOLUME_KEYBOARD_STEP);
+    expect(adjustMasterVolumeStep(0.02, -1)).toBe(0);
+    expect(adjustMasterVolumeStep(0.99, 1)).toBe(1);
   });
 
   it('blocks ? when drawer or nav is open or focus is in a text field', () => {

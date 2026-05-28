@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.21.0] - 2026-05-28
+
+### Added
+
+- Studio keyboard shortcuts: **M** toggles the mixer drawer; **+** / **−** (or **=** / numpad) adjust master volume in 5% steps without opening the drawer. Listed in the **?** shortcuts help.
+
 ## [1.20.0] - 2026-05-28
 
 ### Added

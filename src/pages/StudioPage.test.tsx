@@ -215,6 +215,43 @@ describe('StudioPage', () => {
     expect(resumeMock).not.toHaveBeenCalled();
   });
 
+  it('toggles the mixer drawer with M', () => {
+    renderWithRouter(<AppRouter />, { routerProps: { initialEntries: ['/studio'] } });
+
+    const drawer = screen.getByRole('dialog', { name: '混音与导入' });
+    expect(drawer).not.toHaveClass('open');
+
+    fireEvent.keyDown(window, { key: 'm', code: 'KeyM' });
+    expect(drawer).toHaveClass('open');
+
+    fireEvent.keyDown(window, { key: 'm', code: 'KeyM' });
+    expect(drawer).not.toHaveClass('open');
+  });
+
+  it('adjusts master volume with + and − keys', () => {
+    renderWithRouter(<AppRouter />, { routerProps: { initialEntries: ['/studio'] } });
+
+    const masterSlider = screen.getByLabelText('主音量');
+    expect(masterSlider).toHaveValue('82');
+
+    fireEvent.keyDown(window, { key: '=', code: 'Equal' });
+    expect(masterSlider).toHaveValue('87');
+
+    fireEvent.keyDown(window, { key: '-', code: 'Minus' });
+    expect(masterSlider).toHaveValue('82');
+  });
+
+  it('does not toggle the mixer drawer with M while typing in the drawer', () => {
+    renderWithRouter(<AppRouter />, { routerProps: { initialEntries: ['/studio'] } });
+
+    fireEvent.click(screen.getByRole('button', { name: /混音与导入/ }));
+    const presetInput = screen.getByLabelText('预设名称');
+    presetInput.focus();
+    fireEvent.keyDown(presetInput, { key: 'm', code: 'KeyM' });
+
+    expect(screen.getByRole('dialog', { name: '混音与导入' })).toBeInTheDocument();
+  });
+
   it('cancels an active sleep timer', () => {
     renderWithRouter(<AppRouter />, { routerProps: { initialEntries: ['/studio'] } });
 

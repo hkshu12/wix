@@ -38,15 +38,15 @@
 | ~~落地页功能列表更新~~ | 新用户了解能力 | — | 已完成 v1.11.0 |
 | ~~桌面键盘快捷键~~ | 办公专注时免鼠标 | — | 已完成 v1.15.0（Space 播放/暂停） |
 | ~~快捷键帮助（`?`）~~ | 发现 Space 等快捷键 | — | 已完成 v1.17.0 |
-| ~~自定义睡眠定时时长~~ | 90 分钟午睡等非 15–60 预设 | 仅四档预设 | `sleepTimer.ts` 校验范围 + 抽屉数字输入 |
-| **更多键盘快捷键** | `M` 开抽屉、`+/-` 主音量 | 仅 Space / `?` | 扩展 `studioKeyboard` |
+| ~~自定义睡眠定时时长~~ | 90 分钟午睡等非 15–60 预设 | — | 已完成 v1.20.0 |
+| ~~更多键盘快捷键~~ | `M` 开抽屉、`+/-` 主音量 | 仅 Space / `?` | 扩展 `studioKeyboard`（v1.21.0） |
 
 ### 体验场景与缺口（摘要）
 
 | 场景 | 典型需求 | 现状 |
 | --- | --- | --- |
 | 睡眠 | 定时、渐出、自定义时长（午睡 90 分等） | 定时+渐出+刷新恢复；自定义分钟 v1.20.0 |
-| 专注 | 预设、快速恢复、横屏平板、键盘控制 | 预设+快照；横屏 v1.14.0；Space + `?` v1.15–17 |
+| 专注 | 预设、快速恢复、横屏平板、键盘控制 | 预设+快照；横屏 v1.14.0；Space / M / ± / `?` v1.15–21 |
 | 冥想 | 慢速播放、简单组合 | 有全局/ per-track 速度 |
 | 哄娃 | 长时间稳定循环 | 定时渐出可用；可设最长 8 小时自定义 |
 | 屏蔽噪音 | 粉/棕噪 + 雨声 | 内置齐全 |
@@ -63,30 +63,31 @@
 ### 代码与架构备注（2026-05-28 挖掘）
 
 - **分层清晰**：`domain/` 纯逻辑、`storage/` 快照、`audio/` 引擎、`AppLayout` 编排；分享深链 `mixerShareUrl` + `useMixerShareDeepLink`。
-- **睡眠定时**：`sleepTimer.ts` + `useSleepTimerController` + `sleepTimerSnapshot`；预设与自定义分钟共用 `startSleepTimer`。
-- **键盘**：`studioKeyboard` 仅 Space/`?`；抽屉内输入框需 `isEditableKeyboardTarget` 排除。
+- **睡眠定时**：`sleepTimer.ts` + `useSleepTimerController` + `sleepTimerSnapshot`；5–480 分钟自定义与预设共用管线（v1.20.0）。
+- **键盘**：`studioKeyboard` 集中判定；`M` / `+` `−` / Space / `?`；抽屉内输入框仍用 `isEditableKeyboardTarget` 排除。
 - **Android**：Capacitor 8；后台音频仍为最大平台缺口（P1），需原生 foreground service，不宜与 Web 小功能同 PR。
-- **测试**：domain/hook 单测齐全；`StudioPage` 覆盖深链与抽屉；睡眠定时 UI 可补组件测。
-- **版本**：当前 `1.19.0`；CHANGELOG 单日密集发布，下一项宜选小范围、可测能力。
+- **测试**：domain/hook/StudioPage 覆盖快捷键与深链；Android 原生后台待插件调研后单独立项。
+- **版本**：当前 `1.21.0`；下一项宜 **新内置环境声（P2，含资源）** 或 **Android 后台（P1，大项）**。
 
 ### 外部信号
 
-- GitHub Issues：无 open issue（2026-05-28，与 05-27 一致）。
-- 近期 CHANGELOG：v1.19.0 深链、v1.18.0 Media Session——**避免重复**。
-- 同类 App：自定义定时、后台播放、更多环境声；下一项大项仍为 **Android 原生后台（P1）**；小项 **键盘 M/+/-（P2）** 或 **新内置声（P2，含资源下载）**。
+- GitHub Issues：无 open issue（2026-05-28）。
+- 近期 CHANGELOG：v1.20.0 自定义睡眠定时、v1.19.0 深链——**避免重复**。
+- 同类 App：自定义定时、后台播放、更多环境声；Web 键盘与分享已较完整，平台缺口在 **Android 原生后台**。
 
 ## 本次选中项
 
-**自定义睡眠定时时长（P2）**
+**更多键盘快捷键（P2）— `M` 切换混音抽屉、`+` / `−` 调节主音量**
 
-- **理由**：午睡 90 分钟、哄娃 2 小时等真实场景无法被 15–60 四档覆盖；逻辑已集中在 `sleepTimer.ts`，单次 PR 只需 domain 校验、controller 泛化、抽屉 UI 与测试，不碰 Android 原生。
-- **范围**：5–480 分钟整数输入；与预设、跨刷新持久化、30 秒渐出共用现有管线；不含改 fade 时长或新预设档。
+- **理由**：办公专注场景下用户已习惯 Space 播放/暂停，但开抽屉调主音量仍需鼠标；逻辑集中在 `studioKeyboard.ts`，与 v1.15–17 快捷键体系一致，单次 PR 可测且不碰 Android 原生。
+- **范围**：每按一次 ±5% 主音量（0–100% 钳制）；`M` 在 Android 侧栏与快捷键说明关闭时切换抽屉；更新 `?` 帮助文案与单测。
 
 ## 历史已完成
 
 | 日期 | 项 | 引用 |
 | --- | --- | --- |
-| 2026-05-28 | 自定义睡眠定时时长 | v1.20.0（本次） |
+| 2026-05-28 | 更多键盘快捷键（M、+/-） | v1.21.0（本次） |
+| 2026-05-28 | 自定义睡眠定时时长 | [v1.20.0](https://github.com/hkshu12/wix/releases/tag/v1.20.0) |
 | 2026-05-27 | 混音分享 URL 深链 | [v1.19.0](https://github.com/hkshu12/wix/releases/tag/v1.19.0) |
 | 2026-05-27 | Web Media Session（PWA/桌面锁屏） | [v1.18.0](https://github.com/hkshu12/wix/releases/tag/v1.18.0) |
 | 2026-05-27 | 快捷键帮助（`?`） | [v1.17.0](https://github.com/hkshu12/wix/releases/tag/v1.17.0) |
