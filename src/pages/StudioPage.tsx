@@ -19,7 +19,10 @@ import {
   formatMasterVolumeAnnouncement,
   formatSleepTimerCancelAnnouncement,
   formatSleepTimerCompleteAnnouncement,
-  formatSleepTimerStartAnnouncement
+  formatSleepTimerStartAnnouncement,
+  formatWakeTimerCancelAnnouncement,
+  formatWakeTimerCompleteAnnouncement,
+  formatWakeTimerStartAnnouncement
 } from '../domain/playbackAnnouncement';
 import { usePlaybackAnnouncer } from '../hooks/usePlaybackAnnouncer';
 import { filterSoundsByQuery } from '../domain/soundSearch';
@@ -41,6 +44,13 @@ import {
   SLEEP_TIMER_MIN_MINUTES,
   SLEEP_TIMER_PRESETS_MINUTES
 } from '../domain/sleepTimer';
+import {
+  clampWakeTimerMinutes,
+  WAKE_TIMER_FADE_PRESETS_SECONDS,
+  WAKE_TIMER_MAX_MINUTES,
+  WAKE_TIMER_MIN_MINUTES,
+  WAKE_TIMER_PRESETS_MINUTES
+} from '../domain/wakeTimer';
 import { useStudio } from '../layout/StudioContext';
 import { ThemeToggle } from '../theme/ThemeToggle';
 import './StudioPage.css';
@@ -68,6 +78,13 @@ export function StudioPage() {
     setScreenWakeLockEnabled,
     startSleepTimer,
     cancelSleepTimer,
+    wakeTimerRemainingLabel,
+    wakeTimerActive,
+    wakeTimerFading,
+    wakeTimerFadeSeconds,
+    setWakeTimerFadeSeconds,
+    startWakeTimer,
+    cancelWakeTimer,
     mixerPresets,
     saveMixerPreset,
     loadMixerPreset,
@@ -93,12 +110,16 @@ export function StudioPage() {
   const [sharePaste, setSharePaste] = useState('');
   const [customSleepMinutes, setCustomSleepMinutes] = useState('90');
   const [customSleepError, setCustomSleepError] = useState<string | null>(null);
+  const [customWakeMinutes, setCustomWakeMinutes] = useState('90');
+  const [customWakeError, setCustomWakeError] = useState<string | null>(null);
   const [navOpen, setNavOpen] = useState(false);
   const { updateAvailable } = useAppUpdate();
   const android = isAndroidApp();
   const { message: playbackAnnouncement, announce: announcePlayback } = usePlaybackAnnouncer();
   const sleepTimerWasActiveRef = useRef(sleepTimerActive);
   const sleepTimerCancelledByUserRef = useRef(false);
+  const wakeTimerWasActiveRef = useRef(wakeTimerActive);
+  const wakeTimerCancelledByUserRef = useRef(false);
   const lastAnnouncedMasterPercentRef = useRef<number | null>(null);
 
   const activeCount = mixer.layers.length;
@@ -124,6 +145,40 @@ export function StudioPage() {
     cancelSleepTimer();
     announcePlayback(formatSleepTimerCancelAnnouncement());
   }, [announcePlayback, cancelSleepTimer]);
+
+  const handleStartWakeTimer = useCallback(
+    (minutes: number) => {
+      const started = startWakeTimer(minutes);
+      if (started) {
+        announcePlayback(formatWakeTimerStartAnnouncement(minutes));
+      }
+      return started;
+    },
+    [announcePlayback, startWakeTimer]
+  );
+
+  const handleCancelWakeTimer = useCallback(() => {
+    wakeTimerCancelledByUserRef.current = true;
+    cancelWakeTimer();
+    announcePlayback(formatWakeTimerCancelAnnouncement());
+  }, [announcePlayback, cancelWakeTimer]);
+
+  const handleStartCustomWakeTimer = useCallback(() => {
+    const parsed = Number.parseInt(customWakeMinutes, 10);
+    if (!Number.isFinite(parsed)) {
+      setCustomWakeError('请输入有效的分钟数。');
+      return;
+    }
+
+    const minutes = clampWakeTimerMinutes(parsed);
+    if (minutes !== parsed) {
+      setCustomWakeError(`请输入 ${WAKE_TIMER_MIN_MINUTES}–${WAKE_TIMER_MAX_MINUTES} 之间的整数。`);
+      return;
+    }
+
+    setCustomWakeError(null);
+    handleStartWakeTimer(minutes);
+  }, [customWakeMinutes, handleStartWakeTimer]);
 
   const handleMasterVolumeSliderChange = useCallback(
     (value: number) => {
@@ -167,6 +222,19 @@ export function StudioPage() {
       sleepTimerCancelledByUserRef.current = false;
     }
   }, [announcePlayback, sleepTimerActive]);
+
+  useEffect(() => {
+    const wasActive = wakeTimerWasActiveRef.current;
+    wakeTimerWasActiveRef.current = wakeTimerActive;
+
+    if (wasActive && !wakeTimerActive && !wakeTimerCancelledByUserRef.current) {
+      announcePlayback(formatWakeTimerCompleteAnnouncement());
+    }
+
+    if (!wakeTimerActive) {
+      wakeTimerCancelledByUserRef.current = false;
+    }
+  }, [announcePlayback, wakeTimerActive]);
 
   const handlePlayToggleWithAnnouncement = useCallback(async () => {
     const nextPlaying = !mixer.isPlaying;
@@ -321,7 +389,11 @@ export function StudioPage() {
       <footer className="studio-dock" aria-label="播放与混音控制">
         {sleepTimerActive ? (
           <p className="studio-dock-timer" aria-live="polite">
-            {sleepTimerFading ? '渐出中' : '定时'} · {sleepTimerRemainingLabel}
+            {sleepTimerFading ? '渐出中' : '睡眠'} · {sleepTimerRemainingLabel}
+          </p>
+        ) : wakeTimerActive ? (
+          <p className="studio-dock-timer" aria-live="polite">
+            {wakeTimerFading ? '渐入中' : '唤醒'} · {wakeTimerRemainingLabel}
           </p>
         ) : null}
         <button className="studio-dock-play" type="button" onClick={() => void handlePlayToggleWithAnnouncement()}>
@@ -608,7 +680,98 @@ export function StudioPage() {
                 {sleepTimerFading ? '正在渐出…' : '剩余'} {sleepTimerRemainingLabel}
               </p>
               <button className="ghost-button" type="button" onClick={handleCancelSleepTimer}>
-                取消定时
+                取消睡眠定时
+              </button>
+            </div>
+          ) : null}
+        </section>
+
+        <section className="drawer-section" aria-labelledby="drawer-wake-timer-title">
+          <h3 id="drawer-wake-timer-title">唤醒定时</h3>
+          <p className="drawer-hint">
+            到时自动开始播放（若已暂停）并在 {wakeTimerFadeSeconds} 秒内将主音量从静音渐强至当前设定，适合午睡后或清晨温和叫醒。
+          </p>
+          <p className="drawer-hint sleep-timer-fade-label" id="wake-timer-fade-label">
+            渐入时长
+          </p>
+          <div
+            className="sleep-timer-presets sleep-timer-fade-presets"
+            role="group"
+            aria-labelledby="wake-timer-fade-label"
+          >
+            {WAKE_TIMER_FADE_PRESETS_SECONDS.map((seconds) => (
+              <button
+                key={seconds}
+                aria-pressed={wakeTimerFadeSeconds === seconds}
+                className="studio-btn studio-btn--secondary sleep-timer-preset"
+                type="button"
+                onClick={() => setWakeTimerFadeSeconds(seconds)}
+              >
+                {seconds} 秒
+              </button>
+            ))}
+          </div>
+          <div className="sleep-timer-presets" role="group" aria-label="唤醒定时预设">
+            {WAKE_TIMER_PRESETS_MINUTES.map((minutes) => (
+              <button
+                key={minutes}
+                className="studio-btn studio-btn--secondary sleep-timer-preset"
+                type="button"
+                onClick={() => {
+                  setCustomWakeError(null);
+                  handleStartWakeTimer(minutes);
+                }}
+              >
+                {minutes} 分钟
+              </button>
+            ))}
+          </div>
+          <form
+            className="sleep-timer-custom"
+            onSubmit={(event) => {
+              event.preventDefault();
+              handleStartCustomWakeTimer();
+            }}
+          >
+            <label className="sleep-timer-custom-label" htmlFor="wake-timer-custom-minutes">
+              自定义时长（分钟）
+            </label>
+            <div className="sleep-timer-custom-row">
+              <input
+                aria-describedby={customWakeError ? 'wake-timer-custom-error' : 'wake-timer-custom-hint'}
+                aria-invalid={customWakeError ? true : undefined}
+                className="sleep-timer-custom-input"
+                id="wake-timer-custom-minutes"
+                inputMode="numeric"
+                max={WAKE_TIMER_MAX_MINUTES}
+                min={WAKE_TIMER_MIN_MINUTES}
+                type="number"
+                value={customWakeMinutes}
+                onChange={(event) => {
+                  setCustomWakeMinutes(event.target.value);
+                  setCustomWakeError(null);
+                }}
+              />
+              <button className="studio-btn studio-btn--secondary" type="submit">
+                开始
+              </button>
+            </div>
+            <p className="drawer-hint" id="wake-timer-custom-hint">
+              支持 {WAKE_TIMER_MIN_MINUTES}–{WAKE_TIMER_MAX_MINUTES} 分钟，例如午睡 90 分钟后渐强叫醒。
+            </p>
+            {customWakeError ? (
+              <p className="sleep-timer-custom-error" id="wake-timer-custom-error" role="alert">
+                {customWakeError}
+              </p>
+            ) : null}
+          </form>
+          {wakeTimerActive ? (
+            <div className="sleep-timer-active">
+              <p aria-live="polite">
+                {wakeTimerFading ? '正在渐入…' : '剩余'} {wakeTimerRemainingLabel}
+              </p>
+              <button className="ghost-button" type="button" onClick={handleCancelWakeTimer}>
+                取消唤醒定时
               </button>
             </div>
           ) : null}

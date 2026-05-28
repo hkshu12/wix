@@ -100,9 +100,9 @@ describe('StudioPage', () => {
     renderWithRouter(<AppRouter />, { routerProps: { initialEntries: ['/studio'] } });
 
     fireEvent.click(screen.getByRole('button', { name: /混音与导入/ }));
-    fireEvent.click(screen.getByRole('button', { name: '30 分钟' }));
+    fireEvent.click(within(screen.getByRole('group', { name: '睡眠定时预设' })).getByRole('button', { name: '30 分钟' }));
 
-    expect(screen.getByText(/定时 · 30:00/)).toBeInTheDocument();
+    expect(screen.getByText(/睡眠 · 30:00/)).toBeInTheDocument();
     expect(screen.getByText(/剩余 30:00/)).toBeInTheDocument();
   });
 
@@ -112,10 +112,10 @@ describe('StudioPage', () => {
     const status = screen.getByLabelText('混音播放状态');
 
     fireEvent.click(screen.getByRole('button', { name: /混音与导入/ }));
-    fireEvent.click(screen.getByRole('button', { name: '30 分钟' }));
+    fireEvent.click(within(screen.getByRole('group', { name: '睡眠定时预设' })).getByRole('button', { name: '30 分钟' }));
     await waitFor(() => expect(status).toHaveTextContent('已设置睡眠定时 30 分钟'));
 
-    fireEvent.click(screen.getByRole('button', { name: '取消定时' }));
+    fireEvent.click(screen.getByRole('button', { name: '取消睡眠定时' }));
     await waitFor(() => expect(status).toHaveTextContent('已取消睡眠定时'));
   });
 
@@ -345,9 +345,9 @@ describe('StudioPage', () => {
     renderWithRouter(<AppRouter />, { routerProps: { initialEntries: ['/studio'] } });
 
     fireEvent.click(screen.getByRole('button', { name: /混音与导入/ }));
-    fireEvent.click(screen.getByRole('button', { name: '15 分钟' }));
-    fireEvent.click(screen.getByRole('button', { name: '取消定时' }));
+    fireEvent.click(within(screen.getByRole('group', { name: '睡眠定时预设' })).getByRole('button', { name: '15 分钟' }));
+    fireEvent.click(screen.getByRole('button', { name: '取消睡眠定时' }));
 
-    expect(screen.queryByText(/定时 ·/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/睡眠 ·/)).not.toBeInTheDocument();
   });
 });

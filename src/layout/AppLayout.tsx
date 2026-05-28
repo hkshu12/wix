@@ -34,6 +34,7 @@ import { useScreenWakeLock } from '../hooks/useScreenWakeLock';
 import { clampPlaybackFadeInSeconds } from '../domain/playbackFadeIn';
 import { isScreenWakeLockSupported } from '../domain/screenWakeLock';
 import { useSleepTimerController } from '../hooks/useSleepTimerController';
+import { useWakeTimerController } from '../hooks/useWakeTimerController';
 import {
   readPlaybackFadeInSeconds,
   writePlaybackFadeInSeconds
@@ -63,7 +64,24 @@ export function AppLayout() {
   const [screenWakeLockEnabled, setScreenWakeLockEnabledState] = useState(readScreenWakeLockEnabled);
   const screenWakeLockSupported = isScreenWakeLockSupported();
 
+  const wakeTimerController = useWakeTimerController({ mixer, setMixer });
   const sleepTimerController = useSleepTimerController({ mixer, setMixer });
+
+  const startSleepTimerWithExclusion = useCallback(
+    (minutes: number) => {
+      wakeTimerController.cancel();
+      return sleepTimerController.start(minutes);
+    },
+    [sleepTimerController, wakeTimerController]
+  );
+
+  const startWakeTimerWithExclusion = useCallback(
+    (minutes: number) => {
+      sleepTimerController.cancel();
+      return wakeTimerController.start(minutes);
+    },
+    [sleepTimerController, wakeTimerController]
+  );
 
   useScreenWakeLock(screenWakeLockEnabled, mixer.isPlaying);
 
@@ -428,6 +446,7 @@ export function AppLayout() {
 
   const handleClearAllAppData = useCallback(async () => {
     sleepTimerController.cancel();
+    wakeTimerController.cancel();
     engineRef.current?.stop();
     revokeCustomTrackUrls(customTracksRef.current);
     replaceCustomTracks([]);
@@ -438,7 +457,7 @@ export function AppLayout() {
     setImportProgress(null);
     await clearPersistedAppData();
     window.location.reload();
-  }, [sleepTimerController]);
+  }, [sleepTimerController, wakeTimerController]);
 
   async function handleCopyMixerShareLink() {
     const text = serializeMixerShare(mixer);
@@ -482,8 +501,15 @@ export function AppLayout() {
     screenWakeLockEnabled,
     screenWakeLockSupported,
     setScreenWakeLockEnabled,
-    startSleepTimer: sleepTimerController.start,
+    startSleepTimer: startSleepTimerWithExclusion,
     cancelSleepTimer: sleepTimerController.cancel,
+    wakeTimerRemainingLabel: wakeTimerController.remainingLabel,
+    wakeTimerActive: wakeTimerController.isActive,
+    wakeTimerFading: wakeTimerController.isFading,
+    wakeTimerFadeSeconds: wakeTimerController.fadeSeconds,
+    setWakeTimerFadeSeconds: wakeTimerController.setFadeSeconds,
+    startWakeTimer: startWakeTimerWithExclusion,
+    cancelWakeTimer: wakeTimerController.cancel,
     mixerPresets,
     saveMixerPreset: handleSaveMixerPreset,
     loadMixerPreset: handleLoadMixerPreset,

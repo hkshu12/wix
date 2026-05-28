@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.41.0] - 2026-05-28
+
+### Added
+
+- **Wake timer with gradual volume ramp**: schedule a countdown in the mixer drawer; when it fires, playback starts if paused and master volume fades in from silence to your current level over a configurable 10–120 seconds—gentle wake-ups for naps and mornings. Mutually exclusive with the sleep timer; preference and active countdown persist across refresh.
+
 ## [1.40.0] - 2026-05-28
 
 ### Added

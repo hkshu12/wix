@@ -5,7 +5,10 @@ import {
   formatMasterVolumeAnnouncement,
   formatSleepTimerCancelAnnouncement,
   formatSleepTimerCompleteAnnouncement,
-  formatSleepTimerStartAnnouncement
+  formatSleepTimerStartAnnouncement,
+  formatWakeTimerCancelAnnouncement,
+  formatWakeTimerCompleteAnnouncement,
+  formatWakeTimerStartAnnouncement
 } from './playbackAnnouncement';
 
 describe('formatPlayToggleAnnouncement', () => {
@@ -32,6 +35,14 @@ describe('formatSleepTimerAnnouncements', () => {
     expect(formatSleepTimerStartAnnouncement(30)).toBe('已设置睡眠定时 30 分钟');
     expect(formatSleepTimerCancelAnnouncement()).toBe('已取消睡眠定时');
     expect(formatSleepTimerCompleteAnnouncement()).toBe('睡眠定时已到，播放已暂停');
+  });
+});
+
+describe('formatWakeTimerAnnouncements', () => {
+  it('announces start, cancel, and completion', () => {
+    expect(formatWakeTimerStartAnnouncement(45)).toBe('已设置唤醒定时 45 分钟');
+    expect(formatWakeTimerCancelAnnouncement()).toBe('已取消唤醒定时');
+    expect(formatWakeTimerCompleteAnnouncement()).toBe('唤醒定时已到，主音量已渐强');
   });
 });
 

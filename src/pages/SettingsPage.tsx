@@ -57,7 +57,7 @@ export function SettingsPage() {
       <section className="app-page-card app-page-card--danger" aria-labelledby="settings-reset-title">
         <h2 id="settings-reset-title">清除本机数据</h2>
         <p>
-          将删除混音快照、场景预设、睡眠定时、主题偏好、功能介绍访问记录，以及本机导入的全部自定义音频。内置环境声不受影响。此操作不可撤销。
+          将删除混音快照、场景预设、睡眠与唤醒定时、主题偏好、功能介绍访问记录，以及本机导入的全部自定义音频。内置环境声不受影响。此操作不可撤销。
         </p>
         {!confirmClear ? (
           <div className="app-page-actions">
