@@ -17,8 +17,26 @@ function arrayBufferToBase64(buffer: ArrayBuffer): string {
   return btoa(binary);
 }
 
-function apkFilePath(version: string): string {
-  return `updates/wix-${version}.apk`;
+const APK_CACHE_SUBDIR = 'updates';
+
+export function apkCacheFilePath(version: string): string {
+  return `${APK_CACHE_SUBDIR}/wix-${version}.apk`;
+}
+
+/** Capacitor Android downloadFile does not create nested parent dirs (recursive is ignored). */
+async function ensureApkCacheDirectory(): Promise<void> {
+  try {
+    await Filesystem.mkdir({
+      path: APK_CACHE_SUBDIR,
+      directory: Directory.Cache,
+      recursive: true
+    });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    if (!/already exists/i.test(message)) {
+      throw error;
+    }
+  }
 }
 
 async function resolveDownloadedApkUri(path: string): Promise<string> {
@@ -38,7 +56,8 @@ async function downloadApkWithFilesystem(
     throw new Error('当前发布未包含 Android APK 安装包');
   }
 
-  const path = apkFilePath(release.version);
+  const path = apkCacheFilePath(release.version);
+  await ensureApkCacheDirectory();
   const progressListener = await Filesystem.addListener('progress', (status) => {
     if (status.url === asset.browserDownloadUrl) {
       onProgress?.(status.bytes, status.contentLength);
@@ -97,11 +116,13 @@ async function downloadApkWithFetch(
     const buffer = await response.arrayBuffer();
     onProgress?.(buffer.byteLength, totalBytes);
     const base64 = arrayBufferToBase64(buffer);
-    const path = apkFilePath(release.version);
+    const path = apkCacheFilePath(release.version);
+    await ensureApkCacheDirectory();
     await Filesystem.writeFile({
       path,
       data: base64,
-      directory: Directory.Cache
+      directory: Directory.Cache,
+      recursive: true
     });
     return resolveDownloadedApkUri(path);
   }
@@ -129,11 +150,13 @@ async function downloadApkWithFetch(
   }
 
   const base64 = arrayBufferToBase64(merged.buffer);
-  const path = apkFilePath(release.version);
+  const path = apkCacheFilePath(release.version);
+  await ensureApkCacheDirectory();
   await Filesystem.writeFile({
     path,
     data: base64,
-    directory: Directory.Cache
+    directory: Directory.Cache,
+    recursive: true
   });
 
   return resolveDownloadedApkUri(path);
