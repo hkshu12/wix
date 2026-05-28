@@ -1,6 +1,9 @@
 import { useEffect } from 'react';
 import {
+  masterVolumeDeltaFromKey,
+  shouldAdjustMasterVolume,
   shouldToggleKeyboardHelp,
+  shouldToggleMixerDrawer,
   shouldTogglePlaybackWithSpace,
   type StudioKeyboardOverlayState
 } from '../domain/studioKeyboard';
@@ -8,6 +11,8 @@ import {
 export interface StudioKeyboardShortcutHandlers {
   onTogglePlayback: () => void;
   onToggleKeyboardHelp: () => void;
+  onToggleMixerDrawer: () => void;
+  onAdjustMasterVolume: (delta: -1 | 1) => void;
 }
 
 export function useStudioKeyboardShortcuts(
@@ -15,13 +20,29 @@ export function useStudioKeyboardShortcuts(
   handlers: StudioKeyboardShortcutHandlers
 ): void {
   const { drawerOpen, navOpen, keyboardHelpOpen } = overlay;
-  const { onTogglePlayback, onToggleKeyboardHelp } = handlers;
+  const { onTogglePlayback, onToggleKeyboardHelp, onToggleMixerDrawer, onAdjustMasterVolume } =
+    handlers;
 
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
       if (shouldToggleKeyboardHelp(event, { drawerOpen, navOpen }, event.target)) {
         event.preventDefault();
         onToggleKeyboardHelp();
+        return;
+      }
+
+      if (shouldToggleMixerDrawer(event, { navOpen, keyboardHelpOpen }, event.target)) {
+        event.preventDefault();
+        onToggleMixerDrawer();
+        return;
+      }
+
+      if (shouldAdjustMasterVolume(event, { navOpen, keyboardHelpOpen }, event.target)) {
+        const delta = masterVolumeDeltaFromKey(event);
+        if (delta !== 0) {
+          event.preventDefault();
+          onAdjustMasterVolume(delta);
+        }
         return;
       }
 
@@ -41,5 +62,13 @@ export function useStudioKeyboardShortcuts(
 
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [drawerOpen, keyboardHelpOpen, navOpen, onToggleKeyboardHelp, onTogglePlayback]);
+  }, [
+    drawerOpen,
+    keyboardHelpOpen,
+    navOpen,
+    onAdjustMasterVolume,
+    onToggleKeyboardHelp,
+    onToggleMixerDrawer,
+    onTogglePlayback
+  ]);
 }

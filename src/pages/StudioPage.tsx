@@ -18,6 +18,7 @@ import {
   formatPlayToggleAnnouncement
 } from '../domain/playbackAnnouncement';
 import { usePlaybackAnnouncer } from '../hooks/usePlaybackAnnouncer';
+import { adjustMasterVolumeStep } from '../domain/studioKeyboard';
 import { useStudioKeyboardShortcuts } from '../hooks/useStudioKeyboardShortcuts';
 import { assetUrl } from '../lib/assetUrl';
 import {
@@ -89,6 +90,14 @@ export function StudioPage() {
       },
       onToggleKeyboardHelp: () => {
         setKeyboardHelpOpen((open) => !open);
+      },
+      onToggleMixerDrawer: () => {
+        setDrawerOpen((open) => !open);
+      },
+      onAdjustMasterVolume: (delta) => {
+        setMixer((state) =>
+          setMasterVolume(state, adjustMasterVolumeStep(state.masterVolume, delta))
+        );
       }
     }
   );

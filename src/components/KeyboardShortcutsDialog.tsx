@@ -9,6 +9,8 @@ interface KeyboardShortcutsDialogProps {
 
 const SHORTCUTS: { keys: string; description: string }[] = [
   { keys: 'Space', description: '播放或暂停（混音抽屉与 Android 菜单关闭时）' },
+  { keys: 'M', description: '打开或关闭混音抽屉（Android 菜单与快捷键说明关闭时）' },
+  { keys: '+ / −', description: '主音量每次 ±5%（在输入框内输入时不生效）' },
   { keys: '?', description: '打开或关闭本说明' },
   { keys: 'Esc', description: '关闭本说明或混音抽屉' }
 ];
