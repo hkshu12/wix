@@ -6,7 +6,8 @@ export type BuiltInSoundId =
   | 'thunder'
   | 'forest'
   | 'brown-noise'
-  | 'pink-noise';
+  | 'pink-noise'
+  | 'fan';
 
 export interface BuiltInSound {
   id: BuiltInSoundId;
@@ -91,6 +92,15 @@ export const BUILT_IN_SOUNDS: BuiltInSound[] = [
     icon: '🌸',
     accent: '#f472b6',
     src: 'sounds/pink-noise.ogg'
+  },
+  {
+    id: 'fan',
+    kind: 'built-in',
+    title: '风扇',
+    subtitle: '稳定气流声，助眠与屏蔽环境噪音',
+    icon: '🌀',
+    accent: '#94a3b8',
+    src: 'sounds/fan.ogg'
   }
 ];
 

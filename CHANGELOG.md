@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.22.0] - 2026-05-28
+
+### Added
+
+- Built-in **风扇** ambience loop (CC0 large-room fan recording) for sleep, baby soothing, and masking room noise.
+
 ## [1.21.0] - 2026-05-28
 
 ### Added
