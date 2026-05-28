@@ -48,13 +48,20 @@ export function clearSleepTimerSnapshot(): void {
   localStorage.removeItem(STORAGE_KEY_SLEEP_TIMER_SNAPSHOT);
 }
 
+export interface HydratedSleepTimerSnapshot {
+  timer: SleepTimerState;
+  preFadeMasterVolume: number | null;
+  /** Timer ended while the app was closed; caller should restore pre-fade master volume. */
+  expiredWhileClosed: boolean;
+}
+
 /** Restores an active timer or clears storage when expired or invalid. */
 export function hydrateSleepTimerSnapshot(
   snapshot: SleepTimerSnapshotPayload | null,
   nowMs: number
-): { timer: SleepTimerState; preFadeMasterVolume: number | null } {
+): HydratedSleepTimerSnapshot {
   if (!snapshot) {
-    return { timer: clearSleepTimer(), preFadeMasterVolume: null };
+    return { timer: clearSleepTimer(), preFadeMasterVolume: null, expiredWhileClosed: false };
   }
 
   const timer: SleepTimerState = {
@@ -64,10 +71,14 @@ export function hydrateSleepTimerSnapshot(
 
   if (shouldFinishSleepTimer(timer, nowMs)) {
     clearSleepTimerSnapshot();
-    return { timer: clearSleepTimer(), preFadeMasterVolume: null };
+    return {
+      timer: clearSleepTimer(),
+      preFadeMasterVolume: snapshot.preFadeMasterVolume,
+      expiredWhileClosed: true
+    };
   }
 
-  return { timer, preFadeMasterVolume: snapshot.preFadeMasterVolume };
+  return { timer, preFadeMasterVolume: snapshot.preFadeMasterVolume, expiredWhileClosed: false };
 }
 
 function parseSleepTimerSnapshotPayload(value: unknown): SleepTimerSnapshotPayload | null {

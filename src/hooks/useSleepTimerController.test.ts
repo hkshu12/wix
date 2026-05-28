@@ -79,6 +79,27 @@ describe('useSleepTimerController', () => {
     expect(result.current.controller.isActive).toBe(false);
   });
 
+  it('restores pre-fade master volume when the timer expired while the app was closed', () => {
+    const now = Date.now();
+    const timer = startSleepTimer(now, 1);
+    writeSleepTimerSnapshot(timer, 0.8);
+
+    act(() => {
+      vi.setSystemTime(timer.endsAt! + 1_000);
+    });
+
+    const fadedMixer = { ...createInitialMixerState(), masterVolume: 0.25 };
+
+    const { result } = renderHook(() => {
+      const [mixer, setMixer] = useState(fadedMixer);
+      const controller = useSleepTimerController({ mixer, setMixer });
+      return { mixer, controller };
+    });
+
+    expect(result.current.controller.isActive).toBe(false);
+    expect(result.current.mixer.masterVolume).toBe(0.8);
+  });
+
   it('rejects out-of-range custom durations', () => {
     const { result } = renderHook(() => {
       const [mixer, setMixer] = useState(createInitialMixerState);

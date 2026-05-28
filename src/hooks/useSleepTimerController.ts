@@ -47,6 +47,21 @@ export function useSleepTimerController({ mixer, setMixer }: UseSleepTimerContro
     initialSleepTimer.current.preFadeMasterVolume ?? mixer.masterVolume
   );
 
+  useEffect(() => {
+    if (!initialSleepTimer.current.expiredWhileClosed) {
+      return;
+    }
+
+    const preFade = initialSleepTimer.current.preFadeMasterVolume;
+    if (preFade === null) {
+      return;
+    }
+
+    preFadeMasterVolumeRef.current = preFade;
+    setMixer((state) => setMasterVolume(state, preFade));
+    initialSleepTimer.current.expiredWhileClosed = false;
+  }, [setMixer]);
+
   function cancel() {
     clearSleepTimerSnapshot();
     setSleepTimer(clearSleepTimer());
