@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.20.0] - 2026-05-28
+
+### Added
+
+- Custom sleep timer duration: set any whole number of minutes from 5 to 480 in the mixer drawer (e.g. 90-minute naps or longer baby-soothing sessions), alongside the existing 15–60 minute presets.
+
 ## [1.19.0] - 2026-05-27
 
 ### Added

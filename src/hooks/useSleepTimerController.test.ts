@@ -2,7 +2,7 @@ import { act, renderHook } from '@testing-library/react';
 import { useState } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createInitialMixerState, setPlaying } from '../domain/mixer';
-import { SLEEP_TIMER_FADE_SECONDS, startSleepTimer, type SleepTimerPresetMinutes } from '../domain/sleepTimer';
+import { SLEEP_TIMER_FADE_SECONDS, startSleepTimer } from '../domain/sleepTimer';
 import { writeSleepTimerSnapshot } from '../storage/sleepTimerSnapshot';
 import { useSleepTimerController } from './useSleepTimerController';
 
@@ -25,7 +25,7 @@ describe('useSleepTimerController', () => {
     });
 
     act(() => {
-      result.current.controller.startPreset(1 as SleepTimerPresetMinutes);
+      result.current.controller.start(1);
     });
 
     const fadeMs = SLEEP_TIMER_FADE_SECONDS * 1000;
@@ -73,5 +73,18 @@ describe('useSleepTimerController', () => {
     });
 
     expect(result.current.controller.isActive).toBe(false);
+  });
+
+  it('rejects out-of-range custom durations', () => {
+    const { result } = renderHook(() => {
+      const [mixer, setMixer] = useState(createInitialMixerState);
+      const controller = useSleepTimerController({ mixer, setMixer });
+      return { controller };
+    });
+
+    expect(result.current.controller.start(4)).toBe(false);
+    expect(result.current.controller.start(90)).toBe(true);
+    expect(result.current.controller.isActive).toBe(true);
+    expect(result.current.controller.remainingLabel).toBe('90:00');
   });
 });

@@ -7,8 +7,8 @@ import {
   isSleepTimerActive,
   shouldFinishSleepTimer,
   shouldStartSleepFade,
+  isValidSleepTimerMinutes,
   startSleepTimer,
-  type SleepTimerPresetMinutes,
   type SleepTimerState
 } from '../domain/sleepTimer';
 import {
@@ -32,7 +32,7 @@ export interface SleepTimerController {
   remainingLabel: string;
   isActive: boolean;
   isFading: boolean;
-  startPreset: (minutes: SleepTimerPresetMinutes) => void;
+  start: (minutes: number) => boolean;
   cancel: () => void;
 }
 
@@ -56,12 +56,17 @@ export function useSleepTimerController({ mixer, setMixer }: UseSleepTimerContro
     }
   }
 
-  function startPreset(minutes: SleepTimerPresetMinutes) {
+  function start(minutes: number): boolean {
+    if (!isValidSleepTimerMinutes(minutes)) {
+      return false;
+    }
+
     preFadeMasterVolumeRef.current = mixer.masterVolume;
     const timer = startSleepTimer(Date.now(), minutes);
     writeSleepTimerSnapshot(timer, preFadeMasterVolumeRef.current);
     setSleepTimer(timer);
     setIsFading(false);
+    return true;
   }
 
   useEffect(() => {
@@ -111,7 +116,7 @@ export function useSleepTimerController({ mixer, setMixer }: UseSleepTimerContro
     remainingLabel: formatSleepTimerRemaining(remainingMs),
     isActive: isSleepTimerActive(sleepTimer),
     isFading,
-    startPreset,
+    start,
     cancel
   };
 }

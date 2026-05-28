@@ -6,6 +6,10 @@ import {
   getSleepTimerRemainingMs,
   shouldFinishSleepTimer,
   shouldStartSleepFade,
+  clampSleepTimerMinutes,
+  isValidSleepTimerMinutes,
+  SLEEP_TIMER_MAX_MINUTES,
+  SLEEP_TIMER_MIN_MINUTES,
   startSleepTimer,
   SLEEP_TIMER_FADE_SECONDS
 } from './sleepTimer';
@@ -42,5 +46,16 @@ describe('sleepTimer', () => {
 
   it('clears an active timer', () => {
     expect(clearSleepTimer()).toEqual(createInitialSleepTimerState());
+  });
+
+  it('validates and clamps custom minute bounds', () => {
+    expect(isValidSleepTimerMinutes(90)).toBe(true);
+    expect(isValidSleepTimerMinutes(4)).toBe(false);
+    expect(isValidSleepTimerMinutes(481)).toBe(false);
+    expect(isValidSleepTimerMinutes(30.5)).toBe(false);
+
+    expect(clampSleepTimerMinutes(90.4)).toBe(90);
+    expect(clampSleepTimerMinutes(2)).toBe(SLEEP_TIMER_MIN_MINUTES);
+    expect(clampSleepTimerMinutes(999)).toBe(SLEEP_TIMER_MAX_MINUTES);
   });
 });
