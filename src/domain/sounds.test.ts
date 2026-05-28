@@ -13,7 +13,8 @@ describe('built-in sound catalog', () => {
         'cafe',
         'train',
         'highway',
-        'airplane'
+        'airplane',
+        'office'
       ])
     );
   });
@@ -32,6 +33,7 @@ describe('built-in sound catalog', () => {
     expect(getSoundById('train')?.title).toBe('列车');
     expect(getSoundById('highway')?.title).toBe('公路');
     expect(getSoundById('airplane')?.title).toBe('飞机舱');
+    expect(getSoundById('office')?.title).toBe('办公室');
     expect(getSoundById('missing')).toBeUndefined();
   });
 });
