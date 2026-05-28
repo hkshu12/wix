@@ -23,6 +23,16 @@ download "30-cc0-sfx-loops/ambient_03.ogg" "forest.ogg"
 download "30-cc0-sfx-loops/noise_01.ogg" "brown-noise.ogg"
 download "30-cc0-sfx-loops/noise_02.ogg" "pink-noise.ogg"
 
+# Night cafe ambience loop (CC0 — BB_2HTC Samples Vol 4)
+curl -fsSL "${BASE}/BB_2HTC%20Samples%20Vol%204/Loops/2023-04-15%20Sometimes%2C%20You%20Don%27t%20Make%20it%20to%20Level%20Two%20-%20Night%20Cafe%20Vibes.wav" -o "${OUT}/cafe.wav"
+if command -v ffmpeg >/dev/null 2>&1; then
+  ffmpeg -y -i "${OUT}/cafe.wav" -c:a libvorbis -q:a 5 "${OUT}/cafe.ogg" >/dev/null 2>&1
+  rm -f "${OUT}/cafe.wav"
+else
+  echo "ffmpeg not found; cannot build cafe.ogg from Night Cafe Vibes.wav" >&2
+  exit 1
+fi
+
 # Large room fan (CC0 — bb Fans and Drones pack)
 curl -fsSL "${BASE}/bb%20-%20Fans%20and%20Drones%20(Jul%202021)/Large%20Fan.wav" -o "${OUT}/fan.wav"
 if command -v ffmpeg >/dev/null 2>&1; then
