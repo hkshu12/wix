@@ -45,48 +45,49 @@
 | ~~可配置睡眠渐出时长~~ | 哄娃/睡眠不同渐弱 | — | 已完成 v1.30.0 |
 | ~~设置页清除全部数据~~ | 换机/隐私重置 | — | 已完成 v1.31.0 |
 | ~~播放渐入~~ | 睡眠/婴儿场景避免突兀起播 | — | 已完成 v1.32.0 |
+| ~~播放时保持屏幕常亮~~ | 床头/婴儿房 | — | 已完成 v1.33.0 |
 | **睡眠定时读屏播报** | 开始/取消/结束定时 | 仅抽屉内倒计时 live | 扩展 `playbackAnnouncement` |
 | **自定义音轨库导出** | 换机备份导入的音频 | 仅 IndexedDB 存取 | 导出 zip 或单文件 |
 | **唤醒定时** | 早晨渐强叫醒 | 无 | 定时主音量渐强 + 可选起播 |
-| **播放时保持屏幕常亮** | 床头/婴儿房 | 无 Wake Lock | Screen Wake Lock API |
 
 ### 体验场景与缺口（摘要）
 
 | 场景 | 典型需求 | 现状 |
 | --- | --- | --- |
-| 睡眠 | 定时、渐出、渐入、自定义时长、风扇白噪 | 渐出 10–120 秒；渐入 0/2/4/6/8 秒可选 |
+| 睡眠 | 定时、渐出、渐入、自定义时长、风扇白噪 | 渐出 10–120 秒；渐入 0/2/4/6/8 秒；Wake Lock v1.33.0 |
 | 专注 | 预设、咖啡馆氛围、键盘控制 | 预设+快照；快捷键 v1.21.0 |
 | 隐私/换机 | 一键清除本机数据 | v1.31.0 设置页两步确认 |
 | 弱网 | 内置 OGG 偶发失败 | 自动重试 + 按轨重试 v1.28.0 |
 | 读屏 | 播放/加轨播报 | v1.12.0；定时开始/结束仍可增强 |
 | Android 原生 | 后台播放 | 仍为 P1 最大缺口 |
 
-### 代码与架构备注（2026-05-28 第十次挖掘）
+### 代码与架构备注（2026-05-28 第十一次挖掘）
 
-- **播放渐入**：`AudioEngine.applyMasterVolume` 在 `sync(..., { fadeInSeconds })` 时用 `linearRampToValueAtTime`；`AppLayout` 仅在 `!wasPlaying → isPlaying` 时传入；偏好 `wix.playbackFadeInSeconds`（默认关）。
-- **`clearAllAppData`**：已含播放渐入键。
+- **Screen Wake Lock**：`useScreenWakeLock` + `screenWakeLockController`；偏好 `wix.screenWakeLockWhilePlaying`；仅在 `isPlaying` 时 `navigator.wakeLock.request('screen')`；`visibilitychange` 时重新获取；不支持 API 时隐藏抽屉区块。
+- **播放渐入**：v1.32.0；默认关。
 - **内置声库**：13 轨；下一内容向：办公室 HVAC（P2）。
 - **Android**：仍无 foreground service（P1）。
-- **版本**：当前 **1.32.0**；下一项宜 **Wake Lock**、**办公室环境声** 或 **睡眠定时读屏播报**。
+- **版本**：当前 **1.33.0**；下一项宜 **睡眠定时读屏播报**、**办公室环境声** 或 **唤醒定时**。
 
 ### 外部信号
 
 - GitHub Issues：无 open issue（2026-05-28）。
-- 近期 CHANGELOG：v1.31.0 清除数据、v1.30.0 渐出——**避免重复**。
-- 同类 App：原生后台、Wake Lock、办公室白噪仍常见缺口。
+- 近期 CHANGELOG：v1.32.0 播放渐入、v1.33.0 Wake Lock——**避免重复**。
+- 同类 App：原生后台、办公室白噪仍常见缺口；Wake Lock 为 Web/PWA 常见能力。
 
 ## 本次选中项
 
-**可选播放渐入（P2）**
+**播放时保持屏幕常亮（P2 → Screen Wake Lock API）**
 
-- **理由**：backlog 明确列出；睡眠/哄娃场景用户可感知；单 PR、纯 Web Audio、无原生依赖；与睡眠渐出互补且默认关闭不改变现有行为。
-- **范围**：`domain/playbackFadeIn`、`storage/playbackFadeInPreferences`、`AudioEngine` 主音量 ramp、`AppLayout`/`StudioPage` UI、测试；版本 **1.32.0**。
+- **理由**：床头/哄娃场景明确；单 PR、纯 Web API、默认关；与 v1.32.0 播放渐入互补；不依赖 Android 原生。
+- **范围**：`domain/screenWakeLock`、`lib/screenWakeLockController`、`storage/screenWakeLockPreferences`、`hooks/useScreenWakeLock`、`AppLayout`/`StudioPage` UI、测试；版本 **1.33.0**。
 
 ## 历史已完成
 
 | 日期 | 项 | 引用 |
 | --- | --- | --- |
-| 2026-05-28 | 可选播放渐入（2/4/6/8 秒） | v1.32.0（本次） |
+| 2026-05-28 | 播放时保持屏幕常亮 | v1.33.0（本次） |
+| 2026-05-28 | 可选播放渐入（2/4/6/8 秒） | [v1.32.0](https://github.com/hkshu12/wix/releases/tag/v1.32.0) |
 | 2026-05-28 | 设置页清除全部本机数据 | [v1.31.0](https://github.com/hkshu12/wix/releases/tag/v1.31.0) |
 | 2026-05-28 | 可配置睡眠渐出时长 | [v1.30.0](https://github.com/hkshu12/wix/releases/tag/v1.30.0) |
 | 2026-05-28 | 手动重试加载失败音轨 | [v1.28.0](https://github.com/hkshu12/wix/releases/tag/v1.28.0) |

@@ -29,12 +29,18 @@ import {
 } from '../storage/mixerPresets';
 import { formatFileReadPercent } from '../lib/readFileWithProgress';
 import { useMediaSessionSync } from '../hooks/useMediaSessionSync';
+import { useScreenWakeLock } from '../hooks/useScreenWakeLock';
 import { clampPlaybackFadeInSeconds } from '../domain/playbackFadeIn';
+import { isScreenWakeLockSupported } from '../domain/screenWakeLock';
 import { useSleepTimerController } from '../hooks/useSleepTimerController';
 import {
   readPlaybackFadeInSeconds,
   writePlaybackFadeInSeconds
 } from '../storage/playbackFadeInPreferences';
+import {
+  readScreenWakeLockEnabled,
+  writeScreenWakeLockEnabled
+} from '../storage/screenWakeLockPreferences';
 import { clearAllAppData as clearPersistedAppData } from '../storage/clearAppData';
 import { StudioProvider, type StudioContextValue } from './StudioContext';
 import { UpdateProvider } from './UpdateContext';
@@ -53,13 +59,22 @@ export function AppLayout() {
   const customTracksRef = useRef<CustomTrack[]>([]);
   const wasPlayingRef = useRef(mixer.isPlaying);
   const [playbackFadeInSeconds, setPlaybackFadeInSecondsState] = useState(readPlaybackFadeInSeconds);
+  const [screenWakeLockEnabled, setScreenWakeLockEnabledState] = useState(readScreenWakeLockEnabled);
+  const screenWakeLockSupported = isScreenWakeLockSupported();
 
   const sleepTimerController = useSleepTimerController({ mixer, setMixer });
+
+  useScreenWakeLock(screenWakeLockEnabled, mixer.isPlaying);
 
   function setPlaybackFadeInSeconds(seconds: number) {
     const clamped = clampPlaybackFadeInSeconds(seconds);
     writePlaybackFadeInSeconds(clamped);
     setPlaybackFadeInSecondsState(clamped);
+  }
+
+  function setScreenWakeLockEnabled(enabled: boolean) {
+    writeScreenWakeLockEnabled(enabled);
+    setScreenWakeLockEnabledState(enabled);
   }
 
   const allSounds = useMemo<PlayableSound[]>(() => [...BUILT_IN_SOUNDS, ...customTracks], [customTracks]);
@@ -439,6 +454,9 @@ export function AppLayout() {
     setSleepTimerFadeSeconds: sleepTimerController.setFadeSeconds,
     playbackFadeInSeconds,
     setPlaybackFadeInSeconds,
+    screenWakeLockEnabled,
+    screenWakeLockSupported,
+    setScreenWakeLockEnabled,
     startSleepTimer: sleepTimerController.start,
     cancelSleepTimer: sleepTimerController.cancel,
     mixerPresets,

@@ -22,6 +22,9 @@ export interface StudioContextValue {
   setSleepTimerFadeSeconds: (seconds: number) => void;
   playbackFadeInSeconds: number;
   setPlaybackFadeInSeconds: (seconds: number) => void;
+  screenWakeLockEnabled: boolean;
+  screenWakeLockSupported: boolean;
+  setScreenWakeLockEnabled: (enabled: boolean) => void;
   startSleepTimer: (minutes: number) => boolean;
   cancelSleepTimer: () => void;
   mixerPresets: MixerPreset[];
