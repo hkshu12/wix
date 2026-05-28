@@ -2,7 +2,12 @@ import { describe, expect, it } from 'vitest';
 import { createInitialMixerState, toggleLayer } from './mixer';
 import { serializeMixerShare } from './mixerShare';
 import { encodeMixerShareForUrl } from './mixerShareUrl';
-import { extractStudioShareRouteFromAppUrl } from './androidAppUrl';
+import {
+  extractStudioShareRouteFromAppUrl,
+  GITHUB_PAGES_ORIGIN,
+  resolveMixerShareLinkBuildTarget
+} from './androidAppUrl';
+import { buildMixerShareUrl } from './mixerShareUrl';
 
 describe('extractStudioShareRouteFromAppUrl', () => {
   const shareJson = serializeMixerShare(toggleLayer(createInitialMixerState(), 'rain'));
@@ -38,5 +43,34 @@ describe('extractStudioShareRouteFromAppUrl', () => {
     expect(
       extractStudioShareRouteFromAppUrl(`https://example.com/wix/studio${search}`, '/wix/')
     ).toBeNull();
+  });
+});
+
+describe('resolveMixerShareLinkBuildTarget', () => {
+  it('uses the window origin on web', () => {
+    expect(
+      resolveMixerShareLinkBuildTarget({
+        windowOrigin: 'https://hkshu12.github.io',
+        appBasePath: '/wix/',
+        isAndroidApp: false
+      })
+    ).toEqual({ origin: 'https://hkshu12.github.io', basePath: '/wix/' });
+  });
+
+  it('uses GitHub Pages origin and base on Android', () => {
+    const target = resolveMixerShareLinkBuildTarget({
+      windowOrigin: 'https://localhost',
+      appBasePath: '/',
+      isAndroidApp: true
+    });
+
+    expect(target).toEqual({ origin: GITHUB_PAGES_ORIGIN, basePath: '/wix/' });
+
+    const url = buildMixerShareUrl({
+      origin: target.origin,
+      basePath: target.basePath,
+      shareJson: '{}'
+    });
+    expect(url).toMatch(/^https:\/\/hkshu12\.github\.io\/wix\/studio\?share=/u);
   });
 });
