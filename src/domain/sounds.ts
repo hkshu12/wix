@@ -10,7 +10,8 @@ export type BuiltInSoundId =
   | 'fan'
   | 'cafe'
   | 'train'
-  | 'highway';
+  | 'highway'
+  | 'airplane';
 
 export interface BuiltInSound {
   id: BuiltInSoundId;
@@ -131,6 +132,15 @@ export const BUILT_IN_SOUNDS: BuiltInSound[] = [
     icon: '🛣️',
     accent: '#78716c',
     src: 'sounds/highway.ogg'
+  },
+  {
+    id: 'airplane',
+    kind: 'built-in',
+    title: '飞机舱',
+    subtitle: '机舱稳定嗡鸣，适合长途飞行、专注与屏蔽外界噪音',
+    icon: '✈️',
+    accent: '#0ea5e9',
+    src: 'sounds/airplane.ogg'
   }
 ];
 
