@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type Dispatch, type SetStateAction } from 'react';
 import { setMasterVolume, setPlaying, type MixerState } from '../domain/mixer';
 import {
+  clampSleepTimerFadeSeconds,
   clearSleepTimer,
   formatSleepTimerRemaining,
   getSleepTimerRemainingMs,
@@ -11,6 +12,10 @@ import {
   startSleepTimer,
   type SleepTimerState
 } from '../domain/sleepTimer';
+import {
+  readSleepTimerFadeSeconds,
+  writeSleepTimerFadeSeconds
+} from '../storage/sleepTimerPreferences';
 import {
   clearSleepTimerSnapshot,
   hydrateSleepTimerSnapshot,
@@ -33,6 +38,8 @@ export interface SleepTimerController {
   remainingLabel: string;
   isActive: boolean;
   isFading: boolean;
+  fadeSeconds: number;
+  setFadeSeconds: (seconds: number) => void;
   start: (minutes: number) => boolean;
   cancel: () => void;
 }
@@ -44,9 +51,16 @@ export function useSleepTimerController({ mixer, setMixer }: UseSleepTimerContro
     getSleepTimerRemainingMs(initialSleepTimer.current.timer, Date.now())
   );
   const [isFading, setIsFading] = useState(false);
+  const [fadeSeconds, setFadeSecondsState] = useState(readSleepTimerFadeSeconds);
   const preFadeMasterVolumeRef = useRef(
     initialSleepTimer.current.preFadeMasterVolume ?? mixer.masterVolume
   );
+
+  function setFadeSeconds(seconds: number) {
+    const clamped = clampSleepTimerFadeSeconds(seconds);
+    writeSleepTimerFadeSeconds(clamped);
+    setFadeSecondsState(clamped);
+  }
 
   useEffect(() => {
     if (!initialSleepTimer.current.expiredWhileClosed) {
@@ -78,7 +92,7 @@ export function useSleepTimerController({ mixer, setMixer }: UseSleepTimerContro
     }
 
     preFadeMasterVolumeRef.current = mixer.masterVolume;
-    const timer = startSleepTimer(Date.now(), minutes);
+    const timer = startSleepTimer(Date.now(), minutes, fadeSeconds);
     writeSleepTimerSnapshot(timer, preFadeMasterVolumeRef.current);
     setSleepTimer(timer);
     setIsFading(false);
@@ -132,6 +146,8 @@ export function useSleepTimerController({ mixer, setMixer }: UseSleepTimerContro
     remainingLabel: formatSleepTimerRemaining(remainingMs),
     isActive: isSleepTimerActive(sleepTimer),
     isFading,
+    fadeSeconds,
+    setFadeSeconds,
     start,
     cancel
   };
