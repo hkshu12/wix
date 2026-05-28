@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.35.0] - 2026-05-28
+
+### Fixed
+
+- **Audio resumes after tab or app return**: when playback is active, returning to the wix tab or foreground app resumes the Web Audio context and re-syncs layers—fixes silent playback while the UI still shows “playing” after backgrounding.
+
 ## [1.34.0] - 2026-05-28
 
 ### Added

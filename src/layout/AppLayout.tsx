@@ -28,6 +28,7 @@ import {
   type MixerPreset
 } from '../storage/mixerPresets';
 import { formatFileReadPercent } from '../lib/readFileWithProgress';
+import { useAudioContextResume } from '../hooks/useAudioContextResume';
 import { useMediaSessionSync } from '../hooks/useMediaSessionSync';
 import { useScreenWakeLock } from '../hooks/useScreenWakeLock';
 import { clampPlaybackFadeInSeconds } from '../domain/playbackFadeIn';
@@ -78,6 +79,8 @@ export function AppLayout() {
   }
 
   const allSounds = useMemo<PlayableSound[]>(() => [...BUILT_IN_SOUNDS, ...customTracks], [customTracks]);
+  const mixerRef = useRef(mixer);
+  const allSoundsRef = useRef(allSounds);
   const selectedLayers = mixer.layers
     .map((layer) => ({ layer, sound: allSounds.find((sound) => sound.id === layer.soundId) }))
     .filter((entry): entry is { layer: MixerState['layers'][number]; sound: PlayableSound } => Boolean(entry.sound));
@@ -92,6 +95,28 @@ export function AppLayout() {
     engineRef.current ??= new AudioEngine();
     return engineRef.current;
   }
+
+  useEffect(() => {
+    mixerRef.current = mixer;
+  }, [mixer]);
+
+  useEffect(() => {
+    allSoundsRef.current = allSounds;
+  }, [allSounds]);
+
+  const handleAudioContextResume = useCallback(async () => {
+    const engine = engineRef.current;
+    const currentMixer = mixerRef.current;
+    if (!engine || !currentMixer.isPlaying) {
+      return;
+    }
+
+    await engine.resume();
+    const result = await engine.sync(currentMixer, allSoundsRef.current);
+    setFailedSoundIds(result.failedSoundIds);
+  }, []);
+
+  useAudioContextResume(mixer.isPlaying, handleAudioContextResume);
 
   useEffect(() => {
     let cancelled = false;
