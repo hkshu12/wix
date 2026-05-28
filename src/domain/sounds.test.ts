@@ -4,7 +4,7 @@ import { BUILT_IN_SOUNDS, getSoundById } from './sounds';
 describe('built-in sound catalog', () => {
   it('ships the requested default ambience sounds', () => {
     expect(BUILT_IN_SOUNDS.map((sound) => sound.id)).toEqual(
-      expect.arrayContaining(['campfire', 'rain', 'ocean', 'fireplace', 'fan', 'cafe'])
+      expect.arrayContaining(['campfire', 'rain', 'ocean', 'fireplace', 'fan', 'cafe', 'train'])
     );
   });
 
@@ -19,6 +19,7 @@ describe('built-in sound catalog', () => {
     expect(getSoundById('rain')?.title).toBe('雨声');
     expect(getSoundById('fan')?.title).toBe('风扇');
     expect(getSoundById('cafe')?.title).toBe('咖啡馆');
+    expect(getSoundById('train')?.title).toBe('列车');
     expect(getSoundById('missing')).toBeUndefined();
   });
 });

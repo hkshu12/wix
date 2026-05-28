@@ -8,7 +8,8 @@ export type BuiltInSoundId =
   | 'brown-noise'
   | 'pink-noise'
   | 'fan'
-  | 'cafe';
+  | 'cafe'
+  | 'train';
 
 export interface BuiltInSound {
   id: BuiltInSoundId;
@@ -111,6 +112,15 @@ export const BUILT_IN_SOUNDS: BuiltInSound[] = [
     icon: '☕',
     accent: '#d97706',
     src: 'sounds/cafe.ogg'
+  },
+  {
+    id: 'train',
+    kind: 'built-in',
+    title: '列车',
+    subtitle: '车厢节奏与轨道声，适合旅途、阅读与屏蔽外界噪音',
+    icon: '🚆',
+    accent: '#64748b',
+    src: 'sounds/train.ogg'
   }
 ];
 

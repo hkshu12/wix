@@ -33,6 +33,16 @@ else
   exit 1
 fi
 
+# Train carriage loop (CC0 — MMRetroArcadeSoundsPack, extended for seamless playback)
+download "MMRetroArcadeSoundsPack1_0_5/Vehicles/ogg/TrainLoop1.ogg" "train-base.ogg"
+if command -v ffmpeg >/dev/null 2>&1; then
+  ffmpeg -y -stream_loop 8 -i "${OUT}/train-base.ogg" -c:a libvorbis -q:a 5 -t 24 "${OUT}/train.ogg" >/dev/null 2>&1
+  rm -f "${OUT}/train-base.ogg"
+else
+  echo "ffmpeg not found; cannot extend train.ogg from TrainLoop1.ogg" >&2
+  exit 1
+fi
+
 # Large room fan (CC0 — bb Fans and Drones pack)
 curl -fsSL "${BASE}/bb%20-%20Fans%20and%20Drones%20(Jul%202021)/Large%20Fan.wav" -o "${OUT}/fan.wav"
 if command -v ffmpeg >/dev/null 2>&1; then

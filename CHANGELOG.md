@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.25.0] - 2026-05-28
+
+### Added
+
+- Built-in **列车** ambience loop (CC0 train carriage recording) for travel, reading, and masking environmental noise.
+
 ## [1.24.0] - 2026-05-28
 
 ### Added
