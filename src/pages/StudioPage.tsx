@@ -23,6 +23,7 @@ import { useStudioKeyboardShortcuts } from '../hooks/useStudioKeyboardShortcuts'
 import { assetUrl } from '../lib/assetUrl';
 import {
   clampSleepTimerMinutes,
+  SLEEP_TIMER_FADE_PRESETS_SECONDS,
   SLEEP_TIMER_MAX_MINUTES,
   SLEEP_TIMER_MIN_MINUTES,
   SLEEP_TIMER_PRESETS_MINUTES
@@ -45,6 +46,8 @@ export function StudioPage() {
     sleepTimerRemainingLabel,
     sleepTimerActive,
     sleepTimerFading,
+    sleepTimerFadeSeconds,
+    setSleepTimerFadeSeconds,
     startSleepTimer,
     cancelSleepTimer,
     mixerPresets,
@@ -369,7 +372,29 @@ export function StudioPage() {
 
         <section className="drawer-section" aria-labelledby="drawer-sleep-timer-title">
           <h3 id="drawer-sleep-timer-title">睡眠定时</h3>
-          <p className="drawer-hint">到时自动将主音量在 30 秒内渐弱并暂停播放，避免突然静音惊醒。</p>
+          <p className="drawer-hint">
+            到时自动将主音量在 {sleepTimerFadeSeconds} 秒内渐弱并暂停播放，避免突然静音惊醒。
+          </p>
+          <p className="drawer-hint sleep-timer-fade-label" id="sleep-timer-fade-label">
+            渐出时长
+          </p>
+          <div
+            className="sleep-timer-presets sleep-timer-fade-presets"
+            role="group"
+            aria-labelledby="sleep-timer-fade-label"
+          >
+            {SLEEP_TIMER_FADE_PRESETS_SECONDS.map((seconds) => (
+              <button
+                key={seconds}
+                aria-pressed={sleepTimerFadeSeconds === seconds}
+                className="studio-btn studio-btn--secondary sleep-timer-preset"
+                type="button"
+                onClick={() => setSleepTimerFadeSeconds(seconds)}
+              >
+                {seconds} 秒
+              </button>
+            ))}
+          </div>
           <div className="sleep-timer-presets" role="group" aria-label="睡眠定时预设">
             {SLEEP_TIMER_PRESETS_MINUTES.map((minutes) => (
               <button

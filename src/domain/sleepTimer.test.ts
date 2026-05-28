@@ -6,8 +6,12 @@ import {
   getSleepTimerRemainingMs,
   shouldFinishSleepTimer,
   shouldStartSleepFade,
+  clampSleepTimerFadeSeconds,
   clampSleepTimerMinutes,
+  isValidSleepTimerFadeSeconds,
   isValidSleepTimerMinutes,
+  SLEEP_TIMER_FADE_MAX_SECONDS,
+  SLEEP_TIMER_FADE_MIN_SECONDS,
   SLEEP_TIMER_MAX_MINUTES,
   SLEEP_TIMER_MIN_MINUTES,
   startSleepTimer,
@@ -25,6 +29,23 @@ describe('sleepTimer', () => {
 
     expect(timer.endsAt).toBe(now + 30 * 60 * 1000);
     expect(timer.fadeStartsAt).toBe(timer.endsAt! - SLEEP_TIMER_FADE_SECONDS * 1000);
+  });
+
+  it('accepts a custom fade duration in seconds', () => {
+    const now = 0;
+    const timer = startSleepTimer(now, 15, 60);
+
+    expect(timer.fadeStartsAt).toBe(timer.endsAt! - 60 * 1000);
+  });
+
+  it('validates and clamps custom fade second bounds', () => {
+    expect(isValidSleepTimerFadeSeconds(30)).toBe(true);
+    expect(isValidSleepTimerFadeSeconds(9)).toBe(false);
+    expect(isValidSleepTimerFadeSeconds(121)).toBe(false);
+
+    expect(clampSleepTimerFadeSeconds(45.6)).toBe(46);
+    expect(clampSleepTimerFadeSeconds(5)).toBe(SLEEP_TIMER_FADE_MIN_SECONDS);
+    expect(clampSleepTimerFadeSeconds(200)).toBe(SLEEP_TIMER_FADE_MAX_SECONDS);
   });
 
   it('reports remaining time and phase transitions', () => {

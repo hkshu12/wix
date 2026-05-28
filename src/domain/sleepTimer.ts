@@ -1,6 +1,30 @@
 /** Default fade duration before stop when the sleep timer fires. */
 export const SLEEP_TIMER_FADE_SECONDS = 30;
 
+/** Preset fade durations in seconds for quick selection in the mixer drawer. */
+export const SLEEP_TIMER_FADE_PRESETS_SECONDS = [10, 30, 60, 120] as const;
+
+export type SleepTimerFadePresetSeconds = (typeof SLEEP_TIMER_FADE_PRESETS_SECONDS)[number];
+
+/** Inclusive bounds for custom sleep timer fade duration (seconds). */
+export const SLEEP_TIMER_FADE_MIN_SECONDS = 10;
+export const SLEEP_TIMER_FADE_MAX_SECONDS = 120;
+
+export function isValidSleepTimerFadeSeconds(seconds: number): boolean {
+  return (
+    Number.isFinite(seconds) &&
+    Number.isInteger(seconds) &&
+    seconds >= SLEEP_TIMER_FADE_MIN_SECONDS &&
+    seconds <= SLEEP_TIMER_FADE_MAX_SECONDS
+  );
+}
+
+/** Rounds to an integer and clamps to the allowed sleep fade range. */
+export function clampSleepTimerFadeSeconds(seconds: number): number {
+  const rounded = Math.round(seconds);
+  return Math.min(SLEEP_TIMER_FADE_MAX_SECONDS, Math.max(SLEEP_TIMER_FADE_MIN_SECONDS, rounded));
+}
+
 /** Preset durations in minutes for quick selection. */
 export const SLEEP_TIMER_PRESETS_MINUTES = [15, 30, 45, 60] as const;
 

@@ -100,6 +100,30 @@ describe('useSleepTimerController', () => {
     expect(result.current.mixer.masterVolume).toBe(0.8);
   });
 
+  it('uses a persisted fade duration when starting the timer', () => {
+    const { result } = renderHook(() => {
+      const [mixer, setMixer] = useState(() => setPlaying(createInitialMixerState(), true));
+      const controller = useSleepTimerController({ mixer, setMixer });
+      return { mixer, controller };
+    });
+
+    act(() => {
+      result.current.controller.setFadeSeconds(10);
+      result.current.controller.start(5);
+    });
+
+    const startTime = Date.now();
+    const fadeMs = 10 * 1000;
+    const endMs = 5 * 60 * 1000;
+
+    act(() => {
+      vi.setSystemTime(startTime + endMs - fadeMs / 2);
+      vi.advanceTimersByTime(250);
+    });
+
+    expect(result.current.controller.isFading).toBe(true);
+  });
+
   it('rejects out-of-range custom durations', () => {
     const { result } = renderHook(() => {
       const [mixer, setMixer] = useState(createInitialMixerState);

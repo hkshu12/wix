@@ -306,6 +306,16 @@ p {
   opacity: 0.85;
 }
 
+.sleep-timer-fade-label {
+  margin-bottom: 6px;
+  font-weight: 600;
+  opacity: 1;
+}
+
+.sleep-timer-fade-presets {
+  margin-bottom: 16px;
+}
+
 .sleep-timer-presets {
   display: flex;
   flex-wrap: wrap;

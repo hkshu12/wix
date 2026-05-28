@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.30.0] - 2026-05-28
+
+### Added
+
+- Configurable sleep timer fade-out: choose 10, 30, 60, or 120 seconds in the mixer drawer; your choice is remembered for the next timer (default remains 30 seconds).
+
 ## [1.29.0] - 2026-05-28
 
 ### Fixed
