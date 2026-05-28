@@ -1,8 +1,19 @@
 import { fireEvent, screen, waitFor } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { AppRouter } from '../router/AppRouter';
 import { getHasEnteredStudio } from '../storage/onboarding';
 import { renderWithRouter } from '../test/renderWithRouter';
+
+vi.mock('../audio/AudioEngine', () => ({
+  AudioEngine: vi.fn().mockImplementation(function MockAudioEngine() {
+    return {
+      resume: vi.fn().mockResolvedValue(undefined),
+      sync: vi.fn().mockResolvedValue({ failedSoundIds: [] }),
+      stop: vi.fn(),
+      invalidateCachedBuffer: vi.fn()
+    };
+  })
+}));
 
 describe('LandingPage', () => {
   it('lists current studio capabilities in features', () => {
@@ -21,6 +32,7 @@ describe('LandingPage', () => {
     expect(features).toHaveTextContent(/咖啡馆/);
     expect(features).toHaveTextContent(/命名场景预设/);
     expect(features).toHaveTextContent(/刷新后自动恢复/);
+    expect(features).toHaveTextContent(/自动继续播放/);
     expect(features).toHaveTextContent(/\?share=/);
     expect(features).toHaveTextContent(/键盘快捷键/);
     expect(features).toHaveTextContent(/锁屏/);

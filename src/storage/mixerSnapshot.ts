@@ -44,7 +44,7 @@ export function writeMixerSnapshot(state: MixerState): void {
   localStorage.setItem(STORAGE_KEY_MIXER_SNAPSHOT, JSON.stringify(payload));
 }
 
-/** Restores globals and layers; playback always starts paused. */
+/** Restores globals and layers; {@link MixerState.isPlaying} starts paused until autoplay runs. */
 export function hydrateMixerState(snapshot: MixerSnapshotPayload | null): MixerState {
   const base = createInitialMixerState();
 

@@ -28,6 +28,7 @@ import {
   type MixerPreset
 } from '../storage/mixerPresets';
 import { formatFileReadPercent } from '../lib/readFileWithProgress';
+import { useAutoplay } from '../hooks/useAutoplay';
 import { useAudioContextResume } from '../hooks/useAudioContextResume';
 import { useMediaSessionSync } from '../hooks/useMediaSessionSync';
 import { useScreenWakeLock } from '../hooks/useScreenWakeLock';
@@ -113,6 +114,17 @@ export function AppLayout() {
     engineRef.current ??= new AudioEngine();
     return engineRef.current;
   }
+
+  const resumeAudio = useCallback(async () => {
+    await getAudioEngine().resume();
+  }, []);
+
+  const { primeAudioContext } = useAutoplay({
+    mixer,
+    setMixer,
+    customTracksReady,
+    resumeAudio
+  });
 
   useEffect(() => {
     mixerRef.current = mixer;
@@ -520,7 +532,8 @@ export function AppLayout() {
     importMixerShare: handleImportMixerShare,
     failedSoundIds,
     retryLayerLoad,
-    clearAllAppData: handleClearAllAppData
+    clearAllAppData: handleClearAllAppData,
+    primeAudioContext
   };
 
   return (
