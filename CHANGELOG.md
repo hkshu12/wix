@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.42.0] - 2026-05-28
+
+### Changed
+
+- **Brand icons**: new wix app icon (full wordmark) for PWA, Apple Touch, and Android launcher; waveform mark for favicon and adaptive icon foreground.
+- **Theme**: UI accents and gradients updated to match the icon palette (deep blue `#1a4fd6` to cyan `#00d4ff`).
+
 ## [1.41.1] - 2026-05-28
 
 ### Fixed
