@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.26.0] - 2026-05-28
+
+### Added
+
+- Built-in **公路** ambience loop (CC0 highway traffic recording) for commuting, travel, and masking environmental noise.
+
 ## [1.25.0] - 2026-05-28
 
 ### Added

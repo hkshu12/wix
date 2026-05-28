@@ -9,7 +9,8 @@ export type BuiltInSoundId =
   | 'pink-noise'
   | 'fan'
   | 'cafe'
-  | 'train';
+  | 'train'
+  | 'highway';
 
 export interface BuiltInSound {
   id: BuiltInSoundId;
@@ -121,6 +122,15 @@ export const BUILT_IN_SOUNDS: BuiltInSound[] = [
     icon: '🚆',
     accent: '#64748b',
     src: 'sounds/train.ogg'
+  },
+  {
+    id: 'highway',
+    kind: 'built-in',
+    title: '公路',
+    subtitle: '平稳车流底噪，适合通勤、旅途与屏蔽外界杂音',
+    icon: '🛣️',
+    accent: '#78716c',
+    src: 'sounds/highway.ogg'
   }
 ];
 
