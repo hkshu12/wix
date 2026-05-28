@@ -7,6 +7,13 @@ export const APP_VERSION = __APP_VERSION__;
 export const GITHUB_RELEASES_URL = `https://github.com/${GITHUB_REPO}/releases`;
 export const GITHUB_LATEST_RELEASE_API = `https://api.github.com/repos/${GITHUB_REPO}/releases/latest`;
 
+export function githubApiHeaders(): Record<string, string> {
+  return {
+    Accept: 'application/vnd.github+json',
+    'User-Agent': `${APP_DISPLAY_NAME}/${APP_VERSION}`
+  };
+}
+
 export interface AppVersionInfo {
   version: string;
   build?: string;

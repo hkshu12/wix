@@ -1,5 +1,7 @@
+import { Capacitor } from '@capacitor/core';
 import { Filesystem, Directory } from '@capacitor/filesystem';
 import type { LatestReleaseInfo } from './githubRelease';
+import { formatNetworkError } from './networkError';
 import { ApkInstaller } from '../plugins/apkInstaller';
 
 function arrayBufferToBase64(buffer: ArrayBuffer): string {
@@ -15,7 +17,19 @@ function arrayBufferToBase64(buffer: ArrayBuffer): string {
   return btoa(binary);
 }
 
-export async function downloadAndroidApk(
+function apkFilePath(version: string): string {
+  return `updates/wix-${version}.apk`;
+}
+
+async function resolveDownloadedApkUri(path: string): Promise<string> {
+  const { uri } = await Filesystem.getUri({
+    path,
+    directory: Directory.Cache
+  });
+  return uri;
+}
+
+async function downloadApkWithFilesystem(
   release: LatestReleaseInfo,
   onProgress?: (loadedBytes: number, totalBytes: number) => void
 ): Promise<string> {
@@ -24,7 +38,55 @@ export async function downloadAndroidApk(
     throw new Error('当前发布未包含 Android APK 安装包');
   }
 
-  const response = await fetch(asset.browserDownloadUrl);
+  const path = apkFilePath(release.version);
+  const progressListener = await Filesystem.addListener('progress', (status) => {
+    if (status.url === asset.browserDownloadUrl) {
+      onProgress?.(status.bytes, status.contentLength);
+    }
+  });
+
+  try {
+    await Filesystem.downloadFile({
+      url: asset.browserDownloadUrl,
+      path,
+      directory: Directory.Cache,
+      progress: true,
+      recursive: true
+    });
+  } catch (error) {
+    if (error instanceof Error) {
+      error.message = formatNetworkError(error, '下载更新包失败');
+      throw error;
+    }
+    throw new Error(formatNetworkError(error, '下载更新包失败'), { cause: error });
+  } finally {
+    await progressListener.remove();
+  }
+
+  return resolveDownloadedApkUri(path);
+}
+
+async function downloadApkWithFetch(
+  release: LatestReleaseInfo,
+  onProgress?: (loadedBytes: number, totalBytes: number) => void
+): Promise<string> {
+  const asset = release.androidApk;
+  if (!asset) {
+    throw new Error('当前发布未包含 Android APK 安装包');
+  }
+
+  let response: Response;
+
+  try {
+    response = await fetch(asset.browserDownloadUrl);
+  } catch (error) {
+    if (error instanceof Error) {
+      error.message = formatNetworkError(error, '下载更新包失败');
+      throw error;
+    }
+    throw new Error(formatNetworkError(error, '下载更新包失败'), { cause: error });
+  }
+
   if (!response.ok) {
     throw new Error(`下载失败（${response.status}）`);
   }
@@ -35,13 +97,13 @@ export async function downloadAndroidApk(
     const buffer = await response.arrayBuffer();
     onProgress?.(buffer.byteLength, totalBytes);
     const base64 = arrayBufferToBase64(buffer);
-    const fileName = `wix-${release.version}.apk`;
-    const saved = await Filesystem.writeFile({
-      path: `updates/${fileName}`,
+    const path = apkFilePath(release.version);
+    await Filesystem.writeFile({
+      path,
       data: base64,
       directory: Directory.Cache
     });
-    return saved.uri;
+    return resolveDownloadedApkUri(path);
   }
 
   const chunks: Uint8Array[] = [];
@@ -67,14 +129,25 @@ export async function downloadAndroidApk(
   }
 
   const base64 = arrayBufferToBase64(merged.buffer);
-  const fileName = `wix-${release.version}.apk`;
-  const saved = await Filesystem.writeFile({
-    path: `updates/${fileName}`,
+  const path = apkFilePath(release.version);
+  await Filesystem.writeFile({
+    path,
     data: base64,
     directory: Directory.Cache
   });
 
-  return saved.uri;
+  return resolveDownloadedApkUri(path);
+}
+
+export async function downloadAndroidApk(
+  release: LatestReleaseInfo,
+  onProgress?: (loadedBytes: number, totalBytes: number) => void
+): Promise<string> {
+  if (Capacitor.isNativePlatform()) {
+    return downloadApkWithFilesystem(release, onProgress);
+  }
+
+  return downloadApkWithFetch(release, onProgress);
 }
 
 export async function ensureInstallPermission(): Promise<boolean> {

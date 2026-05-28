@@ -1,6 +1,6 @@
 {
   "name": "white-noise-mixer",
-  "version": "1.28.0",
+  "version": "1.29.0",
   "description": "Cross-platform white noise mixer for Web, PWA, and Android.",
   "type": "module",
   "scripts": {
@@ -34,6 +34,7 @@
     "@capacitor/filesystem": "^8.1.2",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
+    "react-markdown": "^10.1.0",
     "react-router-dom": "^7.15.1"
   },
   "devDependencies": {

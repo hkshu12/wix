@@ -1,5 +1,6 @@
 import { isNewerVersion } from './semver';
-import { APP_VERSION, GITHUB_LATEST_RELEASE_API } from './appMeta';
+import { APP_VERSION, GITHUB_LATEST_RELEASE_API, githubApiHeaders } from './appMeta';
+import { formatNetworkError } from './networkError';
 
 export interface ReleaseAsset {
   name: string;
@@ -60,12 +61,22 @@ export function normalizeGithubRelease(payload: GithubReleasePayload, currentVer
 }
 
 export async function fetchLatestRelease(currentVersion = APP_VERSION): Promise<LatestReleaseInfo> {
-  const response = await fetch(GITHUB_LATEST_RELEASE_API, {
-    headers: { Accept: 'application/vnd.github+json' }
-  });
+  let response: Response;
+
+  try {
+    response = await fetch(GITHUB_LATEST_RELEASE_API, {
+      headers: githubApiHeaders()
+    });
+  } catch (error) {
+    if (error instanceof Error) {
+      error.message = formatNetworkError(error, '无法获取版本信息');
+      throw error;
+    }
+    throw new Error(formatNetworkError(error, '无法获取版本信息'), { cause: error });
+  }
 
   if (!response.ok) {
-    throw new Error(`无法获取发布信息（${response.status}）`);
+    throw new Error(`无法获取版本信息（${response.status}）`);
   }
 
   const payload = (await response.json()) as GithubReleasePayload;
