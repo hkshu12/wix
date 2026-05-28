@@ -22,7 +22,8 @@ describe('sleepTimerSnapshot storage', () => {
   it('returns cleared state when nothing is stored', () => {
     expect(hydrateSleepTimerSnapshot(readSleepTimerSnapshot(), Date.now())).toEqual({
       timer: clearSleepTimer(),
-      preFadeMasterVolume: null
+      preFadeMasterVolume: null,
+      expiredWhileClosed: false
     });
   });
 
@@ -34,9 +35,10 @@ describe('sleepTimerSnapshot storage', () => {
     const restored = hydrateSleepTimerSnapshot(readSleepTimerSnapshot(), now + 60_000);
     expect(restored.timer).toEqual(timer);
     expect(restored.preFadeMasterVolume).toBe(0.72);
+    expect(restored.expiredWhileClosed).toBe(false);
   });
 
-  it('clears expired timers on hydrate', () => {
+  it('clears expired timers on hydrate but keeps pre-fade volume for restore', () => {
     const now = Date.now();
     const timer = startSleepTimer(now, 1);
     writeSleepTimerSnapshot(timer, 0.5);
@@ -44,6 +46,8 @@ describe('sleepTimerSnapshot storage', () => {
     const endsAt = timer.endsAt!;
     const restored = hydrateSleepTimerSnapshot(readSleepTimerSnapshot(), endsAt);
     expect(restored.timer).toEqual(clearSleepTimer());
+    expect(restored.preFadeMasterVolume).toBe(0.5);
+    expect(restored.expiredWhileClosed).toBe(true);
     expect(localStorage.getItem(STORAGE_KEY_SLEEP_TIMER_SNAPSHOT)).toBeNull();
   });
 

@@ -15,10 +15,11 @@ import {
   clearSleepTimerSnapshot,
   hydrateSleepTimerSnapshot,
   readSleepTimerSnapshot,
-  writeSleepTimerSnapshot
+  writeSleepTimerSnapshot,
+  type HydratedSleepTimerSnapshot
 } from '../storage/sleepTimerSnapshot';
 
-function readInitialSleepTimer(): { timer: SleepTimerState; preFadeMasterVolume: number | null } {
+function readInitialSleepTimer(): HydratedSleepTimerSnapshot {
   return hydrateSleepTimerSnapshot(readSleepTimerSnapshot(), Date.now());
 }
 
@@ -46,6 +47,21 @@ export function useSleepTimerController({ mixer, setMixer }: UseSleepTimerContro
   const preFadeMasterVolumeRef = useRef(
     initialSleepTimer.current.preFadeMasterVolume ?? mixer.masterVolume
   );
+
+  useEffect(() => {
+    if (!initialSleepTimer.current.expiredWhileClosed) {
+      return;
+    }
+
+    const preFade = initialSleepTimer.current.preFadeMasterVolume;
+    if (preFade === null) {
+      return;
+    }
+
+    preFadeMasterVolumeRef.current = preFade;
+    setMixer((state) => setMasterVolume(state, preFade));
+    initialSleepTimer.current.expiredWhileClosed = false;
+  }, [setMixer]);
 
   function cancel() {
     clearSleepTimerSnapshot();
