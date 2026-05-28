@@ -511,6 +511,29 @@ p {
   background: color-mix(in srgb, var(--bg-elevated) 88%, transparent);
 }
 
+.layer-card--load-failed {
+  border-color: color-mix(in srgb, #f87171 55%, var(--border));
+}
+
+.layer-load-error {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 14px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: color-mix(in srgb, #ef4444 12%, transparent);
+}
+
+.layer-load-error p {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--text);
+}
+
+.layer-load-retry {
+  justify-self: start;
+}
+
 .layer-title {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;

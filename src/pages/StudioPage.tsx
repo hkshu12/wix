@@ -54,7 +54,9 @@ export function StudioPage() {
     copyMixerShare,
     copyMixerShareLink,
     pasteMixerShareFromClipboard,
-    importMixerShare
+    importMixerShare,
+    failedSoundIds,
+    retryLayerLoad
   } = useStudio();
 
   async function handlePasteShareFromClipboard() {
@@ -467,8 +469,11 @@ export function StudioPage() {
                 <p>在上方选择声音后，可在此调节每轨音量与声像。</p>
               </div>
             ) : (
-              selectedLayers.map(({ layer, sound }) => (
-                <article className="layer-card" key={layer.soundId}>
+              selectedLayers.map(({ layer, sound }) => {
+                const loadFailed = failedSoundIds.includes(layer.soundId);
+
+                return (
+                <article className={`layer-card ${loadFailed ? 'layer-card--load-failed' : ''}`} key={layer.soundId}>
                   <div className="layer-title">
                     <span>{sound.kind === 'built-in' ? sound.icon : '🎵'}</span>
                     <div>
@@ -483,6 +488,18 @@ export function StudioPage() {
                       {layer.muted ? '取消静音' : '静音'}
                     </button>
                   </div>
+                  {loadFailed ? (
+                    <div className="layer-load-error" role="alert">
+                      <p>该轨道未能加载（已自动重试）。请检查网络后手动重试。</p>
+                      <button
+                        className="studio-btn studio-btn--secondary layer-load-retry"
+                        type="button"
+                        onClick={() => retryLayerLoad(layer.soundId)}
+                      >
+                        重试加载
+                      </button>
+                    </div>
+                  ) : null}
                   <Slider
                     label={`${sound.title}音量`}
                     value={Math.round(layer.volume * 100)}
@@ -516,7 +533,8 @@ export function StudioPage() {
                     </button>
                   ) : null}
                 </article>
-              ))
+              );
+              })
             )}
           </div>
         </section>

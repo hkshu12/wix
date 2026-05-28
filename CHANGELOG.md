@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.28.0] - 2026-05-28
+
+### Added
+
+- Per-track **retry load** in the mixer drawer when an ambience layer fails after automatic retries: other layers keep playing, and you can clear the cache and reload without restarting the whole mix.
+
 ## [1.27.0] - 2026-05-28
 
 ### Added

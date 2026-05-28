@@ -10,6 +10,11 @@ interface ActiveLayer {
   panner: StereoPannerNode | null;
 }
 
+export interface AudioSyncResult {
+  /** Sound IDs that could not be loaded or decoded during this sync. */
+  failedSoundIds: string[];
+}
+
 export class AudioEngine {
   private readonly context: AudioContext;
   private readonly master: GainNode;
@@ -29,19 +34,20 @@ export class AudioEngine {
     }
   }
 
-  async sync(state: MixerState, sounds: PlayableSound[]): Promise<void> {
+  async sync(state: MixerState, sounds: PlayableSound[]): Promise<AudioSyncResult> {
     const syncVersion = (this.syncVersion += 1);
     this.master.gain.value = state.masterVolume;
 
     if (!state.isPlaying || state.layers.length === 0) {
       this.stop();
-      return;
+      return { failedSoundIds: [] };
     }
 
     await this.resume();
 
     const plan = createAudioGraphPlan(state, sounds);
     const plannedIds = new Set(plan.map((layer) => layer.soundId));
+    const failedSoundIds: string[] = [];
 
     for (const soundId of this.activeLayers.keys()) {
       if (!plannedIds.has(soundId)) {
@@ -50,15 +56,27 @@ export class AudioEngine {
     }
 
     for (const layer of plan) {
-      const active = this.activeLayers.get(layer.soundId) ?? (await this.startLayer(layer, syncVersion));
-      if (!active || syncVersion !== this.syncVersion) {
-        continue;
-      }
+      try {
+        const active = this.activeLayers.get(layer.soundId) ?? (await this.startLayer(layer, syncVersion));
+        if (!active || syncVersion !== this.syncVersion) {
+          continue;
+        }
 
-      active.gain.gain.setTargetAtTime(layer.finalVolume, this.context.currentTime, 0.04);
-      active.source.playbackRate.setTargetAtTime(layer.finalPlaybackRate, this.context.currentTime, 0.04);
-      active.panner?.pan.setTargetAtTime(layer.finalPan, this.context.currentTime, 0.04);
+        active.gain.gain.setTargetAtTime(layer.finalVolume, this.context.currentTime, 0.04);
+        active.source.playbackRate.setTargetAtTime(layer.finalPlaybackRate, this.context.currentTime, 0.04);
+        active.panner?.pan.setTargetAtTime(layer.finalPan, this.context.currentTime, 0.04);
+      } catch {
+        this.stopLayer(layer.soundId);
+        failedSoundIds.push(layer.soundId);
+      }
     }
+
+    return { failedSoundIds };
+  }
+
+  /** Drops a cached decode so the next sync refetches the audio. */
+  invalidateCachedBuffer(sound: PlayableSound): void {
+    this.bufferCache.delete(this.bufferCacheKey(sound));
   }
 
   stop(): void {
@@ -114,9 +132,12 @@ export class AudioEngine {
     this.activeLayers.delete(soundId);
   }
 
+  private bufferCacheKey(sound: PlayableSound): string {
+    return sound.kind === 'built-in' ? `built-in:${sound.id}` : `custom:${sound.id}:${sound.createdAt}`;
+  }
+
   private async resolveBuffer(sound: PlayableSound): Promise<AudioBuffer> {
-    const cacheKey =
-      sound.kind === 'built-in' ? `built-in:${sound.id}` : `custom:${sound.id}:${sound.createdAt}`;
+    const cacheKey = this.bufferCacheKey(sound);
     const cached = this.bufferCache.get(cacheKey);
     if (cached) {
       return cached;
