@@ -40,7 +40,7 @@ p {
 
 .studio-mark {
   flex-shrink: 0;
-  border-radius: 8px;
+  border-radius: 10px;
 }
 
 .studio-title {

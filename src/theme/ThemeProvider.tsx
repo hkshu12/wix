@@ -44,7 +44,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     document.documentElement.dataset.theme = effective;
     const meta = document.querySelector('meta[name="theme-color"]');
     if (meta) {
-      meta.setAttribute('content', effective === 'dark' ? '#07111f' : '#f8fafc');
+      meta.setAttribute('content', effective === 'dark' ? '#081018' : '#ffffff');
     }
   }, [effective]);
 

@@ -4,19 +4,24 @@ import { fileURLToPath } from 'node:url';
 import sharp from 'sharp';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
-const iconSvg = readFileSync(join(root, 'public/icon.svg'));
-const foregroundSvg = readFileSync(join(root, 'public/icon-foreground.svg'));
+const appIcon = readFileSync(join(root, 'assets/icons/app-icon.png'));
+const iconMark = readFileSync(join(root, 'assets/icons/icon-mark.png'));
 
-async function writePng(path, size, source) {
-  const buffer = await sharp(source).resize(size, size).png().toBuffer();
+async function writePng(path, size, source, options = {}) {
+  let pipeline = sharp(source).resize(size, size, { fit: 'contain', background: options.background ?? { r: 0, g: 0, b: 0, alpha: 0 } });
+  if (options.flattenBackground) {
+    pipeline = pipeline.flatten({ background: options.flattenBackground });
+  }
+  const buffer = await pipeline.png().toBuffer();
   writeFileSync(path, buffer);
 }
 
 const publicSizes = [
-  ['public/favicon-32.png', 32],
-  ['public/icon-192.png', 192],
-  ['public/icon-512.png', 512],
-  ['public/apple-touch-icon.png', 180]
+  ['public/favicon-32.png', 32, iconMark],
+  ['public/icon-mark-96.png', 96, iconMark],
+  ['public/icon-192.png', 192, appIcon],
+  ['public/icon-512.png', 512, appIcon],
+  ['public/apple-touch-icon.png', 180, appIcon]
 ];
 
 const launcherSizes = [
@@ -40,17 +45,19 @@ const foregroundSizes = [
   ['android/app/src/main/res/mipmap-xxxhdpi/ic_launcher_foreground.png', 432]
 ];
 
-for (const [relativePath, size] of publicSizes) {
-  await writePng(join(root, relativePath), size, iconSvg);
+for (const [relativePath, size, source] of publicSizes) {
+  await writePng(join(root, relativePath), size, source);
   console.log(`wrote ${relativePath} (${size}px)`);
 }
 
 for (const [relativePath, size] of launcherSizes) {
-  await writePng(join(root, relativePath), size, iconSvg);
+  await writePng(join(root, relativePath), size, appIcon);
   console.log(`wrote ${relativePath} (${size}px)`);
 }
 
 for (const [relativePath, size] of foregroundSizes) {
-  await writePng(join(root, relativePath), size, foregroundSvg);
+  await writePng(join(root, relativePath), size, iconMark, {
+    background: { r: 255, g: 255, b: 255, alpha: 0 }
+  });
   console.log(`wrote ${relativePath} (${size}px)`);
 }

@@ -20,13 +20,13 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['icon.svg', 'favicon-32.png', 'icon-192.png', 'icon-512.png', 'apple-touch-icon.png'],
+      includeAssets: ['favicon-32.png', 'icon-mark-96.png', 'icon-192.png', 'icon-512.png', 'apple-touch-icon.png'],
       manifest: {
         name: 'wix',
         short_name: 'wix',
         description: '多轨环境声与自定义音乐混音',
-        theme_color: '#07111f',
-        background_color: '#07111f',
+        theme_color: '#1a4fd6',
+        background_color: '#ffffff',
         display: 'standalone',
         orientation: PWA_DISPLAY_ORIENTATION,
         start_url: pwaScope.start_url,
@@ -49,12 +49,6 @@ export default defineConfig({
             sizes: '512x512',
             type: 'image/png',
             purpose: 'maskable'
-          },
-          {
-            src: joinBasePath(base, 'icon.svg'),
-            sizes: 'any',
-            type: 'image/svg+xml',
-            purpose: 'any'
           }
         ]
       },
