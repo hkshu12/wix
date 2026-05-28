@@ -11,6 +11,7 @@ import {
 import { applyMixerPreset } from '../domain/applyMixerPreset';
 import { parseMixerShare, serializeMixerShare } from '../domain/mixerShare';
 import { buildMixerShareUrl } from '../domain/mixerShareUrl';
+import { useAndroidMixerShareDeepLink } from '../hooks/useAndroidMixerShareDeepLink';
 import { useMixerShareDeepLink } from '../hooks/useMixerShareDeepLink';
 import { createInitialMixerState, setPlaying, type MixerState } from '../domain/mixer';
 import { BUILT_IN_SOUNDS } from '../domain/sounds';
@@ -447,6 +448,8 @@ export function AppLayout() {
     },
     [allSounds]
   );
+
+  useAndroidMixerShareDeepLink(navigate);
 
   useMixerShareDeepLink({
     pathname: location.pathname,

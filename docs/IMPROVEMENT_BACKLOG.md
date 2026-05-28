@@ -38,7 +38,7 @@
 | **新内置环境声（续）** | 白噪音等 | 已有 15 轨 | 评估 CC0 库中其他 loop |
 | ~~大文件导入进度~~ | 长播客/长环境录音 | — | v1.16.0 |
 | ~~混音 ARIA 实时区域~~ | 读屏知播放/定时状态 | — | 已完成 v1.12.0 |
-| ~~落地页功能列表更新~~ | 新用户了解分享链接、快捷键等 | — | v1.41.0 同步唤醒定时 |
+| ~~落地页功能列表更新~~ | 新用户了解分享链接、快捷键等 | — | 持续随版本同步 |
 | ~~桌面键盘快捷键~~ | 办公专注时免鼠标 | — | 已完成 v1.15.0 |
 | ~~快捷键帮助（`?`）~~ | 发现 Space 等快捷键 | — | 已完成 v1.17.0 |
 | ~~自定义睡眠定时时长~~ | 90 分钟午睡等非 15–60 预设 | — | 已完成 v1.20.0 |
@@ -52,10 +52,13 @@
 | ~~AudioContext 后台恢复~~ | 切回标签页后无声 | — | v1.35.0 |
 | **自定义音轨库导出** | 换机备份导入的音频 | 仅 IndexedDB 存取 | 导出 zip 或单文件 |
 | ~~唤醒定时~~ | 早晨渐强叫醒 | 无 | 已完成 v1.41.0 |
-| **Android 分享深链** | APK 打开 `/studio?share=…` | 无 intent-filter | `App.addListener('appUrlOpen')` + manifest |
+| ~~Android 分享深链~~ | APK 打开 `/studio?share=…` | 无 intent-filter | v1.44.0 intent-filter + `App.getLaunchUrl` / `appUrlOpen` |
 | ~~键盘主音量读屏播报~~ | 低视力用户 +/- 调音量 | — | 已完成 v1.37.0 |
 | ~~音轨搜索/筛选~~ | 15+ 内置 + 多自定义 | 平铺网格 | Studio 搜索框 v1.38.0 |
 | ~~主音量滑块读屏播报~~ | 拖滑块调主音量 | — | 已完成 v1.40.0 |
+| ~~点选即播与会话恢复~~ | 加轨后还要点播放 | — | 已完成 v1.42.0 |
+| **Android 分享链接复制用公网 origin** | 从 APK 复制链接给朋友 | 可能复制 `https://localhost/...` | 构建链接时用 GitHub Pages origin |
+| **唤醒定时读屏播报** | 低视力用户设叫醒 | 睡眠定时有播报 | 复用 `playbackAnnouncement` 模式 |
 
 ### 体验场景与缺口（摘要）
 
@@ -64,6 +67,7 @@
 | 睡眠 | 定时、渐出、渐入、读屏、常亮 | v1.34–1.35 定时与后台恢复 |
 | 午睡/叫醒 | 倒计时后渐强起播 | v1.41.0 唤醒定时 |
 | 专注/办公 | 预设、办公室氛围、键盘、快速找轨 | v1.38.0 环境声搜索 |
+| 分享/社交 | 发链接好友一键同款混音 | Web/PWA v1.19；Android v1.44.0 深链 |
 | 居家/城市 | 屏蔽装修与街道施工 | v1.39.0 工地环境声 |
 | 多任务 | 切标签/后台后仍听到混音 | v1.35.0 Web Audio 可见性恢复 |
 | 隐私/换机 | 一键清除本机数据 | v1.31.0 设置页两步确认 |
@@ -71,30 +75,33 @@
 | 读屏 | 播放/加轨/定时/键盘与滑块音量 | v1.40.0 主音量滑块播报 |
 | Android 原生 | 后台播放 | 仍为 P1 最大缺口 |
 
-### 代码与架构备注（2026-05-28 第十九次挖掘）
+### 代码与架构备注（2026-05-28 第二十次挖掘）
 
-- **定时器**：`sleepTimer` / `wakeTimer` 域模型对称；`useSleepTimerController` / `useWakeTimerController` 互斥启动；快照键 `wix.sleepTimerSnapshot` / `wix.wakeTimerSnapshot`。
-- **内置声库**：15 轨；下一内容向：CC0 白噪音变体或 P2「新内置（续）」。
-- **Android**：仍无 foreground service（P1）；分享深链为 P2 下一小项。
-- **版本**：当前实现 **1.41.0**；下一项宜 **Android 分享深链** 或 **自定义音轨库导出**。
+- **分享深链**：Web 侧 `useMixerShareDeepLink`；Android 侧 `useAndroidMixerShareDeepLink` + `extractStudioShareRouteFromAppUrl`；Manifest `VIEW` filter `hkshu12.github.io/wix/studio`。
+- **定时器**：`sleepTimer` / `wakeTimer` 对称；互斥启动；快照持久化。
+- **内置声库**：15 轨；P2「新内置（续）」或 CC0 白噪音变体。
+- **版本**：仓库 **1.43.0**（品牌图标）；本次交付 **1.44.0** Android 分享深链。
+- **近期 CHANGELOG**：v1.42–1.43 点选即播、品牌图标——避免重复。
 
 ### 外部信号
 
 - GitHub Issues：无 open issue（2026-05-28）。
-- 近期 CHANGELOG：v1.40.0 主音量滑块读屏——**避免重复**。
-- 同类 App：原生后台、定时渐强叫醒仍常见；Web 侧渐强叫醒已补齐。
+- 同类 App：原生后台播放、分享深链、定时渐强仍常见；wix Web 侧已较完整，Android 原生后台为最大缺口。
 
 ## 本次选中项
 
-**唤醒定时（P2 / 睡眠场景互补）**
+**Android 分享深链（P2 → 分享场景）**
 
-- **理由**：backlog 长期列为缺口；可复用睡眠定时域与快照模式；与 v1.32 播放渐入互补（定时触发渐强 + 自动起播）；单 PR 可交付 UI + 逻辑 + 测试。
-- **范围**：倒计时、10–120 秒渐入、与睡眠定时互斥、持久化、读屏播报；版本 **1.41.0**。
+- **理由**：backlog 明确列为下一小项；Web 已有 `?share=` 导入，Android 缺 intent-filter 与 `App` URL 监听；单 PR 可交付（Manifest + hook + 域解析 + 测试），不涉及 foreground service。
+- **范围**：`https://hkshu12.github.io/wix/studio?share=…` 冷/热启动导航至 Studio 并交给现有导入逻辑；版本 **1.44.0**。
 
 ## 历史已完成
 
 | 日期 | 项 | 引用 |
 | --- | --- | --- |
+| 2026-05-28 | Android 混音分享深链（GitHub Pages → APK） | v1.44.0 |
+| 2026-05-28 | 品牌图标与主题色 | [v1.43.0](https://github.com/hkshu12/wix/releases/tag/v1.43.0) |
+| 2026-05-28 | 点选即播与会话恢复自动播放 | [v1.42.0](https://github.com/hkshu12/wix/releases/tag/v1.42.0) |
 | 2026-05-28 | Android 应用内更新 APK 下载 ENOENT | [v1.41.1](https://github.com/hkshu12/wix/releases/tag/v1.41.1) |
 | 2026-05-28 | 唤醒定时（渐强起播） | [v1.41.0](https://github.com/hkshu12/wix/releases/tag/v1.41.0) |
 | 2026-05-28 | 主音量滑块读屏播报 | [v1.40.0](https://github.com/hkshu12/wix/releases/tag/v1.40.0) |
