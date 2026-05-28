@@ -78,6 +78,16 @@ describe('StudioPage', () => {
     await waitFor(() => expect(resumeMock).toHaveBeenCalledTimes(1));
   });
 
+  it('starts playback when a sound is selected without pressing play', async () => {
+    renderWithRouter(<AppRouter />, { routerProps: { initialEntries: ['/studio'] } });
+
+    fireEvent.click(screen.getByRole('button', { name: /雨声/ }));
+
+    await waitFor(() => expect(resumeMock).toHaveBeenCalled());
+    await waitFor(() => expect(screen.getByRole('button', { name: '暂停' })).toBeInTheDocument());
+    expect(syncMock).toHaveBeenCalled();
+  });
+
   it('announces play/pause and layer toggles in the playback status region', async () => {
     renderWithRouter(<AppRouter />, { routerProps: { initialEntries: ['/studio'] } });
 

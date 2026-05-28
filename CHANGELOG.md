@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.41.1] - 2026-05-28
+
+### Fixed
+
+- **Android in-app update download**: create the `cache/updates` directory before saving the release APK. Fixes `ENOENT` when downloading updates (e.g. `wix-1.41.0.apk`) because Capacitor `Filesystem.downloadFile` does not create missing parent folders on Android.
+
 ## [1.41.0] - 2026-05-28
 
 ### Added

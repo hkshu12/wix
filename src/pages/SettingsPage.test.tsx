@@ -48,6 +48,7 @@ function createStudioStub(overrides: Partial<StudioContextValue> = {}): StudioCo
     failedSoundIds: [],
     retryLayerLoad: vi.fn(),
     clearAllAppData: vi.fn().mockResolvedValue(undefined),
+    primeAudioContext: vi.fn().mockResolvedValue(undefined),
     ...overrides
   };
 }
