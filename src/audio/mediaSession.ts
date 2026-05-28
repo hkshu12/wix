@@ -22,9 +22,9 @@ export function isMediaSessionSupported(): boolean {
 
 function mediaSessionArtwork(): MediaImage[] {
   return [
+    { src: assetUrl('icon-mark-96.png'), sizes: '96x96', type: 'image/png' },
     { src: assetUrl('icon-192.png'), sizes: '192x192', type: 'image/png' },
-    { src: assetUrl('icon-512.png'), sizes: '512x512', type: 'image/png' },
-    { src: assetUrl('icon.svg'), sizes: 'any', type: 'image/svg+xml' }
+    { src: assetUrl('icon-512.png'), sizes: '512x512', type: 'image/png' }
   ];
 }
 

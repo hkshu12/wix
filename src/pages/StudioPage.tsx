@@ -306,7 +306,7 @@ export function StudioPage() {
       </p>
       <header className="studio-topbar">
         <div className="studio-topbar-start">
-          <img className="studio-mark" src={assetUrl('icon.svg')} alt="" width={28} height={28} />
+          <img className="studio-mark" src={assetUrl('icon-mark-96.png')} alt="" width={28} height={28} />
           <div>
             <span className="studio-title">{APP_DISPLAY_NAME}</span>
             <p className="studio-subtitle">远程声景 · 点选即播</p>
