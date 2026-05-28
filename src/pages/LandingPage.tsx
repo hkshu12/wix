@@ -40,7 +40,7 @@ export function LandingPage() {
         <section className="landing-section" aria-labelledby="features-title">
           <h2 id="features-title">能做什么</h2>
           <ul className="landing-list">
-            <li>多轨叠加十一种内置环境声（含列车、咖啡馆、风扇）与导入的本地音乐</li>
+            <li>多轨叠加十二种内置环境声（含公路、列车、咖啡馆、风扇）与导入的本地音乐</li>
             <li>每轨独立调节音量、声像与播放速度，支持静音</li>
             <li>主音量、立体声宽度与全局播放速度一键控制</li>
             <li>

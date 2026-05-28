@@ -16,6 +16,7 @@ They are **CC0 / public domain** and may be used without attribution (credit is 
 | `fan.ogg` | 风扇 | [Large Fan.wav](https://github.com/lavenderdotpet/CC0-Public-Domain-Sounds/blob/main/bb%20-%20Fans%20and%20Drones%20(Jul%202021)/Large%20Fan.wav) (encoded to OGG) |
 | `cafe.ogg` | 咖啡馆 | [Night Cafe Vibes.wav](https://github.com/lavenderdotpet/CC0-Public-Domain-Sounds/blob/main/BB_2HTC%20Samples%20Vol%204/Loops/2023-04-15%20Sometimes%2C%20You%20Don%27t%20Make%20it%20to%20Level%20Two%20-%20Night%20Cafe%20Vibes.wav) (encoded to OGG) |
 | `train.ogg` | 列车 | [TrainLoop1.ogg](https://github.com/lavenderdotpet/CC0-Public-Domain-Sounds/blob/main/MMRetroArcadeSoundsPack1_0_5/Vehicles/ogg/TrainLoop1.ogg) (looped & extended) |
+| `highway.ogg` | 公路 | [sfx100v2_loop_highway.ogg](https://github.com/lavenderdotpet/CC0-Public-Domain-Sounds/blob/main/100-cc0-sfx-2/sfx100v2_loop_highway.ogg) |
 
 **Collection:** [lavenderdotpet/CC0-Public-Domain-Sounds](https://github.com/lavenderdotpet/CC0-Public-Domain-Sounds) (CC0).
 
