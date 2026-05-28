@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.40.0] - 2026-05-28
+
+### Added
+
+- **Master volume slider screen-reader announcements**: dragging the master volume slider in the mixer drawer announces volume in the shared playback status region (in 5% steps while dragging, and the final value on release), matching keyboard **+** / **−** behavior for assistive tech users.
+
 ## [1.39.0] - 2026-05-28
 
 ### Added

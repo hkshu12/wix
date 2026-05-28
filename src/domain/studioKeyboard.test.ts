@@ -5,6 +5,7 @@ import {
   isQuestionMarkKey,
   MASTER_VOLUME_KEYBOARD_STEP,
   shouldAdjustMasterVolume,
+  shouldAnnounceMasterVolumePercent,
   shouldToggleKeyboardHelp,
   shouldToggleMixerDrawer,
   shouldTogglePlaybackWithSpace
@@ -140,6 +141,13 @@ describe('studioKeyboard', () => {
     expect(adjustMasterVolumeStep(0.82, 1)).toBeCloseTo(0.82 + MASTER_VOLUME_KEYBOARD_STEP);
     expect(adjustMasterVolumeStep(0.02, -1)).toBe(0);
     expect(adjustMasterVolumeStep(0.99, 1)).toBe(1);
+  });
+
+  it('throttles master volume slider announcements to 5% steps', () => {
+    expect(shouldAnnounceMasterVolumePercent(null, 82)).toBe(true);
+    expect(shouldAnnounceMasterVolumePercent(82, 86)).toBe(false);
+    expect(shouldAnnounceMasterVolumePercent(82, 87)).toBe(true);
+    expect(shouldAnnounceMasterVolumePercent(87, 82)).toBe(true);
   });
 
   it('blocks ? when drawer or nav is open or focus is in a text field', () => {

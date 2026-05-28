@@ -7,6 +7,20 @@ export interface StudioKeyboardOverlayState {
 /** Master volume step per + / − key press (0–1 scale). */
 export const MASTER_VOLUME_KEYBOARD_STEP = 0.05;
 
+/** Minimum percent change before re-announcing master volume while dragging the slider. */
+export const MASTER_VOLUME_ANNOUNCE_STEP_PERCENT = 5;
+
+export function shouldAnnounceMasterVolumePercent(
+  lastAnnouncedPercent: number | null,
+  nextPercent: number
+): boolean {
+  if (lastAnnouncedPercent === null) {
+    return true;
+  }
+
+  return Math.abs(nextPercent - lastAnnouncedPercent) >= MASTER_VOLUME_ANNOUNCE_STEP_PERCENT;
+}
+
 function hasKeyboardModifier(
   event: Pick<KeyboardEvent, 'ctrlKey' | 'metaKey' | 'altKey'>
 ): boolean {

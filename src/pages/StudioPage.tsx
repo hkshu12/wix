@@ -23,7 +23,10 @@ import {
 } from '../domain/playbackAnnouncement';
 import { usePlaybackAnnouncer } from '../hooks/usePlaybackAnnouncer';
 import { filterSoundsByQuery } from '../domain/soundSearch';
-import { adjustMasterVolumeStep } from '../domain/studioKeyboard';
+import {
+  adjustMasterVolumeStep,
+  shouldAnnounceMasterVolumePercent
+} from '../domain/studioKeyboard';
 import { useStudioKeyboardShortcuts } from '../hooks/useStudioKeyboardShortcuts';
 import { APP_DISPLAY_NAME } from '../lib/appMeta';
 import { assetUrl } from '../lib/assetUrl';
@@ -96,6 +99,7 @@ export function StudioPage() {
   const { message: playbackAnnouncement, announce: announcePlayback } = usePlaybackAnnouncer();
   const sleepTimerWasActiveRef = useRef(sleepTimerActive);
   const sleepTimerCancelledByUserRef = useRef(false);
+  const lastAnnouncedMasterPercentRef = useRef<number | null>(null);
 
   const activeCount = mixer.layers.length;
   const visibleSounds = useMemo(
@@ -120,6 +124,36 @@ export function StudioPage() {
     cancelSleepTimer();
     announcePlayback(formatSleepTimerCancelAnnouncement());
   }, [announcePlayback, cancelSleepTimer]);
+
+  const handleMasterVolumeSliderChange = useCallback(
+    (value: number) => {
+      const volume = value / 100;
+      const percent = Math.round(volume * 100);
+
+      setMixer((state) => setMasterVolume(state, volume));
+
+      if (shouldAnnounceMasterVolumePercent(lastAnnouncedMasterPercentRef.current, percent)) {
+        announcePlayback(formatMasterVolumeAnnouncement(volume));
+        lastAnnouncedMasterPercentRef.current = percent;
+      }
+    },
+    [announcePlayback, setMixer]
+  );
+
+  const handleMasterVolumeSliderCommit = useCallback(
+    (value: number) => {
+      const volume = value / 100;
+      const percent = Math.round(volume * 100);
+
+      if (lastAnnouncedMasterPercentRef.current === percent) {
+        return;
+      }
+
+      announcePlayback(formatMasterVolumeAnnouncement(volume));
+      lastAnnouncedMasterPercentRef.current = percent;
+    },
+    [announcePlayback]
+  );
 
   useEffect(() => {
     const wasActive = sleepTimerWasActiveRef.current;
@@ -155,7 +189,9 @@ export function StudioPage() {
       onAdjustMasterVolume: (delta) => {
         setMixer((state) => {
           const nextVolume = adjustMasterVolumeStep(state.masterVolume, delta);
+          const percent = Math.round(nextVolume * 100);
           announcePlayback(formatMasterVolumeAnnouncement(nextVolume));
+          lastAnnouncedMasterPercentRef.current = percent;
           return setMasterVolume(state, nextVolume);
         });
       }
@@ -586,7 +622,8 @@ export function StudioPage() {
               value={Math.round(mixer.masterVolume * 100)}
               min={0}
               max={100}
-              onChange={(value) => setMixer((state) => setMasterVolume(state, value / 100))}
+              onChange={handleMasterVolumeSliderChange}
+              onCommit={handleMasterVolumeSliderCommit}
             />
             <Slider
               label="立体声宽度"
