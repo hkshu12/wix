@@ -19,6 +19,7 @@ They are **CC0 / public domain** and may be used without attribution (credit is 
 | `highway.ogg` | 公路 | [sfx100v2_loop_highway.ogg](https://github.com/lavenderdotpet/CC0-Public-Domain-Sounds/blob/main/100-cc0-sfx-2/sfx100v2_loop_highway.ogg) |
 | `airplane.ogg` | 飞机舱 | [sfx100v2_loop_ambient_02.ogg](https://github.com/lavenderdotpet/CC0-Public-Domain-Sounds/blob/main/100-cc0-sfx-2/sfx100v2_loop_ambient_02.ogg) |
 | `office.ogg` | 办公室 | [sfx100v2_loop_machine_01.ogg](https://github.com/lavenderdotpet/CC0-Public-Domain-Sounds/blob/main/100-cc0-sfx-2/sfx100v2_loop_machine_01.ogg) |
+| `construction-site.ogg` | 工地 | [sfx100v2_loop_construction_site.ogg](https://github.com/lavenderdotpet/CC0-Public-Domain-Sounds/blob/main/100-cc0-sfx-2/sfx100v2_loop_construction_site.ogg) |
 
 **Collection:** [lavenderdotpet/CC0-Public-Domain-Sounds](https://github.com/lavenderdotpet/CC0-Public-Domain-Sounds) (CC0).
 

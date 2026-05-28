@@ -12,7 +12,8 @@ export type BuiltInSoundId =
   | 'train'
   | 'highway'
   | 'airplane'
-  | 'office';
+  | 'office'
+  | 'construction-site';
 
 export interface BuiltInSound {
   id: BuiltInSoundId;
@@ -151,6 +152,15 @@ export const BUILT_IN_SOUNDS: BuiltInSound[] = [
     icon: '🏢',
     accent: '#6b7280',
     src: 'sounds/office.ogg'
+  },
+  {
+    id: 'construction-site',
+    kind: 'built-in',
+    title: '工地',
+    subtitle: '远处施工与机械底噪，适合屏蔽街道装修与营造城市氛围',
+    icon: '🏗️',
+    accent: '#ca8a04',
+    src: 'sounds/construction-site.ogg'
   }
 ];
 

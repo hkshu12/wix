@@ -11,7 +11,10 @@ describe('LandingPage', () => {
     const features = screen.getByRole('region', { name: '能做什么' });
 
     expect(features).toHaveTextContent(/睡眠定时（5–480 分钟）/);
-    expect(features).toHaveTextContent(/十四种内置环境声/);
+    expect(features).toHaveTextContent(/十五种内置环境声/);
+    expect(features).toHaveTextContent(/工地/);
+    expect(features).toHaveTextContent(/搜索框/);
+    expect(features).toHaveTextContent(/播放渐入/);
     expect(features).toHaveTextContent(/飞机舱/);
     expect(features).toHaveTextContent(/公路/);
     expect(features).toHaveTextContent(/列车/);

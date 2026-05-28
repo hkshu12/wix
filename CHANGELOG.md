@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.39.0] - 2026-05-28
+
+### Added
+
+- Built-in **工地** ambience loop (CC0 construction-site recording) for masking nearby renovation, urban focus, and layered city soundscapes.
+
+### Changed
+
+- Landing page feature list: fifteen built-in ambiences (including 工地), Studio sound search, playback fade-in, screen wake lock, and keyboard master-volume screen-reader announcements.
+
 ## [1.38.0] - 2026-05-28
 
 ### Added
