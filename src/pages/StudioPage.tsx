@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { BottomDrawer } from '../components/BottomDrawer';
 import { KeyboardShortcutsDialog } from '../components/KeyboardShortcutsDialog';
@@ -15,7 +15,10 @@ import {
 } from '../domain/mixer';
 import {
   formatLayerToggleAnnouncement,
-  formatPlayToggleAnnouncement
+  formatPlayToggleAnnouncement,
+  formatSleepTimerCancelAnnouncement,
+  formatSleepTimerCompleteAnnouncement,
+  formatSleepTimerStartAnnouncement
 } from '../domain/playbackAnnouncement';
 import { usePlaybackAnnouncer } from '../hooks/usePlaybackAnnouncer';
 import { adjustMasterVolumeStep } from '../domain/studioKeyboard';
@@ -88,8 +91,40 @@ export function StudioPage() {
   const { updateAvailable } = useAppUpdate();
   const android = isAndroidApp();
   const { message: playbackAnnouncement, announce: announcePlayback } = usePlaybackAnnouncer();
+  const sleepTimerWasActiveRef = useRef(sleepTimerActive);
+  const sleepTimerCancelledByUserRef = useRef(false);
 
   const activeCount = mixer.layers.length;
+
+  const handleStartSleepTimer = useCallback(
+    (minutes: number) => {
+      const started = startSleepTimer(minutes);
+      if (started) {
+        announcePlayback(formatSleepTimerStartAnnouncement(minutes));
+      }
+      return started;
+    },
+    [announcePlayback, startSleepTimer]
+  );
+
+  const handleCancelSleepTimer = useCallback(() => {
+    sleepTimerCancelledByUserRef.current = true;
+    cancelSleepTimer();
+    announcePlayback(formatSleepTimerCancelAnnouncement());
+  }, [announcePlayback, cancelSleepTimer]);
+
+  useEffect(() => {
+    const wasActive = sleepTimerWasActiveRef.current;
+    sleepTimerWasActiveRef.current = sleepTimerActive;
+
+    if (wasActive && !sleepTimerActive && !sleepTimerCancelledByUserRef.current) {
+      announcePlayback(formatSleepTimerCompleteAnnouncement());
+    }
+
+    if (!sleepTimerActive) {
+      sleepTimerCancelledByUserRef.current = false;
+    }
+  }, [announcePlayback, sleepTimerActive]);
 
   const handlePlayToggleWithAnnouncement = useCallback(async () => {
     const nextPlaying = !mixer.isPlaying;
@@ -125,7 +160,7 @@ export function StudioPage() {
     }
 
     const minutes = clampSleepTimerMinutes(parsed);
-    const started = startSleepTimer(minutes);
+    const started = handleStartSleepTimer(minutes);
     if (!started) {
       setCustomSleepError(`请输入 ${SLEEP_TIMER_MIN_MINUTES}–${SLEEP_TIMER_MAX_MINUTES} 之间的整数分钟`);
       return;
@@ -459,7 +494,7 @@ export function StudioPage() {
                 type="button"
                 onClick={() => {
                   setCustomSleepError(null);
-                  startSleepTimer(minutes);
+                  handleStartSleepTimer(minutes);
                 }}
               >
                 {minutes} 分钟
@@ -510,7 +545,7 @@ export function StudioPage() {
               <p aria-live="polite">
                 {sleepTimerFading ? '正在渐出…' : '剩余'} {sleepTimerRemainingLabel}
               </p>
-              <button className="ghost-button" type="button" onClick={cancelSleepTimer}>
+              <button className="ghost-button" type="button" onClick={handleCancelSleepTimer}>
                 取消定时
               </button>
             </div>
