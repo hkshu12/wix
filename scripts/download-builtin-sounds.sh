@@ -23,6 +23,16 @@ download "30-cc0-sfx-loops/ambient_03.ogg" "forest.ogg"
 download "30-cc0-sfx-loops/noise_01.ogg" "brown-noise.ogg"
 download "30-cc0-sfx-loops/noise_02.ogg" "pink-noise.ogg"
 
+# Large room fan (CC0 — bb Fans and Drones pack)
+curl -fsSL "${BASE}/bb%20-%20Fans%20and%20Drones%20(Jul%202021)/Large%20Fan.wav" -o "${OUT}/fan.wav"
+if command -v ffmpeg >/dev/null 2>&1; then
+  ffmpeg -y -i "${OUT}/fan.wav" -c:a libvorbis -q:a 5 "${OUT}/fan.ogg" >/dev/null 2>&1
+  rm -f "${OUT}/fan.wav"
+else
+  echo "ffmpeg not found; cannot build fan.ogg from Large Fan.wav" >&2
+  exit 1
+fi
+
 # Longer distant thunder (CC0) + extended campfire crackle loop
 curl -fsSL "${BASE}/Micro%20Pack%20-%20Chairmat/Fake%20Thunder%201.wav" -o "${OUT}/thunder.wav"
 if command -v ffmpeg >/dev/null 2>&1; then
