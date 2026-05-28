@@ -125,6 +125,37 @@ p {
   line-height: 1.5;
 }
 
+.studio-sound-search {
+  display: block;
+  margin-bottom: 12px;
+}
+
+.studio-sound-search-input {
+  width: 100%;
+  max-width: 360px;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font: inherit;
+  color: var(--text);
+  background: color-mix(in srgb, var(--text) 4%, transparent);
+}
+
+.studio-sound-search-input::placeholder {
+  color: var(--text-muted);
+}
+
+.studio-sound-search-input:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--accent, #60a5fa) 55%, transparent);
+  outline-offset: 2px;
+}
+
+.studio-sound-search-empty {
+  margin: 0 0 12px;
+  color: var(--text-muted);
+  font-size: 0.92rem;
+}
+
 .sound-grid {
   display: grid;
   gap: 12px;
