@@ -54,6 +54,9 @@ export function StudioPage() {
     setSleepTimerFadeSeconds,
     playbackFadeInSeconds,
     setPlaybackFadeInSeconds,
+    screenWakeLockEnabled,
+    screenWakeLockSupported,
+    setScreenWakeLockEnabled,
     startSleepTimer,
     cancelSleepTimer,
     mixerPresets,
@@ -402,6 +405,25 @@ export function StudioPage() {
             ))}
           </div>
         </section>
+
+        {screenWakeLockSupported ? (
+          <section className="drawer-section" aria-labelledby="drawer-wake-lock-title">
+            <h3 id="drawer-wake-lock-title">屏幕常亮</h3>
+            <p className="drawer-hint">
+              播放时防止屏幕自动熄灭，适合床头、婴儿房等需要长时间看着混音台或锁屏界面的场景（仅在本机生效，暂停后自动释放）。
+            </p>
+            <div className="app-page-actions">
+              <button
+                aria-pressed={screenWakeLockEnabled}
+                className="studio-btn studio-btn--secondary"
+                type="button"
+                onClick={() => setScreenWakeLockEnabled(!screenWakeLockEnabled)}
+              >
+                {screenWakeLockEnabled ? '播放时保持常亮：开' : '播放时保持常亮：关'}
+              </button>
+            </div>
+          </section>
+        ) : null}
 
         <section className="drawer-section" aria-labelledby="drawer-sleep-timer-title">
           <h3 id="drawer-sleep-timer-title">睡眠定时</h3>

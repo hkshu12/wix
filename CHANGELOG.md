@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.33.0] - 2026-05-28
+
+### Added
+
+- Optional **screen wake lock** while playing: enable in the mixer drawer to keep the display on during bedside or baby-soothing sessions (released automatically when you pause; preference is remembered on supported browsers and PWAs).
+
 ## [1.32.0] - 2026-05-28
 
 ### Added

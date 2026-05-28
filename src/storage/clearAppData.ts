@@ -2,6 +2,7 @@ import { STORAGE_KEY_ENTERED_STUDIO } from './onboarding';
 import { STORAGE_KEY_MIXER_PRESETS } from './mixerPresets';
 import { STORAGE_KEY_MIXER_SNAPSHOT } from './mixerSnapshot';
 import { STORAGE_KEY_PLAYBACK_FADE_IN_SECONDS } from './playbackFadeInPreferences';
+import { STORAGE_KEY_SCREEN_WAKE_LOCK } from './screenWakeLockPreferences';
 import { STORAGE_KEY_SLEEP_TIMER_FADE_SECONDS } from './sleepTimerPreferences';
 import { STORAGE_KEY_SLEEP_TIMER_SNAPSHOT } from './sleepTimerSnapshot';
 import { clearCustomLibrary, CUSTOM_LIBRARY_DATABASE_NAME } from './customLibrary';
@@ -14,6 +15,7 @@ export const APP_DATA_LOCAL_STORAGE_KEYS = [
   STORAGE_KEY_SLEEP_TIMER_SNAPSHOT,
   STORAGE_KEY_SLEEP_TIMER_FADE_SECONDS,
   STORAGE_KEY_PLAYBACK_FADE_IN_SECONDS,
+  STORAGE_KEY_SCREEN_WAKE_LOCK,
   STORAGE_KEY_ENTERED_STUDIO,
   STORAGE_KEY_THEME
 ] as const;
