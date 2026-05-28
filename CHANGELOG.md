@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.31.0] - 2026-05-28
+
+### Added
+
+- Settings: **clear all on-device data** with a two-step confirmation—removes mixer snapshot, scene presets, sleep timer, theme preference, intro visit flag, and imported custom audio (built-in ambiences are unchanged).
+
 ## [1.30.0] - 2026-05-28
 
 ### Added

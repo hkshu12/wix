@@ -12,7 +12,7 @@ import { applyMixerPreset } from '../domain/applyMixerPreset';
 import { parseMixerShare, serializeMixerShare } from '../domain/mixerShare';
 import { buildMixerShareUrl } from '../domain/mixerShareUrl';
 import { useMixerShareDeepLink } from '../hooks/useMixerShareDeepLink';
-import { setPlaying, type MixerState } from '../domain/mixer';
+import { createInitialMixerState, setPlaying, type MixerState } from '../domain/mixer';
 import { BUILT_IN_SOUNDS } from '../domain/sounds';
 import {
   deleteCustomTrack,
@@ -30,6 +30,7 @@ import {
 import { formatFileReadPercent } from '../lib/readFileWithProgress';
 import { useMediaSessionSync } from '../hooks/useMediaSessionSync';
 import { useSleepTimerController } from '../hooks/useSleepTimerController';
+import { clearAllAppData as clearPersistedAppData } from '../storage/clearAppData';
 import { StudioProvider, type StudioContextValue } from './StudioContext';
 import { UpdateProvider } from './UpdateContext';
 
@@ -368,6 +369,20 @@ export function AppLayout() {
     onImportShare: handleImportMixerShare
   });
 
+  const handleClearAllAppData = useCallback(async () => {
+    sleepTimerController.cancel();
+    engineRef.current?.stop();
+    revokeCustomTrackUrls(customTracksRef.current);
+    replaceCustomTracks([]);
+    setMixer(createInitialMixerState());
+    setMixerPresets([]);
+    setFailedSoundIds([]);
+    setImportStatus('支持 MP3、WAV、M4A 等浏览器可解码音频');
+    setImportProgress(null);
+    await clearPersistedAppData();
+    window.location.reload();
+  }, [sleepTimerController]);
+
   async function handleCopyMixerShareLink() {
     const text = serializeMixerShare(mixer);
     const url = buildMixerShareUrl({
@@ -416,7 +431,8 @@ export function AppLayout() {
     pasteMixerShareFromClipboard: handlePasteMixerShareFromClipboard,
     importMixerShare: handleImportMixerShare,
     failedSoundIds,
-    retryLayerLoad
+    retryLayerLoad,
+    clearAllAppData: handleClearAllAppData
   };
 
   return (
