@@ -95,7 +95,8 @@
 
 | 日期 | 项 | 引用 |
 | --- | --- | --- |
-| 2026-05-28 | 唤醒定时（渐强起播） | v1.41.0（本次） |
+| 2026-05-28 | Android 应用内更新 APK 下载 ENOENT | [v1.41.1](https://github.com/hkshu12/wix/releases/tag/v1.41.1) |
+| 2026-05-28 | 唤醒定时（渐强起播） | [v1.41.0](https://github.com/hkshu12/wix/releases/tag/v1.41.0) |
 | 2026-05-28 | 主音量滑块读屏播报 | [v1.40.0](https://github.com/hkshu12/wix/releases/tag/v1.40.0) |
 | 2026-05-28 | 内置工地环境声 + 落地页同步 | [v1.39.0](https://github.com/hkshu12/wix/releases/tag/v1.39.0) |
 | 2026-05-28 | Studio 环境声搜索/筛选 | [v1.38.0](https://github.com/hkshu12/wix/releases/tag/v1.38.0) |
