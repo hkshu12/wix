@@ -25,6 +25,7 @@ download "30-cc0-sfx-loops/noise_02.ogg" "pink-noise.ogg"
 download "100-cc0-sfx-2/sfx100v2_loop_highway.ogg" "highway.ogg"
 download "100-cc0-sfx-2/sfx100v2_loop_ambient_02.ogg" "airplane.ogg"
 download "100-cc0-sfx-2/sfx100v2_loop_machine_01.ogg" "office.ogg"
+download "100-cc0-sfx-2/sfx100v2_loop_construction_site.ogg" "construction-site.ogg"
 
 # Night cafe ambience loop (CC0 — BB_2HTC Samples Vol 4)
 curl -fsSL "${BASE}/BB_2HTC%20Samples%20Vol%204/Loops/2023-04-15%20Sometimes%2C%20You%20Don%27t%20Make%20it%20to%20Level%20Two%20-%20Night%20Cafe%20Vibes.wav" -o "${OUT}/cafe.wav"

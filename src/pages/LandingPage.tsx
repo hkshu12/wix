@@ -41,7 +41,11 @@ export function LandingPage() {
         <section className="landing-section" aria-labelledby="features-title">
           <h2 id="features-title">能做什么</h2>
           <ul className="landing-list">
-            <li>多轨叠加十四种内置环境声（含办公室、飞机舱、公路、列车、咖啡馆、风扇）与导入的本地音乐</li>
+            <li>
+              多轨叠加十五种内置环境声（含工地、办公室、飞机舱、公路、列车、咖啡馆、风扇）与导入的本地音乐
+            </li>
+            <li>Studio 搜索框按名称、描述或文件名快速筛选环境声</li>
+            <li>可选播放渐入、屏幕常亮、可配置睡眠渐出；键盘 +/- 调主音量时读屏会播报</li>
             <li>每轨独立调节音量、声像与播放速度，支持静音</li>
             <li>主音量、立体声宽度与全局播放速度一键控制</li>
             <li>

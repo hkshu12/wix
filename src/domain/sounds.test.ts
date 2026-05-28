@@ -14,7 +14,8 @@ describe('built-in sound catalog', () => {
         'train',
         'highway',
         'airplane',
-        'office'
+        'office',
+        'construction-site'
       ])
     );
   });
@@ -34,6 +35,7 @@ describe('built-in sound catalog', () => {
     expect(getSoundById('highway')?.title).toBe('公路');
     expect(getSoundById('airplane')?.title).toBe('飞机舱');
     expect(getSoundById('office')?.title).toBe('办公室');
+    expect(getSoundById('construction-site')?.title).toBe('工地');
     expect(getSoundById('missing')).toBeUndefined();
   });
 });
