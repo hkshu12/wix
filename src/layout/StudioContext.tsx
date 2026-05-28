@@ -45,6 +45,8 @@ export interface StudioContextValue {
   failedSoundIds: string[];
   retryLayerLoad: (soundId: string) => void;
   clearAllAppData: () => Promise<void>;
+  /** Call from a user gesture (e.g. landing CTA) so restored mixes can autoplay on studio. */
+  primeAudioContext: () => Promise<void>;
 }
 
 const StudioContext = createContext<StudioContextValue | null>(null);
