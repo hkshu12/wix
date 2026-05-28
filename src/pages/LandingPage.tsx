@@ -56,7 +56,9 @@ export function LandingPage() {
             </li>
             <li>命名场景预设：保存最多 12 组混音，一键切换专注、睡眠等固定搭配</li>
             <li>混音组合与主音量在刷新后自动恢复，有轨道时会自动继续播放</li>
-            <li>分享混音链接或 JSON 分享码；打开带 <code>?share=</code> 的链接可自动导入配方</li>
+            <li>
+              分享混音链接或 JSON 分享码；打开带 <code>?share=</code> 的链接可自动导入配方（Android 应用可接管 GitHub Pages 分享链接）
+            </li>
             <li>桌面键盘快捷键：Space 播放/暂停、M 混音抽屉、+/- 主音量、? 查看说明</li>
             <li>支持的浏览器与 PWA 可在锁屏显示混音标题并控制播放/暂停</li>
             <li>导入 MP3、WAV、M4A 等格式，保存在本机音频库</li>

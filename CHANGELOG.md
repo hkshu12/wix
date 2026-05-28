@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.44.0] - 2026-05-28
+
+### Added
+
+- **Android mixer share deep links**: opening a GitHub Pages `https://hkshu12.github.io/wix/studio?share=…` link on a device with the wix APK installed launches the app and imports the mix (cold start and while the app is running).
+
 ## [1.43.0] - 2026-05-28
 
 ### Changed
