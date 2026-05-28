@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.42.0] - 2026-05-28
+
+### Added
+
+- **Autoplay on layer select and session restore**: choosing an ambience in Studio starts playback without an extra tap on Play; saved mixes resume after refresh once the custom library is ready. Removing all layers pauses automatically. Manual play/pause (dock button, Space, lock-screen controls) is unchanged.
+
+### Changed
+
+- Landing page copy reflects tap-to-play and auto-resume after refresh.
+
 ## [1.41.1] - 2026-05-28
 
 ### Fixed
