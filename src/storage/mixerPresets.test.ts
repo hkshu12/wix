@@ -4,6 +4,7 @@ import {
   deleteMixerPreset,
   MAX_MIXER_PRESETS,
   readMixerPresets,
+  renameMixerPreset,
   saveMixerPreset,
   STORAGE_KEY_MIXER_PRESETS
 } from './mixerPresets';
@@ -110,5 +111,54 @@ describe('mixerPresets storage', () => {
 
     deleteMixerPreset(saved.preset.id);
     expect(readMixerPresets()).toHaveLength(0);
+  });
+
+  it('renames a preset without changing layers or volume', () => {
+    const state = {
+      ...createInitialMixerState(),
+      masterVolume: 0.6,
+      layers: [{ soundId: 'rain', volume: 0.4, pan: 0, playbackRate: 1, muted: false }]
+    };
+    const saved = saveMixerPreset('旧名', state);
+    if (!saved.ok) {
+      throw new Error('expected save to succeed');
+    }
+
+    const renamed = renameMixerPreset(saved.preset.id, ' 新名称 ');
+    expect(renamed.ok).toBe(true);
+    if (!renamed.ok) {
+      return;
+    }
+
+    expect(renamed.preset.name).toBe('新名称');
+    expect(renamed.preset.id).toBe(saved.preset.id);
+    expect(renamed.preset.masterVolume).toBe(0.6);
+    expect(renamed.preset.layers[0]?.soundId).toBe('rain');
+
+    const presets = readMixerPresets();
+    expect(presets).toHaveLength(1);
+    expect(presets[0]?.name).toBe('新名称');
+  });
+
+  it('rejects rename to an existing name', () => {
+    saveMixerPreset('专注', createInitialMixerState());
+    const second = saveMixerPreset('睡眠', createInitialMixerState());
+    if (!second.ok) {
+      throw new Error('expected save to succeed');
+    }
+
+    const result = renameMixerPreset(second.preset.id, '专注');
+    expect(result).toEqual({ ok: false, reason: 'duplicate-name' });
+    expect(readMixerPresets()[1]?.name).toBe('睡眠');
+  });
+
+  it('rejects empty rename', () => {
+    const saved = saveMixerPreset('测试', createInitialMixerState());
+    if (!saved.ok) {
+      throw new Error('expected save to succeed');
+    }
+
+    expect(renameMixerPreset(saved.preset.id, '   ')).toEqual({ ok: false, reason: 'empty-name' });
+    expect(readMixerPresets()[0]?.name).toBe('测试');
   });
 });

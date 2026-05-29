@@ -46,6 +46,7 @@ function createStudioStub(overrides: Partial<StudioContextValue> = {}): StudioCo
     mixerPresets: [],
     saveMixerPreset: vi.fn(),
     loadMixerPreset: vi.fn(),
+    renameMixerPreset: vi.fn(),
     deleteMixerPreset: vi.fn(),
     copyMixerShare: vi.fn(),
     copyMixerShareLink: vi.fn(),

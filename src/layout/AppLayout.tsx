@@ -46,6 +46,7 @@ import {
 import {
   deleteMixerPreset,
   readMixerPresets,
+  renameMixerPreset,
   replaceMixerPresets,
   saveMixerPreset,
   type MixerPreset
@@ -571,6 +572,21 @@ export function AppLayout() {
     setImportStatus(`已加载预设「${preset.name}」。`);
   }
 
+  function handleRenameMixerPreset(id: string, name: string) {
+    const result = renameMixerPreset(id, name);
+    if (!result.ok) {
+      if (result.reason === 'empty-name') {
+        setImportStatus('请输入预设名称后再重命名。');
+      } else if (result.reason === 'duplicate-name') {
+        setImportStatus('已有同名预设，请换一个名称。');
+      }
+      return;
+    }
+
+    refreshMixerPresets();
+    setImportStatus(`已将预设重命名为「${result.preset.name}」。`);
+  }
+
   function handleDeleteMixerPreset(id: string) {
     const preset = mixerPresets.find((entry) => entry.id === id);
     deleteMixerPreset(id);
@@ -744,6 +760,7 @@ export function AppLayout() {
     mixerPresets,
     saveMixerPreset: handleSaveMixerPreset,
     loadMixerPreset: handleLoadMixerPreset,
+    renameMixerPreset: handleRenameMixerPreset,
     deleteMixerPreset: handleDeleteMixerPreset,
     copyMixerShare: handleCopyMixerShare,
     copyMixerShareLink: handleCopyMixerShareLink,

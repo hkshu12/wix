@@ -43,6 +43,7 @@ export interface StudioContextValue {
   mixerPresets: MixerPreset[];
   saveMixerPreset: (name: string) => void;
   loadMixerPreset: (id: string) => void;
+  renameMixerPreset: (id: string, name: string) => void;
   deleteMixerPreset: (id: string) => void;
   copyMixerShare: () => Promise<void>;
   copyMixerShareLink: () => Promise<void>;

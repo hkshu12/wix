@@ -19,6 +19,10 @@ export type SaveMixerPresetResult =
   | { ok: true; preset: MixerPreset; overwritten: boolean }
   | { ok: false; reason: 'empty-name' | 'max-reached' };
 
+export type RenameMixerPresetResult =
+  | { ok: true; preset: MixerPreset }
+  | { ok: false; reason: 'empty-name' | 'not-found' | 'duplicate-name' };
+
 export function readMixerPresets(): MixerPreset[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEY_MIXER_PRESETS);
@@ -83,6 +87,34 @@ export function saveMixerPreset(name: string, state: MixerState): SaveMixerPrese
 export function deleteMixerPreset(id: string): void {
   const presets = readMixerPresets().filter((preset) => preset.id !== id);
   writeMixerPresets(presets);
+}
+
+export function renameMixerPreset(id: string, name: string): RenameMixerPresetResult {
+  const trimmed = name.trim();
+  if (!trimmed) {
+    return { ok: false, reason: 'empty-name' };
+  }
+
+  const presets = readMixerPresets();
+  const index = presets.findIndex((preset) => preset.id === id);
+  if (index < 0) {
+    return { ok: false, reason: 'not-found' };
+  }
+
+  const existing = presets[index];
+  if (!existing) {
+    return { ok: false, reason: 'not-found' };
+  }
+
+  if (presets.some((preset) => preset.id !== id && preset.name === trimmed)) {
+    return { ok: false, reason: 'duplicate-name' };
+  }
+
+  const updated: MixerPreset = { ...existing, name: trimmed };
+  const next = [...presets];
+  next[index] = updated;
+  writeMixerPresets(next);
+  return { ok: true, preset: updated };
 }
 
 export function replaceMixerPresets(presets: MixerPreset[]): void {

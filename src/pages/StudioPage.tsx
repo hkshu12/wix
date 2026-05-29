@@ -88,6 +88,7 @@ export function StudioPage() {
     mixerPresets,
     saveMixerPreset,
     loadMixerPreset,
+    renameMixerPreset,
     deleteMixerPreset,
     copyMixerShare,
     copyMixerShareLink,
@@ -107,6 +108,8 @@ export function StudioPage() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [keyboardHelpOpen, setKeyboardHelpOpen] = useState(false);
   const [presetName, setPresetName] = useState('');
+  const [renamingPresetId, setRenamingPresetId] = useState<string | null>(null);
+  const [renamingPresetName, setRenamingPresetName] = useState('');
   const [sharePaste, setSharePaste] = useState('');
   const [customSleepMinutes, setCustomSleepMinutes] = useState('90');
   const [customSleepError, setCustomSleepError] = useState<string | null>(null);
@@ -444,7 +447,7 @@ export function StudioPage() {
         <section className="drawer-section" aria-labelledby="drawer-presets-title">
           <h3 id="drawer-presets-title">场景预设</h3>
           <p className="drawer-hint">
-            保存当前声轨组合与主音量，一键切换专注、睡眠等固定搭配。同名再次保存会覆盖该预设（最多 12 个）。
+            保存当前声轨组合与主音量，一键切换专注、睡眠等固定搭配。同名再次保存会覆盖该预设；可重命名修正名称而不改混音（最多 12 个）。
           </p>
           <div className="mixer-preset-save">
             <label className="mixer-preset-name-label">
@@ -474,23 +477,73 @@ export function StudioPage() {
             <ul className="mixer-preset-list" aria-label="已保存的场景预设">
               {mixerPresets.map((preset) => (
                 <li className="mixer-preset-item" key={preset.id}>
-                  <button
-                    aria-label={`加载预设 ${preset.name}`}
-                    className="mixer-preset-load studio-btn studio-btn--secondary"
-                    type="button"
-                    onClick={() => loadMixerPreset(preset.id)}
-                  >
-                    {preset.name}
-                    <span className="mixer-preset-meta">{preset.layers.length} 轨</span>
-                  </button>
-                  <button
-                    aria-label={`删除预设 ${preset.name}`}
-                    className="ghost-button mixer-preset-delete"
-                    type="button"
-                    onClick={() => deleteMixerPreset(preset.id)}
-                  >
-                    删除
-                  </button>
+                  {renamingPresetId === preset.id ? (
+                    <form
+                      className="mixer-preset-rename"
+                      onSubmit={(event) => {
+                        event.preventDefault();
+                        renameMixerPreset(preset.id, renamingPresetName);
+                        setRenamingPresetId(null);
+                        setRenamingPresetName('');
+                      }}
+                    >
+                      <input
+                        aria-label={`重命名预设 ${preset.name}`}
+                        autoFocus
+                        className="mixer-preset-name-input"
+                        maxLength={40}
+                        type="text"
+                        value={renamingPresetName}
+                        onChange={(event) => setRenamingPresetName(event.target.value)}
+                      />
+                      <div className="mixer-preset-rename-actions">
+                        <button className="studio-btn studio-btn--secondary" type="submit">
+                          保存
+                        </button>
+                        <button
+                          className="ghost-button"
+                          type="button"
+                          onClick={() => {
+                            setRenamingPresetId(null);
+                            setRenamingPresetName('');
+                          }}
+                        >
+                          取消
+                        </button>
+                      </div>
+                    </form>
+                  ) : (
+                    <>
+                      <button
+                        aria-label={`加载预设 ${preset.name}`}
+                        className="mixer-preset-load studio-btn studio-btn--secondary"
+                        type="button"
+                        onClick={() => loadMixerPreset(preset.id)}
+                      >
+                        {preset.name}
+                        <span className="mixer-preset-meta">{preset.layers.length} 轨</span>
+                      </button>
+                      <button
+                        aria-label={`重命名预设 ${preset.name}`}
+                        className="ghost-button mixer-preset-rename-trigger"
+                        type="button"
+                        onClick={() => {
+                          setRenamingPresetId(preset.id);
+                          setRenamingPresetName(preset.name);
+                        }}
+                      >
+                        重命名
+                      </button>
+                      <button
+                        aria-label={`删除预设 ${preset.name}`}
+                        className="ghost-button mixer-preset-delete"
+                        type="button"
+                        onClick={() => deleteMixerPreset(preset.id)}
+                      >
+                        删除
+                      </button>
+                    </>
+                  )}
                 </li>
               ))}
             </ul>
