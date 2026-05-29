@@ -171,6 +171,27 @@ describe('StudioPage', () => {
     expect(within(activePanel).queryByText('海边')).not.toBeInTheDocument();
   });
 
+  it('renames a saved preset without reloading the mix', () => {
+    renderWithRouter(<AppRouter />, { routerProps: { initialEntries: ['/studio'] } });
+
+    fireEvent.click(screen.getByRole('button', { name: /雨声/ }));
+    fireEvent.click(screen.getByRole('button', { name: /混音与导入/ }));
+
+    fireEvent.change(screen.getByLabelText('预设名称'), { target: { value: '旧名' } });
+    fireEvent.click(screen.getByRole('button', { name: '保存当前混音' }));
+
+    fireEvent.click(screen.getByRole('button', { name: '重命名预设 旧名' }));
+    fireEvent.change(screen.getByLabelText('重命名预设 旧名'), { target: { value: '雨夜专注' } });
+    fireEvent.click(screen.getByRole('button', { name: '保存' }));
+
+    expect(screen.getByText(/已将预设重命名为「雨夜专注」/)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '加载预设 雨夜专注' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: '加载预设 旧名' })).not.toBeInTheDocument();
+
+    const activePanel = screen.getByLabelText('当前混音轨道');
+    expect(within(activePanel).getByText('雨声')).toBeInTheDocument();
+  });
+
   it('imports a mix from a ?share= deep link on studio load', async () => {
     let state = createInitialMixerState();
     state = toggleLayer(state, 'rain');

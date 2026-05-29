@@ -279,8 +279,27 @@ p {
 
 .mixer-preset-item {
   display: flex;
+  flex-wrap: wrap;
   align-items: stretch;
   gap: 8px;
+}
+
+.mixer-preset-rename {
+  display: flex;
+  flex: 1 1 100%;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mixer-preset-rename-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.mixer-preset-rename-trigger {
+  flex-shrink: 0;
+  align-self: center;
 }
 
 .mixer-preset-load {
