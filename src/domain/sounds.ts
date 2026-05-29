@@ -2,6 +2,7 @@ export type BuiltInSoundId =
   | 'campfire'
   | 'rain'
   | 'ocean'
+  | 'stream'
   | 'fireplace'
   | 'thunder'
   | 'forest'
@@ -54,6 +55,15 @@ export const BUILT_IN_SOUNDS: BuiltInSound[] = [
     icon: '🌊',
     accent: '#22d3ee',
     src: 'sounds/ocean.ogg'
+  },
+  {
+    id: 'stream',
+    kind: 'built-in',
+    title: '溪流',
+    subtitle: '潺潺流水，适合冥想、放松与自然氛围',
+    icon: '💧',
+    accent: '#2dd4bf',
+    src: 'sounds/stream.ogg'
   },
   {
     id: 'fireplace',

@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.50.0] - 2026-05-29
+
+### Added
+
+- Built-in **溪流** ambience loop (CC0 `loop_water_01`) for meditation, relaxation, and natural soundscapes—distinct from rain and ocean waves.
+
+### Changed
+
+- Landing page feature list: seventeen built-in ambiences (including 溪流).
+
 ## [1.49.0] - 2026-05-29
 
 ### Added

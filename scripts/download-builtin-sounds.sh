@@ -18,6 +18,7 @@ download() {
 # CC0 — lavenderdotpet/CC0-Public-Domain-Sounds (see public/sounds/ATTRIBUTION.md)
 download "40-cc0-water-splash-slime-sfx/loop_rain.ogg" "rain.ogg"
 download "40-cc0-water-splash-slime-sfx/loop_water_02.ogg" "ocean.ogg"
+download "40-cc0-water-splash-slime-sfx/loop_water_01.ogg" "stream.ogg"
 download "30-cc0-sfx-loops/ambient_01.ogg" "fireplace.ogg"
 download "30-cc0-sfx-loops/ambient_03.ogg" "forest.ogg"
 download "30-cc0-sfx-loops/noise_01.ogg" "brown-noise.ogg"
