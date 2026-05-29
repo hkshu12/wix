@@ -59,7 +59,8 @@ describe('mediaSession', () => {
     syncMediaSession({
       isPlaying: true,
       trackTitles: ['雨声', '篝火'],
-      sleepTimerLabel: null
+      sleepTimerLabel: null,
+      wakeTimerLabel: null
     });
 
     expect(navigator.mediaSession.metadata?.title).toBe('雨声 · 篝火');
@@ -69,11 +70,21 @@ describe('mediaSession', () => {
     syncMediaSession({
       isPlaying: false,
       trackTitles: ['雨声'],
-      sleepTimerLabel: '14:59'
+      sleepTimerLabel: '14:59',
+      wakeTimerLabel: null
     });
 
     expect(navigator.mediaSession.playbackState).toBe('paused');
     expect(navigator.mediaSession.metadata?.artist).toBe('睡眠定时 · 14:59');
+
+    syncMediaSession({
+      isPlaying: false,
+      trackTitles: ['雨声'],
+      sleepTimerLabel: null,
+      wakeTimerLabel: '05:00'
+    });
+
+    expect(navigator.mediaSession.metadata?.artist).toBe('唤醒定时 · 05:00');
   });
 
   it('binds play and pause handlers with cleanup', () => {

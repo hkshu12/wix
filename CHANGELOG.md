@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.46.0] - 2026-05-29
+
+### Added
+
+- **Wake timer on lock-screen Media Session**: when a wake countdown is active, the system media subtitle shows「唤醒定时 · MM:SS」(matching sleep timer on lock screen and PWA), so you can see nap/morning alarm time without opening the mixer drawer.
+
 ## [1.45.0] - 2026-05-28
 
 ### Fixed

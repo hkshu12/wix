@@ -318,6 +318,10 @@ export function AppLayout() {
     ? sleepTimerController.remainingLabel
     : null;
 
+  const mediaSessionWakeLabel = wakeTimerController.isActive
+    ? wakeTimerController.remainingLabel
+    : null;
+
   const handleMediaSessionPlay = useCallback(() => {
     if (!mixer.isPlaying) {
       void handlePlayToggle();
@@ -334,6 +338,7 @@ export function AppLayout() {
     isPlaying: mixer.isPlaying,
     trackTitles: mediaSessionTrackTitles,
     sleepTimerLabel: mediaSessionSleepLabel,
+    wakeTimerLabel: mediaSessionWakeLabel,
     onPlay: handleMediaSessionPlay,
     onPause: handleMediaSessionPause
   });

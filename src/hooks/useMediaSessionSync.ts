@@ -11,6 +11,7 @@ export function useMediaSessionSync({
   isPlaying,
   trackTitles,
   sleepTimerLabel,
+  wakeTimerLabel,
   onPlay,
   onPause
 }: MediaSessionSyncOptions): void {
@@ -19,6 +20,6 @@ export function useMediaSessionSync({
   }, [onPlay, onPause]);
 
   useEffect(() => {
-    syncMediaSession({ isPlaying, trackTitles, sleepTimerLabel });
-  }, [isPlaying, sleepTimerLabel, trackTitles]);
+    syncMediaSession({ isPlaying, trackTitles, sleepTimerLabel, wakeTimerLabel });
+  }, [isPlaying, sleepTimerLabel, wakeTimerLabel, trackTitles]);
 }
