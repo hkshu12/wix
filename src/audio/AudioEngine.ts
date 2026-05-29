@@ -97,6 +97,35 @@ export class AudioEngine {
     }
   }
 
+  /**
+   * Schedules a linear master-gain ramp (sleep/wake timers). While active, {@link sync}
+   * does not overwrite the master gain until the ramp ends.
+   */
+  scheduleMasterVolumeRamp(targetVolume: number, durationSeconds: number): void {
+    const now = this.context.currentTime;
+    const duration = Math.max(0, durationSeconds);
+
+    this.master.gain.cancelScheduledValues(now);
+    this.master.gain.setValueAtTime(this.master.gain.value, now);
+
+    if (duration <= 0) {
+      this.master.gain.setValueAtTime(targetVolume, now);
+      this.clearMasterFade();
+      return;
+    }
+
+    this.master.gain.linearRampToValueAtTime(targetVolume, now + duration);
+    this.masterFadeEndsAt = now + duration;
+  }
+
+  /** Cancels a scheduled master ramp and sets gain immediately (timer cancel / restore). */
+  setMasterVolumeImmediate(volume: number): void {
+    const now = this.context.currentTime;
+    this.clearMasterFade();
+    this.master.gain.cancelScheduledValues(now);
+    this.master.gain.setValueAtTime(volume, now);
+  }
+
   private applyMasterVolume(targetVolume: number, fadeInSeconds: number): void {
     const now = this.context.currentTime;
 

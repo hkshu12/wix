@@ -60,6 +60,7 @@ import { useScreenWakeLock } from '../hooks/useScreenWakeLock';
 import { clampPlaybackFadeInSeconds } from '../domain/playbackFadeIn';
 import { isScreenWakeLockSupported } from '../domain/screenWakeLock';
 import { useSleepTimerController } from '../hooks/useSleepTimerController';
+import type { TimerAudioFade } from '../hooks/timerAudioFade';
 import { useWakeTimerController } from '../hooks/useWakeTimerController';
 import {
   readPlaybackFadeInSeconds,
@@ -90,8 +91,27 @@ export function AppLayout() {
   const [screenWakeLockEnabled, setScreenWakeLockEnabledState] = useState(readScreenWakeLockEnabled);
   const screenWakeLockSupported = isScreenWakeLockSupported();
 
-  const wakeTimerController = useWakeTimerController({ mixer, setMixer });
-  const sleepTimerController = useSleepTimerController({ mixer, setMixer });
+  function getAudioEngine() {
+    engineRef.current ??= new AudioEngine();
+    return engineRef.current;
+  }
+
+  const timerAudio = useMemo<TimerAudioFade>(
+    () => ({
+      scheduleMasterRamp(fromVolume, toVolume, durationSeconds) {
+        const engine = getAudioEngine();
+        engine.setMasterVolumeImmediate(fromVolume);
+        engine.scheduleMasterVolumeRamp(toVolume, durationSeconds);
+      },
+      setMasterVolumeImmediate(volume) {
+        getAudioEngine().setMasterVolumeImmediate(volume);
+      }
+    }),
+    []
+  );
+
+  const wakeTimerController = useWakeTimerController({ mixer, setMixer, timerAudio });
+  const sleepTimerController = useSleepTimerController({ mixer, setMixer, timerAudio });
 
   const startSleepTimerWithExclusion = useCallback(
     (minutes: number) => {
@@ -133,11 +153,6 @@ export function AppLayout() {
     revokeCustomTrackUrls(customTracksRef.current);
     customTracksRef.current = nextTracks;
     setCustomTracks(nextTracks);
-  }
-
-  function getAudioEngine() {
-    engineRef.current ??= new AudioEngine();
-    return engineRef.current;
   }
 
   const resumeAudio = useCallback(async () => {

@@ -23,6 +23,7 @@ import {
   writeSleepTimerSnapshot,
   type HydratedSleepTimerSnapshot
 } from '../storage/sleepTimerSnapshot';
+import { fadeProgress, remainingFadeSeconds, type TimerAudioFade } from './timerAudioFade';
 
 function readInitialSleepTimer(): HydratedSleepTimerSnapshot {
   return hydrateSleepTimerSnapshot(readSleepTimerSnapshot(), Date.now());
@@ -31,6 +32,7 @@ function readInitialSleepTimer(): HydratedSleepTimerSnapshot {
 interface UseSleepTimerControllerOptions {
   mixer: MixerState;
   setMixer: Dispatch<SetStateAction<MixerState>>;
+  timerAudio?: TimerAudioFade;
 }
 
 export interface SleepTimerController {
@@ -44,7 +46,11 @@ export interface SleepTimerController {
   cancel: () => void;
 }
 
-export function useSleepTimerController({ mixer, setMixer }: UseSleepTimerControllerOptions): SleepTimerController {
+export function useSleepTimerController({
+  mixer,
+  setMixer,
+  timerAudio
+}: UseSleepTimerControllerOptions): SleepTimerController {
   const initialSleepTimer = useRef(readInitialSleepTimer());
   const [sleepTimer, setSleepTimer] = useState<SleepTimerState>(() => initialSleepTimer.current.timer);
   const [remainingMs, setRemainingMs] = useState(() =>
@@ -55,6 +61,7 @@ export function useSleepTimerController({ mixer, setMixer }: UseSleepTimerContro
   const preFadeMasterVolumeRef = useRef(
     initialSleepTimer.current.preFadeMasterVolume ?? mixer.masterVolume
   );
+  const fadeRampStartedRef = useRef(false);
 
   function setFadeSeconds(seconds: number) {
     const clamped = clampSleepTimerFadeSeconds(seconds);
@@ -81,6 +88,8 @@ export function useSleepTimerController({ mixer, setMixer }: UseSleepTimerContro
     clearSleepTimerSnapshot();
     setSleepTimer(clearSleepTimer());
     setIsFading(false);
+    fadeRampStartedRef.current = false;
+    timerAudio?.setMasterVolumeImmediate(preFadeMasterVolumeRef.current);
     if (preFadeMasterVolumeRef.current !== undefined) {
       setMixer((state) => setMasterVolume(state, preFadeMasterVolumeRef.current));
     }
@@ -96,6 +105,7 @@ export function useSleepTimerController({ mixer, setMixer }: UseSleepTimerContro
     writeSleepTimerSnapshot(timer, preFadeMasterVolumeRef.current);
     setSleepTimer(timer);
     setIsFading(false);
+    fadeRampStartedRef.current = false;
     return true;
   }
 
@@ -103,6 +113,7 @@ export function useSleepTimerController({ mixer, setMixer }: UseSleepTimerContro
     if (!isSleepTimerActive(sleepTimer)) {
       setRemainingMs(0);
       setIsFading(false);
+      fadeRampStartedRef.current = false;
       return;
     }
 
@@ -114,6 +125,8 @@ export function useSleepTimerController({ mixer, setMixer }: UseSleepTimerContro
         clearSleepTimerSnapshot();
         setSleepTimer(clearSleepTimer());
         setIsFading(false);
+        fadeRampStartedRef.current = false;
+        timerAudio?.setMasterVolumeImmediate(preFadeMasterVolumeRef.current);
         if (mixer.isPlaying) {
           setMixer((state) =>
             setPlaying(setMasterVolume(state, preFadeMasterVolumeRef.current), false)
@@ -127,19 +140,33 @@ export function useSleepTimerController({ mixer, setMixer }: UseSleepTimerContro
       if (mixer.isPlaying && shouldStartSleepFade(sleepTimer, now)) {
         const fadeStartsAt = sleepTimer.fadeStartsAt!;
         const fadeEndsAt = sleepTimer.endsAt!;
-        const fadeDuration = fadeEndsAt - fadeStartsAt;
-        const progress = fadeDuration > 0 ? Math.min(1, (now - fadeStartsAt) / fadeDuration) : 1;
-        const nextVolume = preFadeMasterVolumeRef.current * (1 - progress);
+        const preFade = preFadeMasterVolumeRef.current;
 
         setIsFading(true);
-        setMixer((state) => setMasterVolume(state, nextVolume));
+
+        if (!fadeRampStartedRef.current) {
+          fadeRampStartedRef.current = true;
+
+          if (timerAudio) {
+            const progress = fadeProgress(fadeStartsAt, fadeEndsAt, now);
+            const fromVolume = preFade * (1 - progress);
+            const remainingSeconds = remainingFadeSeconds(fadeStartsAt, fadeEndsAt, now);
+            timerAudio.scheduleMasterRamp(fromVolume, 0, remainingSeconds);
+          }
+        }
+
+        if (!timerAudio) {
+          const progress = fadeProgress(fadeStartsAt, fadeEndsAt, now);
+          const nextVolume = preFade * (1 - progress);
+          setMixer((state) => setMasterVolume(state, nextVolume));
+        }
       }
     };
 
     tick();
     const intervalId = window.setInterval(tick, 250);
     return () => window.clearInterval(intervalId);
-  }, [mixer.isPlaying, setMixer, sleepTimer]);
+  }, [mixer.isPlaying, setMixer, sleepTimer, timerAudio]);
 
   return {
     sleepTimer,

@@ -139,6 +139,36 @@ describe('AudioEngine lifecycle', () => {
 
     vi.unstubAllGlobals();
   });
+
+  it('schedules a linear master ramp for timer fade without sync overwriting it', async () => {
+    const context = new FakeAudioContext({ immediateDecode: true });
+    const engine = new AudioEngine(context as unknown as AudioContext);
+    context.masterGain!.gain.value = 0.8;
+
+    engine.scheduleMasterVolumeRamp(0, 30);
+
+    const master = context.masterGain!;
+    expect(master.gain.scheduled).toEqual([
+      { type: 'cancel', time: 0 },
+      { type: 'set', time: 0, value: 0.8 },
+      { type: 'linearRamp', time: 30, value: 0 }
+    ]);
+
+    context.currentTime = 15;
+    await engine.sync(createState(true), []);
+    expect(master.gain.scheduled).toHaveLength(3);
+  });
+
+  it('setMasterVolumeImmediate cancels a scheduled ramp', () => {
+    const context = new FakeAudioContext();
+    const engine = new AudioEngine(context as unknown as AudioContext);
+
+    engine.scheduleMasterVolumeRamp(0.2, 60);
+    engine.setMasterVolumeImmediate(0.65);
+
+    expect(context.masterGain!.gain.value).toBe(0.65);
+    expect(context.masterGain!.gain.scheduled.at(-1)).toEqual({ type: 'set', time: 0, value: 0.65 });
+  });
 });
 
 async function waitForPendingDecode(context: FakeAudioContext): Promise<void> {
