@@ -553,7 +553,11 @@ export function AppLayout() {
     }
 
     refreshMixerPresets();
-    setImportStatus(`已保存预设「${result.preset.name}」。`);
+    setImportStatus(
+      result.overwritten
+        ? `已更新预设「${result.preset.name}」（同名覆盖）。`
+        : `已保存预设「${result.preset.name}」。`
+    );
   }
 
   function handleLoadMixerPreset(id: string) {

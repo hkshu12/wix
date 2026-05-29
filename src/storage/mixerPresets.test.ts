@@ -52,6 +52,56 @@ describe('mixerPresets storage', () => {
     expect(readMixerPresets()).toHaveLength(MAX_MIXER_PRESETS);
   });
 
+  it('overwrites an existing preset when the name matches', () => {
+    const initial = {
+      ...createInitialMixerState(),
+      masterVolume: 0.4,
+      layers: [{ soundId: 'rain', volume: 0.3, pan: 0, playbackRate: 1, muted: false }]
+    };
+    const first = saveMixerPreset('睡眠', initial);
+    expect(first.ok).toBe(true);
+    if (!first.ok) {
+      return;
+    }
+    expect(first.overwritten).toBe(false);
+
+    const updatedState = {
+      ...createInitialMixerState(),
+      masterVolume: 0.8,
+      layers: [{ soundId: 'ocean', volume: 0.5, pan: 0, playbackRate: 1, muted: false }]
+    };
+    const second = saveMixerPreset('睡眠', updatedState);
+    expect(second.ok).toBe(true);
+    if (!second.ok) {
+      return;
+    }
+    expect(second.overwritten).toBe(true);
+    expect(second.preset.id).toBe(first.preset.id);
+
+    const presets = readMixerPresets();
+    expect(presets).toHaveLength(1);
+    expect(presets[0]?.masterVolume).toBe(0.8);
+    expect(presets[0]?.layers[0]?.soundId).toBe('ocean');
+  });
+
+  it('allows updating the twelfth preset without hitting max-reached', () => {
+    for (let index = 0; index < MAX_MIXER_PRESETS; index += 1) {
+      saveMixerPreset(`预设 ${index}`, createInitialMixerState());
+    }
+
+    const overwrite = saveMixerPreset('预设 0', {
+      ...createInitialMixerState(),
+      masterVolume: 0.25
+    });
+    expect(overwrite.ok).toBe(true);
+    if (!overwrite.ok) {
+      return;
+    }
+    expect(overwrite.overwritten).toBe(true);
+    expect(readMixerPresets()).toHaveLength(MAX_MIXER_PRESETS);
+    expect(readMixerPresets()[0]?.masterVolume).toBe(0.25);
+  });
+
   it('deletes a preset by id', () => {
     const saved = saveMixerPreset('测试', createInitialMixerState());
     if (!saved.ok) {
