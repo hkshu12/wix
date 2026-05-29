@@ -15,6 +15,8 @@ export interface StudioContextValue {
   handleImport: (files: FileList | null) => Promise<void>;
   exportCustomLibrary: () => Promise<string>;
   importCustomLibraryBackup: (files: FileList | null) => Promise<string>;
+  exportMixerPresets: () => string;
+  importMixerPresetsBackup: (files: FileList | null) => Promise<string>;
   handleDeleteCustomTrack: (track: CustomTrack) => Promise<void>;
   handlePlayToggle: () => Promise<void>;
   sleepTimerRemainingLabel: string;

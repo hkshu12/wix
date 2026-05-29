@@ -32,8 +32,15 @@ import {
   serializeCustomLibraryBackup
 } from '../domain/customLibraryBackup';
 import {
+  downloadMixerPresetsBackup,
+  formatMixerPresetsBackupFilename,
+  parseMixerPresetsBackup,
+  serializeMixerPresetsBackup
+} from '../domain/mixerPresetsBackup';
+import {
   deleteMixerPreset,
   readMixerPresets,
+  replaceMixerPresets,
   saveMixerPreset,
   type MixerPreset
 } from '../storage/mixerPresets';
@@ -317,6 +324,48 @@ export function AppLayout() {
     return `已从备份导入 ${result.tracks.length} 个自定义音频。`;
   }
 
+  function handleExportMixerPresets(): string {
+    const presets = readMixerPresets();
+    if (presets.length === 0) {
+      return '暂无场景预设可导出。';
+    }
+
+    const exportedAt = Date.now();
+    const json = serializeMixerPresetsBackup(presets, exportedAt);
+    downloadMixerPresetsBackup(json, formatMixerPresetsBackupFilename(exportedAt));
+    return `已导出 ${presets.length} 个场景预设。`;
+  }
+
+  async function handleImportMixerPresetsBackup(fileList: FileList | null): Promise<string> {
+    const file = fileList?.[0];
+    if (!file) {
+      return '';
+    }
+
+    let text: string;
+    try {
+      text = await file.text();
+    } catch {
+      return '无法读取备份文件，请重试。';
+    }
+
+    const result = parseMixerPresetsBackup(text);
+    if (!result.ok) {
+      const messages: Record<typeof result.reason, string> = {
+        empty: '备份文件为空，请选择有效的 wix 场景预设备份。',
+        'invalid-json': '备份文件不是有效的 JSON，请检查后重试。',
+        'wrong-type': '不是 wix 场景预设备份文件。',
+        'unsupported-version': '备份版本过新，请更新应用后再导入。',
+        'invalid-payload': '备份内容无效或已损坏。'
+      };
+      return messages[result.reason];
+    }
+
+    replaceMixerPresets(result.presets);
+    refreshMixerPresets();
+    return `已从备份恢复 ${result.presets.length} 个场景预设。`;
+  }
+
   async function handleDeleteCustomTrack(track: CustomTrack) {
     await deleteCustomTrack(track.id);
     setMixer((state) => ({
@@ -577,6 +626,8 @@ export function AppLayout() {
     handleImport,
     exportCustomLibrary: handleExportCustomLibrary,
     importCustomLibraryBackup: handleImportCustomLibraryBackup,
+    exportMixerPresets: handleExportMixerPresets,
+    importMixerPresetsBackup: handleImportMixerPresetsBackup,
     handleDeleteCustomTrack,
     handlePlayToggle,
     sleepTimerRemainingLabel: sleepTimerController.remainingLabel,

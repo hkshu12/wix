@@ -18,6 +18,8 @@ function createStudioStub(overrides: Partial<StudioContextValue> = {}): StudioCo
     handleImport: vi.fn(),
     exportCustomLibrary: vi.fn().mockResolvedValue('已导出 1 个自定义音频。'),
     importCustomLibraryBackup: vi.fn().mockResolvedValue('已从备份导入 1 个自定义音频。'),
+    exportMixerPresets: vi.fn().mockReturnValue('已导出 1 个场景预设。'),
+    importMixerPresetsBackup: vi.fn().mockResolvedValue('已从备份恢复 1 个场景预设。'),
     handleDeleteCustomTrack: vi.fn(),
     handlePlayToggle: vi.fn(),
     sleepTimerRemainingLabel: '',
@@ -140,5 +142,45 @@ describe('SettingsPage', () => {
     renderSettings(createStudioStub({ customTracks: [] }));
 
     expect(screen.getByRole('button', { name: '导出 0 个音频…' })).toBeDisabled();
+  });
+
+  it('exports mixer presets from settings', () => {
+    const exportMixerPresets = vi.fn().mockReturnValue('已导出 2 个场景预设。');
+    renderSettings(
+      createStudioStub({
+        exportMixerPresets,
+        mixerPresets: [
+          {
+            id: 'p1',
+            name: '睡眠',
+            createdAt: 1,
+            masterVolume: 0.8,
+            stereoWidth: 1,
+            playbackRate: 1,
+            layers: []
+          },
+          {
+            id: 'p2',
+            name: '专注',
+            createdAt: 2,
+            masterVolume: 0.7,
+            stereoWidth: 1,
+            playbackRate: 1,
+            layers: []
+          }
+        ]
+      })
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: '导出 2 个预设…' }));
+
+    expect(exportMixerPresets).toHaveBeenCalledTimes(1);
+    expect(screen.getByRole('status')).toHaveTextContent('已导出 2 个场景预设');
+  });
+
+  it('disables preset export when there are no presets', () => {
+    renderSettings(createStudioStub({ mixerPresets: [] }));
+
+    expect(screen.getByRole('button', { name: '导出 0 个预设…' })).toBeDisabled();
   });
 });
