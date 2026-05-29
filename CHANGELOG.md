@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.47.0] - 2026-05-29
+
+### Added
+
+- Built-in **白噪音** ambience loop (CC0 `noise_03`) alongside pink and brown noise—bright, even spectrum for focus, baby soothing, and masking sudden environmental sounds.
+
+### Changed
+
+- Landing page feature list: sixteen built-in ambiences (including 白噪音).
+
 ## [1.46.0] - 2026-05-29
 
 ### Added

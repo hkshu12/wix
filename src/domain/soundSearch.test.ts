@@ -28,6 +28,9 @@ describe('filterSoundsByQuery', () => {
     expect(filterSoundsByQuery(BUILT_IN_SOUNDS, '雨夜')).toEqual(
       BUILT_IN_SOUNDS.filter((sound) => sound.id === 'thunder')
     );
+    expect(filterSoundsByQuery(BUILT_IN_SOUNDS, '白噪音')).toEqual(
+      BUILT_IN_SOUNDS.filter((sound) => sound.id === 'white-noise')
+    );
     expect(filterSoundsByQuery(BUILT_IN_SOUNDS, 'OFFICE')).toEqual(
       BUILT_IN_SOUNDS.filter((sound) => sound.id === 'office')
     );
