@@ -9,6 +9,8 @@ vi.mock('../audio/AudioEngine', () => ({
     return {
       resume: vi.fn().mockResolvedValue(undefined),
       sync: vi.fn().mockResolvedValue({ failedSoundIds: [] }),
+      scheduleMasterVolumeRamp: vi.fn(),
+      setMasterVolumeImmediate: vi.fn(),
       stop: vi.fn(),
       invalidateCachedBuffer: vi.fn()
     };

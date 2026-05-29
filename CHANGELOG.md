@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.56.0] - 2026-05-29
+
+### Changed
+
+- **Sleep and wake timer fades use Web Audio ramps**: master volume now fades via `linearRampToValueAtTime` on the audio engine instead of 250 ms React state steps—smoother sleep wind-down and wake-up, especially on long fade durations.
+
 ## [1.55.0] - 2026-05-29
 
 ### Added

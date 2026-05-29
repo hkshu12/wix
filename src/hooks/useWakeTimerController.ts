@@ -20,6 +20,7 @@ import {
   writeWakeTimerSnapshot,
   type HydratedWakeTimerSnapshot
 } from '../storage/wakeTimerSnapshot';
+import { fadeProgress, remainingFadeSeconds, type TimerAudioFade } from './timerAudioFade';
 
 function readInitialWakeTimer(): HydratedWakeTimerSnapshot {
   return hydrateWakeTimerSnapshot(readWakeTimerSnapshot(), Date.now());
@@ -28,6 +29,7 @@ function readInitialWakeTimer(): HydratedWakeTimerSnapshot {
 interface UseWakeTimerControllerOptions {
   mixer: MixerState;
   setMixer: Dispatch<SetStateAction<MixerState>>;
+  timerAudio?: TimerAudioFade;
 }
 
 export interface WakeTimerController {
@@ -41,7 +43,11 @@ export interface WakeTimerController {
   cancel: () => void;
 }
 
-export function useWakeTimerController({ mixer, setMixer }: UseWakeTimerControllerOptions): WakeTimerController {
+export function useWakeTimerController({
+  mixer,
+  setMixer,
+  timerAudio
+}: UseWakeTimerControllerOptions): WakeTimerController {
   const initialWakeTimer = useRef(readInitialWakeTimer());
   const [wakeTimer, setWakeTimer] = useState<WakeTimerState>(() => initialWakeTimer.current.timer);
   const [remainingMs, setRemainingMs] = useState(() =>
@@ -80,6 +86,7 @@ export function useWakeTimerController({ mixer, setMixer }: UseWakeTimerControll
     setWakeTimer(clearWakeTimer());
     setIsFading(false);
     fadeStartedRef.current = false;
+    timerAudio?.setMasterVolumeImmediate(targetMasterVolumeRef.current);
   }
 
   function start(minutes: number): boolean {
@@ -114,6 +121,7 @@ export function useWakeTimerController({ mixer, setMixer }: UseWakeTimerControll
         setIsFading(false);
         fadeStartedRef.current = false;
         const target = targetMasterVolumeRef.current;
+        timerAudio?.setMasterVolumeImmediate(target);
         setMixer((state) => {
           const withVolume = setMasterVolume(state, target);
           return state.isPlaying ? withVolume : setPlaying(withVolume, true);
@@ -124,30 +132,38 @@ export function useWakeTimerController({ mixer, setMixer }: UseWakeTimerControll
       if (shouldStartWakeFade(wakeTimer, now)) {
         const fadeStartsAt = wakeTimer.fadeStartsAt!;
         const fadeEndsAt = wakeTimer.endsAt!;
-        const fadeDuration = fadeEndsAt - fadeStartsAt;
-        const progress = fadeDuration > 0 ? Math.min(1, (now - fadeStartsAt) / fadeDuration) : 1;
         const target = targetMasterVolumeRef.current;
-        const nextVolume = target * progress;
+
+        setIsFading(true);
 
         if (!fadeStartedRef.current) {
           fadeStartedRef.current = true;
-          setIsFading(true);
           setMixer((state) => {
             const atZero = setMasterVolume(state, 0);
             return state.isPlaying ? atZero : setPlaying(atZero, true);
           });
+
+          if (timerAudio) {
+            const progress = fadeProgress(fadeStartsAt, fadeEndsAt, now);
+            const fromVolume = target * progress;
+            const remainingSeconds = remainingFadeSeconds(fadeStartsAt, fadeEndsAt, now);
+            timerAudio.scheduleMasterRamp(fromVolume, target, remainingSeconds);
+          }
           return;
         }
 
-        setIsFading(true);
-        setMixer((state) => setMasterVolume(state, nextVolume));
+        if (!timerAudio) {
+          const progress = fadeProgress(fadeStartsAt, fadeEndsAt, now);
+          const nextVolume = target * progress;
+          setMixer((state) => setMasterVolume(state, nextVolume));
+        }
       }
     };
 
     tick();
     const intervalId = window.setInterval(tick, 250);
     return () => window.clearInterval(intervalId);
-  }, [setMixer, wakeTimer]);
+  }, [setMixer, wakeTimer, timerAudio]);
 
   return {
     wakeTimer,

@@ -64,7 +64,7 @@
 | ~~Studio 唤醒定时 UI 测试~~ | 回归唤醒流程 | — | 已完成 v1.48.0 |
 | ~~`useMixerShareDeepLink` 单测~~ | 分享深链回归 | — | 已完成 v1.49.0 |
 | ~~预设重命名~~ | 修正错字而不改混音 | 仅删/新建 | 已完成 v1.55.0 抽屉内联重命名 |
-| **定时渐出/渐强 Web Audio 斜坡** | 睡眠/唤醒更顺滑 | 250ms 步进调主音量 | `AudioEngine` `linearRampToValueAtTime` + 定时 hook |
+| ~~定时渐出/渐强 Web Audio 斜坡~~ | 睡眠/唤醒更顺滑 | — | 已完成 v1.56.0 `scheduleMasterVolumeRamp` |
 | **时钟点唤醒** | 「7:30 叫醒」 | 仅「N 分钟后」 | 扩展 `wakeTimer.ts` + UI |
 | **完整备份含混音快照与偏好** | 换机后立刻恢复当前会话 | v1.53 仅音频+预设 | `fullAppBackup` v2 可选字段 |
 
@@ -87,14 +87,14 @@
 | 锁屏/PWA | 睡眠与唤醒倒计时 | v1.46.0 Media Session 副标题对称 |
 | Android 原生 | 后台播放 | 仍为 P1 最大缺口 |
 
-### 代码与架构备注（2026-05-29 第三十一次挖掘）
+### 代码与架构备注（2026-05-29 第三十二次挖掘）
 
-- **预设**：`renameMixerPreset` 按 id 改名称，拒绝空名与与其他预设同名；不触碰 layers/masterVolume。
-- **音库**：17 内置轨；下一加音版本间隔至少一项非音库能力。
-- **备份**：`fullAppBackup` v1 仅 `customTracks` + `presets`；混音快照与 fade/常亮偏好为 P2 扩展。
-- **定时器**：睡眠/唤醒 fade 仍经 React `masterVolume` 步进；Web Audio 斜坡为下一项 UX 打磨。
-- **测试**：`mixerPresets.test.ts` 覆盖重命名与重名拒绝；`StudioPage.test` 覆盖抽屉重命名流程。
-- **版本**：仓库 **1.54.0** → 本次 **1.55.0** 预设重命名。
+- **定时器**：睡眠/唤醒渐出渐强经 `AudioEngine.scheduleMasterVolumeRamp`；`sync` 在斜坡完成前不覆盖主增益。
+- **预设**：重命名、同名覆盖、完整备份已齐；下一项可为时钟点唤醒或备份含混音快照。
+- **音库**：17 内置轨；避免连续版本仅加音。
+- **Android**：后台播放仍为 P1 最大缺口（需原生/Capacitor 研究）。
+- **测试**：`AudioEngine.test` 覆盖定时斜坡；`timerAudioFade.test` 覆盖剩余时长计算。
+- **版本**：仓库 **1.55.0** → 本次 **1.56.0** 定时 Web Audio 斜坡。
 
 ### 外部信号
 
@@ -103,15 +103,16 @@
 
 ## 本次选中项
 
-**场景预设重命名（P2 专注/睡眠日常）**
+**睡眠/唤醒定时 Web Audio 主音量斜坡（P2 UX）**
 
-- **理由**：v1.54.0 已支持同名覆盖更新混音，但修正错字仍会改动声轨；重命名仅改标签，单 PR 改 `mixerPresets.ts` + 抽屉 UI，不碰原生。
-- **范围**：`storage/mixerPresets.ts`、`AppLayout`、`StudioPage`、版本 **1.55.0**。
+- **理由**：v1.55.0 已完成预设重命名；定时渐出仍每 250ms 改 React 主音量并触发 `sync`，听感阶梯感明显；`AudioEngine` 已有播放渐入斜坡，扩展为定时器单 PR、无原生依赖。
+- **范围**：`AudioEngine.ts`、`timerAudioFade.ts`、定时 hook、`AppLayout`、版本 **1.56.0**。
 
 ## 历史已完成
 
 | 日期 | 项 | 引用 |
 | --- | --- | --- |
+| 2026-05-29 | 睡眠/唤醒定时 Web Audio 斜坡 | v1.56.0 |
 | 2026-05-29 | 场景预设重命名 | v1.55.0 |
 | 2026-05-29 | 场景预设同名覆盖保存 | v1.54.0 |
 | 2026-05-29 | 完整备份（音频+预设单 JSON） | v1.53.0 |

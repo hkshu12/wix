@@ -17,6 +17,8 @@ vi.mock('../audio/AudioEngine', () => ({
       resume: resumeMock,
       sync: syncMock,
       invalidateCachedBuffer: invalidateCachedBufferMock,
+      scheduleMasterVolumeRamp: vi.fn(),
+      setMasterVolumeImmediate: vi.fn(),
       stop: vi.fn()
     };
   })
