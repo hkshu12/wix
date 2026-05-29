@@ -35,6 +35,7 @@ function createStudioStub(overrides: Partial<StudioContextValue> = {}): StudioCo
     screenWakeLockSupported: false,
     setScreenWakeLockEnabled: vi.fn(),
     startSleepTimer: vi.fn(() => true),
+    startSleepTimerAtClock: vi.fn(() => true),
     cancelSleepTimer: vi.fn(),
     wakeTimerRemainingLabel: '',
     wakeTimerActive: false,

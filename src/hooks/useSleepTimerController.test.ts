@@ -124,6 +124,22 @@ describe('useSleepTimerController', () => {
     expect(result.current.controller.isFading).toBe(true);
   });
 
+  it('starts a clock sleep timer at the next local occurrence', () => {
+    const { result } = renderHook(() => {
+      const [mixer, setMixer] = useState(createInitialMixerState);
+      const controller = useSleepTimerController({ mixer, setMixer });
+      return { controller };
+    });
+
+    act(() => {
+      vi.setSystemTime(Date.parse('2026-05-29T20:00:00'));
+      expect(result.current.controller.startAtClock(23, 0)).toBe(true);
+    });
+
+    expect(result.current.controller.isActive).toBe(true);
+    expect(result.current.controller.remainingLabel).toBe('3:00:00');
+  });
+
   it('rejects out-of-range custom durations', () => {
     const { result } = renderHook(() => {
       const [mixer, setMixer] = useState(createInitialMixerState);

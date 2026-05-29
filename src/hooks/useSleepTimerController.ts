@@ -9,7 +9,9 @@ import {
   shouldFinishSleepTimer,
   shouldStartSleepFade,
   isValidSleepTimerMinutes,
+  isValidSleepClockTime,
   startSleepTimer,
+  startSleepTimerAtClock,
   type SleepTimerState
 } from '../domain/sleepTimer';
 import {
@@ -43,6 +45,7 @@ export interface SleepTimerController {
   fadeSeconds: number;
   setFadeSeconds: (seconds: number) => void;
   start: (minutes: number) => boolean;
+  startAtClock: (hour: number, minute: number) => boolean;
   cancel: () => void;
 }
 
@@ -102,6 +105,24 @@ export function useSleepTimerController({
 
     preFadeMasterVolumeRef.current = mixer.masterVolume;
     const timer = startSleepTimer(Date.now(), minutes, fadeSeconds);
+    writeSleepTimerSnapshot(timer, preFadeMasterVolumeRef.current);
+    setSleepTimer(timer);
+    setIsFading(false);
+    fadeRampStartedRef.current = false;
+    return true;
+  }
+
+  function startAtClock(hour: number, minute: number): boolean {
+    if (!isValidSleepClockTime(hour, minute)) {
+      return false;
+    }
+
+    const timer = startSleepTimerAtClock(Date.now(), hour, minute, fadeSeconds);
+    if (!timer) {
+      return false;
+    }
+
+    preFadeMasterVolumeRef.current = mixer.masterVolume;
     writeSleepTimerSnapshot(timer, preFadeMasterVolumeRef.current);
     setSleepTimer(timer);
     setIsFading(false);
@@ -176,6 +197,7 @@ export function useSleepTimerController({
     fadeSeconds,
     setFadeSeconds,
     start,
+    startAtClock,
     cancel
   };
 }

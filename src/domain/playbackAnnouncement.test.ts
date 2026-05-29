@@ -5,6 +5,7 @@ import {
   formatMasterVolumeAnnouncement,
   formatSleepTimerCancelAnnouncement,
   formatSleepTimerCompleteAnnouncement,
+  formatSleepTimerClockStartAnnouncement,
   formatSleepTimerStartAnnouncement,
   formatWakeTimerCancelAnnouncement,
   formatWakeTimerClockStartAnnouncement,
@@ -33,6 +34,7 @@ describe('formatLayerToggleAnnouncement', () => {
 
 describe('formatSleepTimerAnnouncements', () => {
   it('announces start, cancel, and completion', () => {
+    expect(formatSleepTimerClockStartAnnouncement(23, 0)).toBe('已设置睡眠定时，将于 23:00 渐弱并停止');
     expect(formatSleepTimerStartAnnouncement(30)).toBe('已设置睡眠定时 30 分钟');
     expect(formatSleepTimerCancelAnnouncement()).toBe('已取消睡眠定时');
     expect(formatSleepTimerCompleteAnnouncement()).toBe('睡眠定时已到，播放已暂停');

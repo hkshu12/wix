@@ -24,6 +24,12 @@ export function formatSleepTimerStartAnnouncement(minutes: number): string {
   return `已设置睡眠定时 ${minutes} 分钟`;
 }
 
+export function formatSleepTimerClockStartAnnouncement(hour: number, minute: number): string {
+  const hh = String(hour).padStart(2, '0');
+  const mm = String(minute).padStart(2, '0');
+  return `已设置睡眠定时，将于 ${hh}:${mm} 渐弱并停止`;
+}
+
 export function formatSleepTimerCancelAnnouncement(): string {
   return '已取消睡眠定时';
 }

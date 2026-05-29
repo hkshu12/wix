@@ -14,7 +14,12 @@ import {
   SLEEP_TIMER_FADE_MIN_SECONDS,
   SLEEP_TIMER_MAX_MINUTES,
   SLEEP_TIMER_MIN_MINUTES,
+  formatSleepClockTime,
+  isSleepClockTimeReachable,
+  parseSleepClockTimeInput,
+  resolveSleepEndsAtMs,
   startSleepTimer,
+  startSleepTimerAtClock,
   SLEEP_TIMER_FADE_SECONDS
 } from './sleepTimer';
 
@@ -67,6 +72,35 @@ describe('sleepTimer', () => {
 
   it('clears an active timer', () => {
     expect(clearSleepTimer()).toEqual(createInitialSleepTimerState());
+  });
+
+  it('schedules clock sleep for later today', () => {
+    const nowMs = Date.parse('2026-05-29T20:00:00');
+    const timer = startSleepTimerAtClock(nowMs, 23, 0, 60)!;
+    const endsAt = Date.parse('2026-05-29T23:00:00');
+
+    expect(timer.endsAt).toBe(endsAt);
+    expect(timer.fadeStartsAt).toBe(endsAt - 60 * 1000);
+  });
+
+  it('schedules clock sleep for tomorrow when time already passed', () => {
+    const nowMs = Date.parse('2026-05-29T23:30:00');
+    const endsAt = resolveSleepEndsAtMs(nowMs, 23, 0);
+
+    expect(endsAt).toBe(Date.parse('2026-05-30T23:00:00'));
+    expect(isSleepClockTimeReachable(nowMs, 23, 0)).toBe(true);
+  });
+
+  it('rejects clock sleep less than one minute away', () => {
+    const nowMs = Date.parse('2026-05-29T22:59:30');
+    expect(startSleepTimerAtClock(nowMs, 23, 0, 60)).toBeNull();
+    expect(isSleepClockTimeReachable(nowMs, 23, 0)).toBe(false);
+  });
+
+  it('parses and formats clock input', () => {
+    expect(parseSleepClockTimeInput('23:00')).toEqual({ hour: 23, minute: 0 });
+    expect(parseSleepClockTimeInput('invalid')).toBeNull();
+    expect(formatSleepClockTime(7, 5)).toBe('07:05');
   });
 
   it('validates and clamps custom minute bounds', () => {

@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.58.0] - 2026-05-29
+
+### Added
+
+- **Clock-time sleep timer**: set a sleep stop time (e.g. 23:00) in the mixer drawer—playback fades out and pauses at that local time (tomorrow if the time has already passed today). Includes screen-reader announcement and validation for at least one minute lead time.
+
 ## [1.57.0] - 2026-05-29
 
 ### Added
