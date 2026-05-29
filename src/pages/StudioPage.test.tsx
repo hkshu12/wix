@@ -129,6 +129,29 @@ describe('StudioPage', () => {
     await waitFor(() => expect(status).toHaveTextContent('已取消睡眠定时'));
   });
 
+  it('starts a wake timer from the mixer drawer and shows remaining time in the dock', () => {
+    renderWithRouter(<AppRouter />, { routerProps: { initialEntries: ['/studio'] } });
+
+    fireEvent.click(screen.getByRole('button', { name: /混音与导入/ }));
+    fireEvent.click(within(screen.getByRole('group', { name: '唤醒定时预设' })).getByRole('button', { name: '30 分钟' }));
+
+    expect(screen.getByText(/唤醒 · 30:00/)).toBeInTheDocument();
+    expect(screen.getByText(/剩余 30:00/)).toBeInTheDocument();
+  });
+
+  it('announces wake timer start and cancel in the playback status region', async () => {
+    renderWithRouter(<AppRouter />, { routerProps: { initialEntries: ['/studio'] } });
+
+    const status = screen.getByLabelText('混音播放状态');
+
+    fireEvent.click(screen.getByRole('button', { name: /混音与导入/ }));
+    fireEvent.click(within(screen.getByRole('group', { name: '唤醒定时预设' })).getByRole('button', { name: '30 分钟' }));
+    await waitFor(() => expect(status).toHaveTextContent('已设置唤醒定时 30 分钟'));
+
+    fireEvent.click(screen.getByRole('button', { name: '取消唤醒定时' }));
+    await waitFor(() => expect(status).toHaveTextContent('已取消唤醒定时'));
+  });
+
   it('saves and loads a named mixer preset from the drawer', () => {
     renderWithRouter(<AppRouter />, { routerProps: { initialEntries: ['/studio'] } });
 
@@ -359,5 +382,15 @@ describe('StudioPage', () => {
     fireEvent.click(screen.getByRole('button', { name: '取消睡眠定时' }));
 
     expect(screen.queryByText(/睡眠 ·/)).not.toBeInTheDocument();
+  });
+
+  it('cancels an active wake timer', () => {
+    renderWithRouter(<AppRouter />, { routerProps: { initialEntries: ['/studio'] } });
+
+    fireEvent.click(screen.getByRole('button', { name: /混音与导入/ }));
+    fireEvent.click(within(screen.getByRole('group', { name: '唤醒定时预设' })).getByRole('button', { name: '15 分钟' }));
+    fireEvent.click(screen.getByRole('button', { name: '取消唤醒定时' }));
+
+    expect(screen.queryByText(/唤醒 ·/)).not.toBeInTheDocument();
   });
 });
