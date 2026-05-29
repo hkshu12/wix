@@ -121,6 +121,14 @@ export function AppLayout() {
     [sleepTimerController, wakeTimerController]
   );
 
+  const startSleepTimerAtClockWithExclusion = useCallback(
+    (hour: number, minute: number) => {
+      wakeTimerController.cancel();
+      return sleepTimerController.startAtClock(hour, minute);
+    },
+    [sleepTimerController, wakeTimerController]
+  );
+
   const startWakeTimerWithExclusion = useCallback(
     (minutes: number) => {
       sleepTimerController.cancel();
@@ -772,6 +780,7 @@ export function AppLayout() {
     screenWakeLockSupported,
     setScreenWakeLockEnabled,
     startSleepTimer: startSleepTimerWithExclusion,
+    startSleepTimerAtClock: startSleepTimerAtClockWithExclusion,
     cancelSleepTimer: sleepTimerController.cancel,
     wakeTimerRemainingLabel: wakeTimerController.remainingLabel,
     wakeTimerActive: wakeTimerController.isActive,

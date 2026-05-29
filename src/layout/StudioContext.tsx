@@ -32,6 +32,7 @@ export interface StudioContextValue {
   screenWakeLockSupported: boolean;
   setScreenWakeLockEnabled: (enabled: boolean) => void;
   startSleepTimer: (minutes: number) => boolean;
+  startSleepTimerAtClock: (hour: number, minute: number) => boolean;
   cancelSleepTimer: () => void;
   wakeTimerRemainingLabel: string;
   wakeTimerActive: boolean;
