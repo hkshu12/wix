@@ -7,6 +7,7 @@ export type BuiltInSoundId =
   | 'forest'
   | 'brown-noise'
   | 'pink-noise'
+  | 'white-noise'
   | 'fan'
   | 'cafe'
   | 'train'
@@ -98,6 +99,15 @@ export const BUILT_IN_SOUNDS: BuiltInSound[] = [
     icon: '🌸',
     accent: '#f472b6',
     src: 'sounds/pink-noise.ogg'
+  },
+  {
+    id: 'white-noise',
+    kind: 'built-in',
+    title: '白噪音',
+    subtitle: '明亮均匀频谱，专注、哄娃与屏蔽突发噪音',
+    icon: '⚪',
+    accent: '#e2e8f0',
+    src: 'sounds/white-noise.ogg'
   },
   {
     id: 'fan',
