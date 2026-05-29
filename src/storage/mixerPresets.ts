@@ -16,7 +16,7 @@ export interface MixerPreset {
 }
 
 export type SaveMixerPresetResult =
-  | { ok: true; preset: MixerPreset }
+  | { ok: true; preset: MixerPreset; overwritten: boolean }
   | { ok: false; reason: 'empty-name' | 'max-reached' };
 
 export function readMixerPresets(): MixerPreset[] {
@@ -40,6 +40,28 @@ export function saveMixerPreset(name: string, state: MixerState): SaveMixerPrese
   }
 
   const presets = readMixerPresets();
+  const existingIndex = presets.findIndex((preset) => preset.name === trimmed);
+
+  if (existingIndex >= 0) {
+    const existing = presets[existingIndex];
+    if (!existing) {
+      return { ok: false, reason: 'max-reached' };
+    }
+
+    const updated: MixerPreset = {
+      ...existing,
+      masterVolume: state.masterVolume,
+      stereoWidth: state.stereoWidth,
+      playbackRate: state.playbackRate,
+      layers: state.layers.map((layer) => ({ ...layer }))
+    };
+
+    const next = [...presets];
+    next[existingIndex] = updated;
+    writeMixerPresets(next);
+    return { ok: true, preset: updated, overwritten: true };
+  }
+
   if (presets.length >= MAX_MIXER_PRESETS) {
     return { ok: false, reason: 'max-reached' };
   }
@@ -55,7 +77,7 @@ export function saveMixerPreset(name: string, state: MixerState): SaveMixerPrese
   };
 
   writeMixerPresets([...presets, preset]);
-  return { ok: true, preset };
+  return { ok: true, preset, overwritten: false };
 }
 
 export function deleteMixerPreset(id: string): void {

@@ -443,7 +443,9 @@ export function StudioPage() {
 
         <section className="drawer-section" aria-labelledby="drawer-presets-title">
           <h3 id="drawer-presets-title">场景预设</h3>
-          <p className="drawer-hint">保存当前声轨组合与主音量，一键切换专注、睡眠等固定搭配。</p>
+          <p className="drawer-hint">
+            保存当前声轨组合与主音量，一键切换专注、睡眠等固定搭配。同名再次保存会覆盖该预设（最多 12 个）。
+          </p>
           <div className="mixer-preset-save">
             <label className="mixer-preset-name-label">
               预设名称
