@@ -39,6 +39,7 @@ export interface StudioContextValue {
   wakeTimerFadeSeconds: number;
   setWakeTimerFadeSeconds: (seconds: number) => void;
   startWakeTimer: (minutes: number) => boolean;
+  startWakeTimerAtClock: (hour: number, minute: number) => boolean;
   cancelWakeTimer: () => void;
   mixerPresets: MixerPreset[];
   saveMixerPreset: (name: string) => void;

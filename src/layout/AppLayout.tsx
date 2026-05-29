@@ -129,6 +129,14 @@ export function AppLayout() {
     [sleepTimerController, wakeTimerController]
   );
 
+  const startWakeTimerAtClockWithExclusion = useCallback(
+    (hour: number, minute: number) => {
+      sleepTimerController.cancel();
+      return wakeTimerController.startAtClock(hour, minute);
+    },
+    [sleepTimerController, wakeTimerController]
+  );
+
   useScreenWakeLock(screenWakeLockEnabled, mixer.isPlaying);
 
   function setPlaybackFadeInSeconds(seconds: number) {
@@ -771,6 +779,7 @@ export function AppLayout() {
     wakeTimerFadeSeconds: wakeTimerController.fadeSeconds,
     setWakeTimerFadeSeconds: wakeTimerController.setFadeSeconds,
     startWakeTimer: startWakeTimerWithExclusion,
+    startWakeTimerAtClock: startWakeTimerAtClockWithExclusion,
     cancelWakeTimer: wakeTimerController.cancel,
     mixerPresets,
     saveMixerPreset: handleSaveMixerPreset,

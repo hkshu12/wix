@@ -7,9 +7,11 @@ import {
   getWakeTimerRemainingMs,
   isWakeTimerActive,
   isValidWakeTimerMinutes,
+  isValidWakeClockTime,
   shouldFinishWakeTimer,
   shouldStartWakeFade,
   startWakeTimer,
+  startWakeTimerAtClock,
   type WakeTimerState
 } from '../domain/wakeTimer';
 import { readWakeTimerFadeSeconds, writeWakeTimerFadeSeconds } from '../storage/wakeTimerPreferences';
@@ -40,6 +42,7 @@ export interface WakeTimerController {
   fadeSeconds: number;
   setFadeSeconds: (seconds: number) => void;
   start: (minutes: number) => boolean;
+  startAtClock: (hour: number, minute: number) => boolean;
   cancel: () => void;
 }
 
@@ -96,6 +99,24 @@ export function useWakeTimerController({
 
     targetMasterVolumeRef.current = mixer.masterVolume;
     const timer = startWakeTimer(Date.now(), minutes, fadeSeconds);
+    writeWakeTimerSnapshot(timer, targetMasterVolumeRef.current);
+    setWakeTimer(timer);
+    setIsFading(false);
+    fadeStartedRef.current = false;
+    return true;
+  }
+
+  function startAtClock(hour: number, minute: number): boolean {
+    if (!isValidWakeClockTime(hour, minute)) {
+      return false;
+    }
+
+    const timer = startWakeTimerAtClock(Date.now(), hour, minute, fadeSeconds);
+    if (!timer) {
+      return false;
+    }
+
+    targetMasterVolumeRef.current = mixer.masterVolume;
     writeWakeTimerSnapshot(timer, targetMasterVolumeRef.current);
     setWakeTimer(timer);
     setIsFading(false);
@@ -173,6 +194,7 @@ export function useWakeTimerController({
     fadeSeconds,
     setFadeSeconds,
     start,
+    startAtClock,
     cancel
   };
 }

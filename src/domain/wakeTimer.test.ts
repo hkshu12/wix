@@ -1,11 +1,16 @@
 import { describe, expect, it } from 'vitest';
 import {
   clearWakeTimer,
+  formatWakeClockTime,
   formatWakeTimerRemaining,
   getWakeTimerRemainingMs,
+  isWakeClockTimeReachable,
+  parseWakeClockTimeInput,
+  resolveWakeEndsAtMs,
   shouldFinishWakeTimer,
   shouldStartWakeFade,
   startWakeTimer,
+  startWakeTimerAtClock,
   WAKE_TIMER_FADE_SECONDS
 } from './wakeTimer';
 
@@ -41,5 +46,35 @@ describe('wakeTimer', () => {
   it('clears inactive timer', () => {
     expect(clearWakeTimer()).toEqual({ fadeStartsAt: null, endsAt: null });
     expect(getWakeTimerRemainingMs(clearWakeTimer(), now)).toBe(0);
+  });
+
+  it('schedules clock wake for later today', () => {
+    const nowMs = Date.parse('2026-05-29T06:00:00');
+    const timer = startWakeTimerAtClock(nowMs, 7, 30, 60)!;
+    const endsAt = Date.parse('2026-05-29T07:30:00');
+
+    expect(timer.endsAt).toBe(endsAt);
+    expect(timer.fadeStartsAt).toBe(endsAt - 60 * 1000);
+    expect(getWakeTimerRemainingMs(timer, nowMs)).toBe(90 * 60 * 1000);
+  });
+
+  it('schedules clock wake for tomorrow when time already passed', () => {
+    const nowMs = Date.parse('2026-05-29T08:00:00');
+    const endsAt = resolveWakeEndsAtMs(nowMs, 7, 30);
+
+    expect(endsAt).toBe(Date.parse('2026-05-30T07:30:00'));
+    expect(isWakeClockTimeReachable(nowMs, 7, 30)).toBe(true);
+  });
+
+  it('rejects clock wake less than one minute away', () => {
+    const nowMs = Date.parse('2026-05-29T07:29:30');
+    expect(startWakeTimerAtClock(nowMs, 7, 30, 60)).toBeNull();
+    expect(isWakeClockTimeReachable(nowMs, 7, 30)).toBe(false);
+  });
+
+  it('parses and formats clock input', () => {
+    expect(parseWakeClockTimeInput('07:30')).toEqual({ hour: 7, minute: 30 });
+    expect(parseWakeClockTimeInput('invalid')).toBeNull();
+    expect(formatWakeClockTime(7, 5)).toBe('07:05');
   });
 });

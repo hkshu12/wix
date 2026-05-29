@@ -75,6 +75,85 @@ export function startWakeTimer(
   };
 }
 
+/** Minimum lead time before a clock wake (avoids accidental immediate fade). */
+export const WAKE_TIMER_CLOCK_MIN_LEAD_MS = 60 * 1000;
+
+export function isValidWakeClockTime(hour: number, minute: number): boolean {
+  return (
+    Number.isInteger(hour) &&
+    hour >= 0 &&
+    hour <= 23 &&
+    Number.isInteger(minute) &&
+    minute >= 0 &&
+    minute <= 59
+  );
+}
+
+/** Next occurrence of `hour:minute` on the local calendar (tomorrow if already passed). */
+export function resolveWakeEndsAtMs(nowMs: number, hour: number, minute: number): number | null {
+  if (!isValidWakeClockTime(hour, minute)) {
+    return null;
+  }
+
+  const now = new Date(nowMs);
+  const target = new Date(now);
+  target.setSeconds(0, 0);
+  target.setHours(hour, minute, 0, 0);
+
+  if (target.getTime() <= nowMs) {
+    target.setDate(target.getDate() + 1);
+  }
+
+  return target.getTime();
+}
+
+export function isWakeClockTimeReachable(nowMs: number, hour: number, minute: number): boolean {
+  const endsAt = resolveWakeEndsAtMs(nowMs, hour, minute);
+  if (endsAt === null) {
+    return false;
+  }
+
+  return endsAt - nowMs >= WAKE_TIMER_CLOCK_MIN_LEAD_MS;
+}
+
+export function startWakeTimerAtClock(
+  nowMs: number,
+  hour: number,
+  minute: number,
+  fadeSeconds = WAKE_TIMER_FADE_SECONDS
+): WakeTimerState | null {
+  const endsAt = resolveWakeEndsAtMs(nowMs, hour, minute);
+  if (endsAt === null || !isWakeClockTimeReachable(nowMs, hour, minute)) {
+    return null;
+  }
+
+  const fadeMs = fadeSeconds * 1000;
+  return {
+    fadeStartsAt: endsAt - fadeMs,
+    endsAt
+  };
+}
+
+/** Parses `HH:mm` from an `<input type="time">` value. */
+export function parseWakeClockTimeInput(value: string): { hour: number; minute: number } | null {
+  const match = /^(\d{1,2}):(\d{2})$/.exec(value.trim());
+  if (!match) {
+    return null;
+  }
+
+  const hour = Number.parseInt(match[1], 10);
+  const minute = Number.parseInt(match[2], 10);
+  if (!isValidWakeClockTime(hour, minute)) {
+    return null;
+  }
+
+  return { hour, minute };
+}
+
+export function formatWakeClockTime(hour: number, minute: number): string {
+  return `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
+}
+
 export function clearWakeTimer(): WakeTimerState {
   return createInitialWakeTimerState();
 }

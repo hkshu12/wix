@@ -124,4 +124,21 @@ describe('useWakeTimerController', () => {
     expect(result.current.mixer.isPlaying).toBe(true);
     expect(result.current.controller.isFading).toBe(true);
   });
+
+  it('starts a clock wake timer until the next occurrence of the chosen time', () => {
+    vi.setSystemTime(new Date('2026-05-29T06:00:00'));
+
+    const { result } = renderHook(() => {
+      const [mixer, setMixer] = useState(createInitialMixerState);
+      const controller = useWakeTimerController({ mixer, setMixer });
+      return { controller };
+    });
+
+    act(() => {
+      expect(result.current.controller.startAtClock(7, 30)).toBe(true);
+    });
+
+    expect(result.current.controller.isActive).toBe(true);
+    expect(result.current.controller.remainingLabel).toBe('1:30:00');
+  });
 });
