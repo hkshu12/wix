@@ -20,6 +20,8 @@ function createStudioStub(overrides: Partial<StudioContextValue> = {}): StudioCo
     importCustomLibraryBackup: vi.fn().mockResolvedValue('已从备份导入 1 个自定义音频。'),
     exportMixerPresets: vi.fn().mockReturnValue('已导出 1 个场景预设。'),
     importMixerPresetsBackup: vi.fn().mockResolvedValue('已从备份恢复 1 个场景预设。'),
+    exportFullAppBackup: vi.fn().mockResolvedValue('已导出完整备份（1 个自定义音频、1 个场景预设）。'),
+    importFullAppBackup: vi.fn().mockResolvedValue('已从完整备份恢复 1 个自定义音频、1 个场景预设。'),
     handleDeleteCustomTrack: vi.fn(),
     handlePlayToggle: vi.fn(),
     sleepTimerRemainingLabel: '',
@@ -182,5 +184,52 @@ describe('SettingsPage', () => {
     renderSettings(createStudioStub({ mixerPresets: [] }));
 
     expect(screen.getByRole('button', { name: '导出 0 个预设…' })).toBeDisabled();
+  });
+
+  it('exports full backup when custom tracks or presets exist', async () => {
+    const exportFullAppBackup = vi
+      .fn()
+      .mockResolvedValue('已导出完整备份（2 个自定义音频、1 个场景预设）。');
+    renderSettings(
+      createStudioStub({
+        exportFullAppBackup,
+        customTracks: [
+          {
+            id: 'track-1',
+            kind: 'custom',
+            title: 'loop-a',
+            fileName: 'loop-a.mp3',
+            mimeType: 'audio/mpeg',
+            size: 10,
+            createdAt: 1,
+            objectUrl: 'blob:track-1'
+          }
+        ],
+        mixerPresets: [
+          {
+            id: 'p1',
+            name: '睡眠',
+            createdAt: 1,
+            masterVolume: 0.8,
+            stereoWidth: 1,
+            playbackRate: 1,
+            layers: []
+          }
+        ]
+      })
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: '导出完整备份…' }));
+
+    await waitFor(() => {
+      expect(exportFullAppBackup).toHaveBeenCalledTimes(1);
+      expect(screen.getByRole('status')).toHaveTextContent('已导出完整备份');
+    });
+  });
+
+  it('disables full backup export when there is nothing to back up', () => {
+    renderSettings(createStudioStub({ customTracks: [], mixerPresets: [] }));
+
+    expect(screen.getByRole('button', { name: '导出完整备份…' })).toBeDisabled();
   });
 });

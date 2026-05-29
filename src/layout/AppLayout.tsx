@@ -38,6 +38,12 @@ import {
   serializeMixerPresetsBackup
 } from '../domain/mixerPresetsBackup';
 import {
+  downloadFullAppBackup,
+  formatFullAppBackupFilename,
+  parseFullAppBackup,
+  serializeFullAppBackup
+} from '../domain/fullAppBackup';
+import {
   deleteMixerPreset,
   readMixerPresets,
   replaceMixerPresets,
@@ -366,6 +372,86 @@ export function AppLayout() {
     return `已从备份恢复 ${result.presets.length} 个场景预设。`;
   }
 
+  async function handleExportFullAppBackup(): Promise<string> {
+    const storedTracks = await listStoredCustomTracks();
+    const presets = readMixerPresets();
+
+    if (storedTracks.length === 0 && presets.length === 0) {
+      return '暂无自定义音频或场景预设可导出。';
+    }
+
+    const exportedAt = Date.now();
+    const json = serializeFullAppBackup(storedTracks, presets, exportedAt);
+    if (!json) {
+      return '暂无自定义音频或场景预设可导出。';
+    }
+
+    downloadFullAppBackup(json, formatFullAppBackupFilename(exportedAt));
+    const parts: string[] = [];
+    if (storedTracks.length > 0) {
+      parts.push(`${storedTracks.length} 个自定义音频`);
+    }
+    if (presets.length > 0) {
+      parts.push(`${presets.length} 个场景预设`);
+    }
+    return `已导出完整备份（${parts.join('、')}）。`;
+  }
+
+  async function handleImportFullAppBackup(fileList: FileList | null): Promise<string> {
+    const file = fileList?.[0];
+    if (!file) {
+      return '';
+    }
+
+    let text: string;
+    try {
+      text = await file.text();
+    } catch {
+      return '无法读取备份文件，请重试。';
+    }
+
+    const result = parseFullAppBackup(text);
+    if (!result.ok) {
+      const messages: Record<typeof result.reason, string> = {
+        empty: '备份文件为空，请选择有效的 wix 完整备份。',
+        'invalid-json': '备份文件不是有效的 JSON，请检查后重试。',
+        'wrong-type': '不是 wix 完整备份文件。',
+        'unsupported-version': '备份版本过新，请更新应用后再导入。',
+        'invalid-payload': '备份内容无效或已损坏。',
+        'nothing-to-export': '备份内容无效或已损坏。'
+      };
+      return messages[result.reason];
+    }
+
+    if (result.tracks.length > 0) {
+      for (const track of result.tracks) {
+        await importStoredCustomTrack(track);
+      }
+
+      const tracks = await listCustomTracks();
+      replaceCustomTracks(tracks);
+      const allowedSoundIds = new Set([
+        ...BUILT_IN_SOUNDS.map((sound) => sound.id),
+        ...tracks.map((track) => track.id)
+      ]);
+      setMixer((state) => filterMixerLayersToSounds(state, allowedSoundIds));
+    }
+
+    if (result.presets.length > 0) {
+      replaceMixerPresets(result.presets);
+      refreshMixerPresets();
+    }
+
+    const parts: string[] = [];
+    if (result.tracks.length > 0) {
+      parts.push(`${result.tracks.length} 个自定义音频`);
+    }
+    if (result.presets.length > 0) {
+      parts.push(`${result.presets.length} 个场景预设`);
+    }
+    return `已从完整备份恢复 ${parts.join('、')}。`;
+  }
+
   async function handleDeleteCustomTrack(track: CustomTrack) {
     await deleteCustomTrack(track.id);
     setMixer((state) => ({
@@ -628,6 +714,8 @@ export function AppLayout() {
     importCustomLibraryBackup: handleImportCustomLibraryBackup,
     exportMixerPresets: handleExportMixerPresets,
     importMixerPresetsBackup: handleImportMixerPresetsBackup,
+    exportFullAppBackup: handleExportFullAppBackup,
+    importFullAppBackup: handleImportFullAppBackup,
     handleDeleteCustomTrack,
     handlePlayToggle,
     sleepTimerRemainingLabel: sleepTimerController.remainingLabel,

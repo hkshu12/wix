@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.53.0] - 2026-05-29
+
+### Added
+
+- **Full backup (one file)**: export and import custom audio tracks and scene presets together as a single JSON from Settings—recommended for device migration instead of managing two separate backup files.
+
 ## [1.52.0] - 2026-05-29
 
 ### Added
