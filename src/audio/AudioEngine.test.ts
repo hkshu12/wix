@@ -139,6 +139,47 @@ describe('AudioEngine lifecycle', () => {
 
     vi.unstubAllGlobals();
   });
+
+  it('applies a new master volume while a playback fade-in ramp is still active', async () => {
+    const context = new FakeAudioContext({ immediateDecode: true });
+    const engine = new AudioEngine(context as unknown as AudioContext);
+    const customSound: CustomTrack = {
+      id: 'custom-1',
+      kind: 'custom',
+      title: 'custom',
+      fileName: 'custom.mp3',
+      mimeType: 'audio/mpeg',
+      size: 4,
+      createdAt: 1,
+      objectUrl: 'blob:custom-1'
+    };
+
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: true,
+        arrayBuffer: () => Promise.resolve(new ArrayBuffer(4))
+      })
+    );
+
+    const playingState: MixerState = {
+      isPlaying: true,
+      masterVolume: 0.8,
+      stereoWidth: 1,
+      playbackRate: 1,
+      layers: [{ soundId: 'custom-1', volume: 1, pan: 0, playbackRate: 1, muted: false }]
+    };
+
+    await engine.sync(playingState, [customSound], { fadeInSeconds: 4 });
+
+    context.currentTime = 1;
+    await engine.sync({ ...playingState, masterVolume: 0.35 }, [customSound]);
+
+    const master = context.masterGain!;
+    expect(master.gain.scheduled.at(-1)).toEqual({ type: 'set', time: 1, value: 0.35 });
+
+    vi.unstubAllGlobals();
+  });
 });
 
 async function waitForPendingDecode(context: FakeAudioContext): Promise<void> {
