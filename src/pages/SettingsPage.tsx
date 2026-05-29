@@ -13,6 +13,8 @@ export function SettingsPage() {
     importCustomLibraryBackup,
     exportMixerPresets,
     importMixerPresetsBackup,
+    exportFullAppBackup,
+    importFullAppBackup,
     mixerPresets
   } = useStudio();
   const [platformLabel, setPlatformLabel] = useState('');
@@ -25,6 +27,18 @@ export function SettingsPage() {
   const [presetBackupStatus, setPresetBackupStatus] = useState('');
   const [exportingPresets, setExportingPresets] = useState(false);
   const [importingPresets, setImportingPresets] = useState(false);
+  const [fullBackupStatus, setFullBackupStatus] = useState('');
+  const [exportingFullBackup, setExportingFullBackup] = useState(false);
+  const [importingFullBackup, setImportingFullBackup] = useState(false);
+
+  const hasFullBackupContent = customTracks.length > 0 || mixerPresets.length > 0;
+  const backupBusy =
+    exportingBackup ||
+    importingBackup ||
+    exportingPresets ||
+    importingPresets ||
+    exportingFullBackup ||
+    importingFullBackup;
 
   useEffect(() => {
     void getAppVersionInfo().then((info) => setPlatformLabel(info.platformLabel));
@@ -84,6 +98,39 @@ export function SettingsPage() {
     }
   }
 
+  async function handleExportFullBackup() {
+    setExportingFullBackup(true);
+    setFullBackupStatus('');
+    try {
+      const message = await exportFullAppBackup();
+      setFullBackupStatus(message);
+    } catch {
+      setFullBackupStatus('导出失败，请稍后重试。');
+    } finally {
+      setExportingFullBackup(false);
+    }
+  }
+
+  async function handleImportFullBackup(fileList: FileList | null) {
+    const input = fileList?.[0];
+    if (!input) {
+      return;
+    }
+
+    setImportingFullBackup(true);
+    setFullBackupStatus('');
+    try {
+      const message = await importFullAppBackup(fileList);
+      if (message) {
+        setFullBackupStatus(message);
+      }
+    } catch {
+      setFullBackupStatus('导入完整备份失败，请检查文件格式。');
+    } finally {
+      setImportingFullBackup(false);
+    }
+  }
+
   async function handleImportBackup(fileList: FileList | null) {
     const input = fileList?.[0];
     if (!input) {
@@ -119,17 +166,52 @@ export function SettingsPage() {
         {android ? (
           <ul>
             <li>混音状态、已保存的方案与主题偏好保存在本机。</li>
-            <li>你导入的自定义音频与保存的场景预设也保存在本机；可在下方分别导出备份，换机或重装后导入恢复。</li>
+            <li>你导入的自定义音频与保存的场景预设也保存在本机；可在下方导出完整备份（推荐）或分别备份，换机或重装后导入恢复。</li>
             <li>若后台播放被系统中断，可在系统设置中为应用关闭电池限制或允许后台活动。</li>
           </ul>
         ) : (
           <ul>
             <li>混音状态、已保存的方案与主题偏好保存在浏览器本机存储中。</li>
-            <li>导入的自定义音频与场景预设保存在本机；可在下方分别导出备份，换设备或重装后导入恢复。</li>
+            <li>导入的自定义音频与场景预设保存在本机；可在下方导出完整备份（推荐）或分别备份，换设备或重装后导入恢复。</li>
             <li>清除站点数据会删除这些内容。</li>
             <li>安装到主屏幕后，可离线使用已缓存的界面与内置环境声。</li>
           </ul>
         )}
+      </section>
+
+      <section className="app-page-card" aria-labelledby="settings-full-backup-title">
+        <h2 id="settings-full-backup-title">完整备份（推荐）</h2>
+        <p>
+          将本机的自定义音频与场景预设一并导出为单个 JSON 文件，换设备或重装后一次导入即可恢复，无需分别操作两个备份文件。
+        </p>
+        <div className="app-page-actions">
+          <button
+            className="app-page-btn"
+            type="button"
+            disabled={backupBusy || !hasFullBackupContent}
+            onClick={() => void handleExportFullBackup()}
+          >
+            {exportingFullBackup ? '正在导出…' : '导出完整备份…'}
+          </button>
+          <label className="app-page-btn">
+            {importingFullBackup ? '正在导入…' : '导入完整备份…'}
+            <input
+              type="file"
+              accept=".json,application/json"
+              hidden
+              disabled={backupBusy}
+              onChange={(event) => {
+                void handleImportFullBackup(event.target.files);
+                event.target.value = '';
+              }}
+            />
+          </label>
+        </div>
+        {fullBackupStatus ? (
+          <p className="app-page-status" role="status">
+            {fullBackupStatus}
+          </p>
+        ) : null}
       </section>
 
       <section className="app-page-card" aria-labelledby="settings-backup-title">
@@ -141,7 +223,7 @@ export function SettingsPage() {
           <button
             className="app-page-btn"
             type="button"
-            disabled={exportingBackup || importingBackup || customTracks.length === 0}
+            disabled={backupBusy || customTracks.length === 0}
             onClick={() => void handleExportBackup()}
           >
             {exportingBackup ? '正在导出…' : `导出 ${customTracks.length} 个音频…`}
@@ -152,7 +234,7 @@ export function SettingsPage() {
               type="file"
               accept=".json,application/json"
               hidden
-              disabled={exportingBackup || importingBackup}
+              disabled={backupBusy}
               onChange={(event) => {
                 void handleImportBackup(event.target.files);
                 event.target.value = '';
@@ -176,7 +258,7 @@ export function SettingsPage() {
           <button
             className="app-page-btn"
             type="button"
-            disabled={exportingPresets || importingPresets || mixerPresets.length === 0}
+            disabled={backupBusy || mixerPresets.length === 0}
             onClick={handleExportPresets}
           >
             {exportingPresets ? '正在导出…' : `导出 ${mixerPresets.length} 个预设…`}
@@ -187,7 +269,7 @@ export function SettingsPage() {
               type="file"
               accept=".json,application/json"
               hidden
-              disabled={exportingPresets || importingPresets}
+              disabled={backupBusy}
               onChange={(event) => {
                 void handleImportPresets(event.target.files);
                 event.target.value = '';
