@@ -18,11 +18,19 @@ import { createInitialMixerState, setPlaying, type MixerState } from '../domain/
 import { BUILT_IN_SOUNDS } from '../domain/sounds';
 import {
   deleteCustomTrack,
+  importStoredCustomTrack,
   listCustomTracks,
+  listStoredCustomTracks,
   revokeCustomTrackUrls,
   saveCustomTrack,
   type CustomTrack
 } from '../storage/customLibrary';
+import {
+  downloadCustomLibraryBackup,
+  formatCustomLibraryBackupFilename,
+  parseCustomLibraryBackup,
+  serializeCustomLibraryBackup
+} from '../domain/customLibraryBackup';
 import {
   deleteMixerPreset,
   readMixerPresets,
@@ -256,6 +264,57 @@ export function AppLayout() {
     } finally {
       setImportProgress(null);
     }
+  }
+
+  async function handleExportCustomLibrary(): Promise<string> {
+    const storedTracks = await listStoredCustomTracks();
+    if (storedTracks.length === 0) {
+      return '暂无自定义音频可导出。';
+    }
+
+    const exportedAt = Date.now();
+    const json = serializeCustomLibraryBackup(storedTracks, exportedAt);
+    downloadCustomLibraryBackup(json, formatCustomLibraryBackupFilename(exportedAt));
+    return `已导出 ${storedTracks.length} 个自定义音频。`;
+  }
+
+  async function handleImportCustomLibraryBackup(fileList: FileList | null): Promise<string> {
+    const file = fileList?.[0];
+    if (!file) {
+      return '';
+    }
+
+    let text: string;
+    try {
+      text = await file.text();
+    } catch {
+      return '无法读取备份文件，请重试。';
+    }
+
+    const result = parseCustomLibraryBackup(text);
+    if (!result.ok) {
+      const messages: Record<typeof result.reason, string> = {
+        empty: '备份文件为空，请选择有效的 wix 自定义音频备份。',
+        'invalid-json': '备份文件不是有效的 JSON，请检查后重试。',
+        'wrong-type': '不是 wix 自定义音频备份文件。',
+        'unsupported-version': '备份版本过新，请更新应用后再导入。',
+        'invalid-payload': '备份内容无效或已损坏。'
+      };
+      return messages[result.reason];
+    }
+
+    for (const track of result.tracks) {
+      await importStoredCustomTrack(track);
+    }
+
+    const tracks = await listCustomTracks();
+    replaceCustomTracks(tracks);
+    const allowedSoundIds = new Set([
+      ...BUILT_IN_SOUNDS.map((sound) => sound.id),
+      ...tracks.map((track) => track.id)
+    ]);
+    setMixer((state) => filterMixerLayersToSounds(state, allowedSoundIds));
+    return `已从备份导入 ${result.tracks.length} 个自定义音频。`;
   }
 
   async function handleDeleteCustomTrack(track: CustomTrack) {
@@ -516,6 +575,8 @@ export function AppLayout() {
     allSounds,
     selectedLayers,
     handleImport,
+    exportCustomLibrary: handleExportCustomLibrary,
+    importCustomLibraryBackup: handleImportCustomLibraryBackup,
     handleDeleteCustomTrack,
     handlePlayToggle,
     sleepTimerRemainingLabel: sleepTimerController.remainingLabel,

@@ -59,6 +59,52 @@ export async function deleteCustomTrack(id: string, options: CustomLibraryOption
   db.close();
 }
 
+export interface StoredCustomTrackInput {
+  title: string;
+  fileName: string;
+  mimeType: string;
+  size: number;
+  createdAt: number;
+  bytes: ArrayBuffer;
+}
+
+export async function listStoredCustomTracks(options: CustomLibraryOptions = {}): Promise<StoredCustomTrackInput[]> {
+  const db = await openDatabase(options.databaseName);
+  const storedTracks = await readAllFromStore(db);
+  db.close();
+
+  return storedTracks.map((track) => ({
+    title: track.title,
+    fileName: track.fileName,
+    mimeType: track.mimeType,
+    size: track.size,
+    createdAt: track.createdAt,
+    bytes: track.bytes
+  }));
+}
+
+export async function importStoredCustomTrack(
+  input: StoredCustomTrackInput,
+  options: CustomLibraryOptions = {}
+): Promise<CustomTrack> {
+  const db = await openDatabase(options.databaseName);
+  const storedTrack: StoredCustomTrack = {
+    id: createTrackId(),
+    kind: 'custom',
+    title: input.title,
+    fileName: input.fileName,
+    mimeType: input.mimeType,
+    size: input.size,
+    createdAt: input.createdAt,
+    bytes: input.bytes
+  };
+
+  await writeToStore(db, 'readwrite', (store) => store.put(storedTrack));
+  db.close();
+
+  return toCustomTrack(storedTrack);
+}
+
 export function clearCustomLibrary(databaseName = DEFAULT_DATABASE): Promise<void> {
   return new Promise((resolve, reject) => {
     const request = indexedDB.deleteDatabase(databaseName);

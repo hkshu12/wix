@@ -16,6 +16,8 @@ function createStudioStub(overrides: Partial<StudioContextValue> = {}): StudioCo
     allSounds: [],
     selectedLayers: [],
     handleImport: vi.fn(),
+    exportCustomLibrary: vi.fn().mockResolvedValue('已导出 1 个自定义音频。'),
+    importCustomLibraryBackup: vi.fn().mockResolvedValue('已从备份导入 1 个自定义音频。'),
     handleDeleteCustomTrack: vi.fn(),
     handlePlayToggle: vi.fn(),
     sleepTimerRemainingLabel: '',
@@ -94,5 +96,49 @@ describe('SettingsPage', () => {
     fireEvent.click(screen.getByRole('button', { name: '确认清除' }));
 
     expect(await screen.findByRole('alert')).toHaveTextContent('清除失败');
+  });
+
+  it('exports custom library backup from settings', async () => {
+    const exportCustomLibrary = vi.fn().mockResolvedValue('已导出 2 个自定义音频。');
+    renderSettings(
+      createStudioStub({
+        exportCustomLibrary,
+        customTracks: [
+          {
+            id: 'track-1',
+            kind: 'custom',
+            title: 'loop-a',
+            fileName: 'loop-a.mp3',
+            mimeType: 'audio/mpeg',
+            size: 10,
+            createdAt: 1,
+            objectUrl: 'blob:track-1'
+          },
+          {
+            id: 'track-2',
+            kind: 'custom',
+            title: 'loop-b',
+            fileName: 'loop-b.mp3',
+            mimeType: 'audio/mpeg',
+            size: 20,
+            createdAt: 2,
+            objectUrl: 'blob:track-2'
+          }
+        ]
+      })
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: '导出 2 个音频…' }));
+
+    await waitFor(() => {
+      expect(exportCustomLibrary).toHaveBeenCalledTimes(1);
+      expect(screen.getByRole('status')).toHaveTextContent('已导出 2 个自定义音频');
+    });
+  });
+
+  it('disables export when there are no custom tracks', () => {
+    renderSettings(createStudioStub({ customTracks: [] }));
+
+    expect(screen.getByRole('button', { name: '导出 0 个音频…' })).toBeDisabled();
   });
 });

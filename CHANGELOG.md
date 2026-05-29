@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.51.0] - 2026-05-29
+
+### Added
+
+- **Custom audio library backup**: export imported tracks as a JSON backup from Settings, and import the backup on a new device or after reinstall—helps migrate personal audio without re-importing each file.
+
 ## [1.50.0] - 2026-05-29
 
 ### Added
