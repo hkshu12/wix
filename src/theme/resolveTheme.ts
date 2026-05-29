@@ -11,6 +11,10 @@ export function readThemePreference(): ThemePreference {
   return 'system';
 }
 
+export function writeThemePreference(preference: ThemePreference): void {
+  localStorage.setItem(STORAGE_KEY_THEME, preference);
+}
+
 export function resolveEffectiveTheme(
   preference: ThemePreference,
   prefersDark: boolean
