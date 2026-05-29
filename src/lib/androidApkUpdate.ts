@@ -1,3 +1,4 @@
+import { App } from '@capacitor/app';
 import { Capacitor } from '@capacitor/core';
 import { Filesystem, Directory } from '@capacitor/filesystem';
 import type { LatestReleaseInfo } from './githubRelease';
@@ -173,6 +174,29 @@ export async function downloadAndroidApk(
   return downloadApkWithFetch(release, onProgress);
 }
 
+async function waitForInstallPermissionFromSettings(): Promise<boolean> {
+  let sawBackground = false;
+
+  return new Promise((resolve) => {
+    void (async () => {
+      const handle = await App.addListener('appStateChange', async (state) => {
+        if (!state.isActive) {
+          sawBackground = true;
+          return;
+        }
+
+        if (!sawBackground) {
+          return;
+        }
+
+        await handle.remove();
+        const recheck = await ApkInstaller.canInstall();
+        resolve(recheck.allowed);
+      });
+    })();
+  });
+}
+
 export async function ensureInstallPermission(): Promise<boolean> {
   const { allowed } = await ApkInstaller.canInstall();
   if (allowed) {
@@ -180,8 +204,7 @@ export async function ensureInstallPermission(): Promise<boolean> {
   }
 
   await ApkInstaller.openInstallPermissionSettings();
-  const recheck = await ApkInstaller.canInstall();
-  return recheck.allowed;
+  return waitForInstallPermissionFromSettings();
 }
 
 export async function installDownloadedApk(uri: string): Promise<void> {
