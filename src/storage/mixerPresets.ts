@@ -23,6 +23,10 @@ export type RenameMixerPresetResult =
   | { ok: true; preset: MixerPreset }
   | { ok: false; reason: 'empty-name' | 'not-found' | 'duplicate-name' };
 
+export type DuplicateMixerPresetResult =
+  | { ok: true; preset: MixerPreset }
+  | { ok: false; reason: 'not-found' | 'max-reached' };
+
 export function readMixerPresets(): MixerPreset[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEY_MIXER_PRESETS);
@@ -87,6 +91,50 @@ export function saveMixerPreset(name: string, state: MixerState): SaveMixerPrese
 export function deleteMixerPreset(id: string): void {
   const presets = readMixerPresets().filter((preset) => preset.id !== id);
   writeMixerPresets(presets);
+}
+
+/** Suggests a unique preset name when duplicating (e.g. `专注` → `专注 副本`). */
+export function suggestDuplicatePresetName(sourceName: string, presets: MixerPreset[]): string {
+  const existing = new Set(presets.map((preset) => preset.name));
+  const first = `${sourceName} 副本`.trim().slice(0, 40);
+
+  if (!existing.has(first)) {
+    return first;
+  }
+
+  for (let index = 2; index <= 99; index += 1) {
+    const candidate = `${sourceName} 副本 ${index}`.slice(0, 40);
+    if (!existing.has(candidate)) {
+      return candidate;
+    }
+  }
+
+  return first;
+}
+
+export function duplicateMixerPreset(id: string): DuplicateMixerPresetResult {
+  const presets = readMixerPresets();
+  if (presets.length >= MAX_MIXER_PRESETS) {
+    return { ok: false, reason: 'max-reached' };
+  }
+
+  const source = presets.find((preset) => preset.id === id);
+  if (!source) {
+    return { ok: false, reason: 'not-found' };
+  }
+
+  const preset: MixerPreset = {
+    id: createPresetId(),
+    name: suggestDuplicatePresetName(source.name, presets),
+    createdAt: Date.now(),
+    masterVolume: source.masterVolume,
+    stereoWidth: source.stereoWidth,
+    playbackRate: source.playbackRate,
+    layers: source.layers.map((layer) => ({ ...layer }))
+  };
+
+  writeMixerPresets([...presets, preset]);
+  return { ok: true, preset };
 }
 
 export function renameMixerPreset(id: string, name: string): RenameMixerPresetResult {

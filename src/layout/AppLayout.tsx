@@ -51,6 +51,7 @@ import { useTheme } from '../theme/ThemeProvider';
 import {
   deleteMixerPreset,
   readMixerPresets,
+  duplicateMixerPreset,
   renameMixerPreset,
   replaceMixerPresets,
   saveMixerPreset,
@@ -671,6 +672,19 @@ export function AppLayout() {
     setImportStatus(`已将预设重命名为「${result.preset.name}」。`);
   }
 
+  function handleDuplicateMixerPreset(id: string) {
+    const result = duplicateMixerPreset(id);
+    if (!result.ok) {
+      if (result.reason === 'max-reached') {
+        setImportStatus('预设已满（最多 12 个），请先删除旧预设。');
+      }
+      return;
+    }
+
+    refreshMixerPresets();
+    setImportStatus(`已复制预设为「${result.preset.name}」。`);
+  }
+
   function handleDeleteMixerPreset(id: string) {
     const preset = mixerPresets.find((entry) => entry.id === id);
     deleteMixerPreset(id);
@@ -847,6 +861,7 @@ export function AppLayout() {
     saveMixerPreset: handleSaveMixerPreset,
     loadMixerPreset: handleLoadMixerPreset,
     renameMixerPreset: handleRenameMixerPreset,
+    duplicateMixerPreset: handleDuplicateMixerPreset,
     deleteMixerPreset: handleDeleteMixerPreset,
     copyMixerShare: handleCopyMixerShare,
     copyMixerShareLink: handleCopyMixerShareLink,

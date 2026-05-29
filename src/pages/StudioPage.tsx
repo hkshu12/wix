@@ -95,6 +95,7 @@ export function StudioPage() {
     saveMixerPreset,
     loadMixerPreset,
     renameMixerPreset,
+    duplicateMixerPreset,
     deleteMixerPreset,
     copyMixerShare,
     copyMixerShareLink,
@@ -491,7 +492,7 @@ export function StudioPage() {
         <section className="drawer-section" aria-labelledby="drawer-presets-title">
           <h3 id="drawer-presets-title">场景预设</h3>
           <p className="drawer-hint">
-            保存当前声轨组合与主音量，一键切换专注、睡眠等固定搭配。同名再次保存会覆盖该预设；可重命名修正名称而不改混音（最多 12 个）。
+            保存当前声轨组合与主音量，一键切换专注、睡眠等固定搭配。同名再次保存会覆盖该预设；可复制或重命名预设而不改声轨（最多 12 个）。
           </p>
           <div className="mixer-preset-save">
             <label className="mixer-preset-name-label">
@@ -566,6 +567,14 @@ export function StudioPage() {
                       >
                         {preset.name}
                         <span className="mixer-preset-meta">{preset.layers.length} 轨</span>
+                      </button>
+                      <button
+                        aria-label={`复制预设 ${preset.name}`}
+                        className="ghost-button mixer-preset-duplicate"
+                        type="button"
+                        onClick={() => duplicateMixerPreset(preset.id)}
+                      >
+                        复制
                       </button>
                       <button
                         aria-label={`重命名预设 ${preset.name}`}
