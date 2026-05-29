@@ -270,6 +270,22 @@ describe('StudioPage', () => {
     expect(within(activePanel).getByText('雨声')).toBeInTheDocument();
   });
 
+  it('duplicates a saved preset as a new entry', () => {
+    renderWithRouter(<AppRouter />, { routerProps: { initialEntries: ['/studio'] } });
+
+    fireEvent.click(screen.getByRole('button', { name: /雨声/ }));
+    fireEvent.click(screen.getByRole('button', { name: /混音与导入/ }));
+
+    fireEvent.change(screen.getByLabelText('预设名称'), { target: { value: '雨夜专注' } });
+    fireEvent.click(screen.getByRole('button', { name: '保存当前混音' }));
+
+    fireEvent.click(screen.getByRole('button', { name: '复制预设 雨夜专注' }));
+
+    expect(screen.getByText(/已复制预设为「雨夜专注 副本」/)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '加载预设 雨夜专注' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '加载预设 雨夜专注 副本' })).toBeInTheDocument();
+  });
+
   it('imports a mix from a ?share= deep link on studio load', async () => {
     let state = createInitialMixerState();
     state = toggleLayer(state, 'rain');

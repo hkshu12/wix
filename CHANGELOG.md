@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.60.0] - 2026-05-29
+
+### Added
+
+- **Duplicate scene presets**: copy a saved mixer preset to a new slot (auto-named e.g. `专注 副本`) without changing the original—handy for variants like「专注」vs「专注 + 雨声」when all 12 slots matter.
+
 ## [1.59.0] - 2026-05-29
 
 ### Added

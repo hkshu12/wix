@@ -2,10 +2,12 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { createInitialMixerState } from '../domain/mixer';
 import {
   deleteMixerPreset,
+  duplicateMixerPreset,
   MAX_MIXER_PRESETS,
   readMixerPresets,
   renameMixerPreset,
   saveMixerPreset,
+  suggestDuplicatePresetName,
   STORAGE_KEY_MIXER_PRESETS
 } from './mixerPresets';
 
@@ -160,5 +162,55 @@ describe('mixerPresets storage', () => {
 
     expect(renameMixerPreset(saved.preset.id, '   ')).toEqual({ ok: false, reason: 'empty-name' });
     expect(readMixerPresets()[0]?.name).toBe('测试');
+  });
+
+  it('suggests unique duplicate names', () => {
+    saveMixerPreset('专注', createInitialMixerState());
+    saveMixerPreset('专注 副本', createInitialMixerState());
+
+    const presets = readMixerPresets();
+    expect(suggestDuplicatePresetName('专注', presets)).toBe('专注 副本 2');
+  });
+
+  it('duplicates a preset with layers and volume', () => {
+    const state = {
+      ...createInitialMixerState(),
+      masterVolume: 0.7,
+      layers: [{ soundId: 'rain', volume: 0.5, pan: -0.2, playbackRate: 1.1, muted: false }]
+    };
+    const saved = saveMixerPreset('雨夜', state);
+    if (!saved.ok) {
+      throw new Error('expected save to succeed');
+    }
+
+    const duplicated = duplicateMixerPreset(saved.preset.id);
+    expect(duplicated.ok).toBe(true);
+    if (!duplicated.ok) {
+      return;
+    }
+
+    expect(duplicated.preset.id).not.toBe(saved.preset.id);
+    expect(duplicated.preset.name).toBe('雨夜 副本');
+    expect(duplicated.preset.masterVolume).toBe(0.7);
+    expect(duplicated.preset.layers[0]?.soundId).toBe('rain');
+
+    const presets = readMixerPresets();
+    expect(presets).toHaveLength(2);
+    expect(presets[0]?.name).toBe('雨夜');
+    expect(presets[1]?.name).toBe('雨夜 副本');
+  });
+
+  it('rejects duplicate when max presets reached', () => {
+    for (let index = 0; index < MAX_MIXER_PRESETS; index += 1) {
+      saveMixerPreset(`预设 ${index}`, createInitialMixerState());
+    }
+
+    const first = readMixerPresets()[0];
+    if (!first) {
+      throw new Error('expected a preset');
+    }
+
+    expect(duplicateMixerPreset(first.id)).toEqual({ ok: false, reason: 'max-reached' });
+    expect(readMixerPresets()).toHaveLength(MAX_MIXER_PRESETS);
   });
 });
