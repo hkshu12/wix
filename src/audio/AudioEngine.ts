@@ -27,6 +27,8 @@ export class AudioEngine {
   private readonly bufferCache = new Map<string, AudioBuffer>();
   private syncVersion = 0;
   private masterFadeEndsAt: number | null = null;
+  /** Target volume of an in-flight playback fade-in ramp (see {@link applyMasterVolume}). */
+  private masterFadeTargetVolume: number | null = null;
 
   constructor(context: AudioContext = new AudioContext()) {
     this.context = context;
@@ -105,10 +107,16 @@ export class AudioEngine {
       this.master.gain.setValueAtTime(0, now);
       this.master.gain.linearRampToValueAtTime(targetVolume, now + fadeInSeconds);
       this.masterFadeEndsAt = now + fadeInSeconds;
+      this.masterFadeTargetVolume = targetVolume;
       return;
     }
 
-    if (this.masterFadeEndsAt !== null && now < this.masterFadeEndsAt) {
+    if (
+      this.masterFadeEndsAt !== null &&
+      now < this.masterFadeEndsAt &&
+      this.masterFadeTargetVolume !== null &&
+      Math.abs(targetVolume - this.masterFadeTargetVolume) < 1e-6
+    ) {
       return;
     }
 
@@ -119,6 +127,7 @@ export class AudioEngine {
 
   private clearMasterFade(): void {
     this.masterFadeEndsAt = null;
+    this.masterFadeTargetVolume = null;
   }
 
   private async startLayer(layer: AudioGraphLayer, syncVersion: number): Promise<ActiveLayer | null> {
