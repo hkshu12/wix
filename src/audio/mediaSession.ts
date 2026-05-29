@@ -9,6 +9,7 @@ export interface MediaSessionSyncInput {
   isPlaying: boolean;
   trackTitles: string[];
   sleepTimerLabel: string | null;
+  wakeTimerLabel: string | null;
 }
 
 export interface MediaSessionHandlers {
@@ -33,12 +34,13 @@ export function syncMediaSession(input: MediaSessionSyncInput): void {
     return;
   }
 
-  const { isPlaying, trackTitles, sleepTimerLabel } = input;
+  const { isPlaying, trackTitles, sleepTimerLabel, wakeTimerLabel } = input;
   const title = formatMediaSessionTitle(trackTitles);
   const artist = formatMediaSessionArtist({
     isPlaying,
     trackCount: trackTitles.length,
-    sleepTimerLabel
+    sleepTimerLabel,
+    wakeTimerLabel
   });
 
   navigator.mediaSession.metadata = new MediaMetadata({

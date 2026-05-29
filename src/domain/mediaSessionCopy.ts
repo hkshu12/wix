@@ -22,11 +22,16 @@ export function formatMediaSessionArtist(options: {
   isPlaying: boolean;
   trackCount: number;
   sleepTimerLabel: string | null;
+  wakeTimerLabel: string | null;
 }): string {
-  const { isPlaying, trackCount, sleepTimerLabel } = options;
+  const { isPlaying, trackCount, sleepTimerLabel, wakeTimerLabel } = options;
 
   if (sleepTimerLabel) {
     return `睡眠定时 · ${sleepTimerLabel}`;
+  }
+
+  if (wakeTimerLabel) {
+    return `唤醒定时 · ${wakeTimerLabel}`;
   }
 
   if (!isPlaying) {

@@ -55,7 +55,7 @@
 | ~~Android 分享深链~~ | APK 打开 `/studio?share=…` | 无 intent-filter | v1.44.0 |
 | ~~Android 分享链接复制用公网 origin~~ | 从 APK 复制链接给朋友 | 曾复制 `https://localhost/...` | v1.45.0 `resolveMixerShareLinkBuildTarget` |
 | ~~唤醒定时读屏播报~~ | 低视力用户设叫醒 | — | 已随 v1.41.0 与睡眠定时对称实现 |
-| **锁屏 Media Session 显示唤醒定时** | 锁屏看叫醒倒计时 | 仅睡眠定时出现在副标题 | 扩展 `formatMediaSessionArtist` |
+| ~~锁屏 Media Session 显示唤醒定时~~ | 锁屏看叫醒倒计时 | — | 已完成 v1.46.0 |
 
 ### 体验场景与缺口（摘要）
 
@@ -70,32 +70,36 @@
 | 隐私/换机 | 一键清除本机数据 | v1.31.0 设置页两步确认 |
 | 弱网 | 内置 OGG 偶发失败 | 自动重试 + 按轨重试 v1.28.0 |
 | 读屏 | 播放/加轨/定时/键盘与滑块音量 | 睡眠与唤醒定时均已播报 |
+| 锁屏/PWA | 睡眠与唤醒倒计时 | v1.46.0 Media Session 副标题对称 |
 | Android 原生 | 后台播放 | 仍为 P1 最大缺口 |
 
-### 代码与架构备注（2026-05-28 第二十一次挖掘）
+### 代码与架构备注（2026-05-29 第二十二次挖掘）
 
-- **分享**：`buildMixerShareUrl` + `resolveMixerShareLinkBuildTarget`（Android → `https://hkshu12.github.io/wix/`）；深链 `extractStudioShareRouteFromAppUrl` 仍接受 localhost 开发 URL。
-- **定时器**：睡眠/唤醒对称；Media Session 副标题仍只绑睡眠定时。
-- **内置声库**：15 轨；P2「新内置（续）」可评估 CC0 白噪音变体。
-- **版本**：仓库 **1.44.0** → 本次 **1.45.0** Android 分享链接 origin 修复。
-- **近期 CHANGELOG**：v1.44 Android 深链——避免重复。
+- **Media Session**：`formatMediaSessionArtist` 现支持睡眠与唤醒倒计时副标题；睡眠优先（与 UI 互斥一致）。
+- **分享**：v1.45.0 公网 origin + v1.44 深链已闭环；自定义音轨仍无法随分享链接导入。
+- **定时器**：睡眠/唤醒 UI、读屏、锁屏副标题均已对称；缺的是时钟闹钟（非倒计时）与 Android 后台。
+- **内置声库**：15 轨（含 brown/pink，无独立「白噪音」轨）；P2 可增 CC0 white noise loop。
+- **测试缺口**：`StudioPage` 无唤醒定时 UI 用例；`useMixerShareDeepLink` 无单测；`UpdatePage`/APK 路径无测。
+- **版本**：仓库 **1.45.0** → 本次 **1.46.0** 锁屏唤醒定时副标题。
+- **近期 CHANGELOG**：v1.45 Android 分享 origin——避免重复。
 
 ### 外部信号
 
-- GitHub Issues：无 open issue（2026-05-28）。
-- 同类 App：原生后台播放、可分享公网链接、定时渐强仍常见；wix Web 侧已较完整，Android 原生后台为最大缺口。
+- GitHub Issues：无 open issue（2026-05-29，cron 运行前状态）。
+- 同类 App：Android 后台 + 大音库 + 时钟闹钟仍常见；wix Web/PWA 定时与分享已齐，原生后台为最大差距。
 
 ## 本次选中项
 
-**Android 分享链接复制用公网 origin（P2 → 分享场景）**
+**锁屏 Media Session 显示唤醒定时（P2 → 午睡/叫醒场景）**
 
-- **理由**：v1.44.0 已支持从外链打开 APK，但 APK 内「复制分享链接」仍用 Capacitor `localhost` origin，好友无法在浏览器打开；单 PR 可交付（域函数 + AppLayout + 测试），不涉及 Gradle 原生改动。
-- **范围**：`resolveMixerShareLinkBuildTarget`；版本 **1.45.0**。
+- **理由**：v1.41.0 已有唤醒定时与读屏播报，但锁屏副标题仅显示睡眠定时；单 PR 扩展 `formatMediaSessionArtist` + `AppLayout`/`useMediaSessionSync`，与 v1.18 Media Session 互补，无需 Gradle。
+- **范围**：域文案 + 同步管线 + 单元测试；版本 **1.46.0**。
 
 ## 历史已完成
 
 | 日期 | 项 | 引用 |
 | --- | --- | --- |
+| 2026-05-29 | 锁屏 Media Session 显示唤醒定时倒计时 | v1.46.0 |
 | 2026-05-28 | Android 复制分享链接使用 GitHub Pages 公网 URL | v1.45.0 |
 | 2026-05-28 | Android 混音分享深链（GitHub Pages → APK） | v1.44.0 |
 | 2026-05-28 | 品牌图标与主题色 | [v1.43.0](https://github.com/hkshu12/wix/releases/tag/v1.43.0) |
