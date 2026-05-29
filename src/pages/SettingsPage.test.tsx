@@ -42,6 +42,7 @@ function createStudioStub(overrides: Partial<StudioContextValue> = {}): StudioCo
     wakeTimerFadeSeconds: 30,
     setWakeTimerFadeSeconds: vi.fn(),
     startWakeTimer: vi.fn(() => true),
+    startWakeTimerAtClock: vi.fn(() => true),
     cancelWakeTimer: vi.fn(),
     mixerPresets: [],
     saveMixerPreset: vi.fn(),

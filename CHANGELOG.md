@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.57.0] - 2026-05-29
+
+### Added
+
+- **Clock-time wake timer**: set a wake alarm for a specific local time (e.g. 07:30) in the mixer drawer—if that time has already passed today, it schedules for tomorrow. Includes screen-reader announcement and validation for at least one minute lead time.
+
 ## [1.56.0] - 2026-05-29
 
 ### Changed

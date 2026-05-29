@@ -21,6 +21,7 @@ import {
   formatSleepTimerCompleteAnnouncement,
   formatSleepTimerStartAnnouncement,
   formatWakeTimerCancelAnnouncement,
+  formatWakeTimerClockStartAnnouncement,
   formatWakeTimerCompleteAnnouncement,
   formatWakeTimerStartAnnouncement
 } from '../domain/playbackAnnouncement';
@@ -46,6 +47,7 @@ import {
 } from '../domain/sleepTimer';
 import {
   clampWakeTimerMinutes,
+  parseWakeClockTimeInput,
   WAKE_TIMER_FADE_PRESETS_SECONDS,
   WAKE_TIMER_MAX_MINUTES,
   WAKE_TIMER_MIN_MINUTES,
@@ -84,6 +86,7 @@ export function StudioPage() {
     wakeTimerFadeSeconds,
     setWakeTimerFadeSeconds,
     startWakeTimer,
+    startWakeTimerAtClock,
     cancelWakeTimer,
     mixerPresets,
     saveMixerPreset,
@@ -115,6 +118,8 @@ export function StudioPage() {
   const [customSleepError, setCustomSleepError] = useState<string | null>(null);
   const [customWakeMinutes, setCustomWakeMinutes] = useState('90');
   const [customWakeError, setCustomWakeError] = useState<string | null>(null);
+  const [wakeClockTime, setWakeClockTime] = useState('07:30');
+  const [wakeClockError, setWakeClockError] = useState<string | null>(null);
   const [navOpen, setNavOpen] = useState(false);
   const { updateAvailable } = useAppUpdate();
   const android = isAndroidApp();
@@ -182,6 +187,23 @@ export function StudioPage() {
     setCustomWakeError(null);
     handleStartWakeTimer(minutes);
   }, [customWakeMinutes, handleStartWakeTimer]);
+
+  const handleStartWakeClockTimer = useCallback(() => {
+    const parsed = parseWakeClockTimeInput(wakeClockTime);
+    if (!parsed) {
+      setWakeClockError('请选择有效的时刻。');
+      return;
+    }
+
+    const started = startWakeTimerAtClock(parsed.hour, parsed.minute);
+    if (!started) {
+      setWakeClockError('请选择至少 1 分钟后的叫醒时刻。');
+      return;
+    }
+
+    setWakeClockError(null);
+    announcePlayback(formatWakeTimerClockStartAnnouncement(parsed.hour, parsed.minute));
+  }, [announcePlayback, startWakeTimerAtClock, wakeClockTime]);
 
   const handleMasterVolumeSliderChange = useCallback(
     (value: number) => {
@@ -817,6 +839,42 @@ export function StudioPage() {
             {customWakeError ? (
               <p className="sleep-timer-custom-error" id="wake-timer-custom-error" role="alert">
                 {customWakeError}
+              </p>
+            ) : null}
+          </form>
+          <form
+            className="sleep-timer-custom"
+            onSubmit={(event) => {
+              event.preventDefault();
+              handleStartWakeClockTimer();
+            }}
+          >
+            <label className="sleep-timer-custom-label" htmlFor="wake-timer-clock-time">
+              按时刻叫醒
+            </label>
+            <div className="sleep-timer-custom-row">
+              <input
+                aria-describedby={wakeClockError ? 'wake-timer-clock-error' : 'wake-timer-clock-hint'}
+                aria-invalid={wakeClockError ? true : undefined}
+                className="sleep-timer-custom-input sleep-timer-clock-input"
+                id="wake-timer-clock-time"
+                type="time"
+                value={wakeClockTime}
+                onChange={(event) => {
+                  setWakeClockTime(event.target.value);
+                  setWakeClockError(null);
+                }}
+              />
+              <button className="studio-btn studio-btn--secondary" type="submit">
+                开始
+              </button>
+            </div>
+            <p className="drawer-hint" id="wake-timer-clock-hint">
+              例如设置 07:30，将在该时刻（若已过则为次日）渐强叫醒；与上方「N 分钟后」二选一。
+            </p>
+            {wakeClockError ? (
+              <p className="sleep-timer-custom-error" id="wake-timer-clock-error" role="alert">
+                {wakeClockError}
               </p>
             ) : null}
           </form>

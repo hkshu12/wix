@@ -36,6 +36,12 @@ export function formatWakeTimerStartAnnouncement(minutes: number): string {
   return `已设置唤醒定时 ${minutes} 分钟`;
 }
 
+export function formatWakeTimerClockStartAnnouncement(hour: number, minute: number): string {
+  const hh = String(hour).padStart(2, '0');
+  const mm = String(minute).padStart(2, '0');
+  return `已设置唤醒定时，将于 ${hh}:${mm} 叫醒`;
+}
+
 export function formatWakeTimerCancelAnnouncement(): string {
   return '已取消唤醒定时';
 }

@@ -7,6 +7,7 @@ import {
   formatSleepTimerCompleteAnnouncement,
   formatSleepTimerStartAnnouncement,
   formatWakeTimerCancelAnnouncement,
+  formatWakeTimerClockStartAnnouncement,
   formatWakeTimerCompleteAnnouncement,
   formatWakeTimerStartAnnouncement
 } from './playbackAnnouncement';
@@ -41,6 +42,7 @@ describe('formatSleepTimerAnnouncements', () => {
 describe('formatWakeTimerAnnouncements', () => {
   it('announces start, cancel, and completion', () => {
     expect(formatWakeTimerStartAnnouncement(45)).toBe('已设置唤醒定时 45 分钟');
+    expect(formatWakeTimerClockStartAnnouncement(7, 30)).toBe('已设置唤醒定时，将于 07:30 叫醒');
     expect(formatWakeTimerCancelAnnouncement()).toBe('已取消唤醒定时');
     expect(formatWakeTimerCompleteAnnouncement()).toBe('唤醒定时已到，主音量已渐强');
   });

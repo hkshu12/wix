@@ -154,6 +154,43 @@ describe('StudioPage', () => {
     await waitFor(() => expect(status).toHaveTextContent('已取消唤醒定时'));
   });
 
+  it('starts a clock wake timer from the mixer drawer', () => {
+    const nowSpy = vi.spyOn(Date, 'now').mockReturnValue(Date.parse('2026-05-29T06:00:00'));
+
+    try {
+      renderWithRouter(<AppRouter />, { routerProps: { initialEntries: ['/studio'] } });
+
+      fireEvent.click(screen.getByRole('button', { name: /混音与导入/ }));
+      fireEvent.change(screen.getByLabelText('按时刻叫醒'), { target: { value: '07:30' } });
+      fireEvent.click(
+        within(screen.getByLabelText('按时刻叫醒').closest('form')!).getByRole('button', { name: '开始' })
+      );
+
+      expect(screen.getByText(/唤醒 · 1:30:00/)).toBeInTheDocument();
+    } finally {
+      nowSpy.mockRestore();
+    }
+  });
+
+  it('announces clock wake timer start in the playback status region', async () => {
+    const nowSpy = vi.spyOn(Date, 'now').mockReturnValue(Date.parse('2026-05-29T06:00:00'));
+
+    try {
+      renderWithRouter(<AppRouter />, { routerProps: { initialEntries: ['/studio'] } });
+
+      const status = screen.getByLabelText('混音播放状态');
+
+      fireEvent.click(screen.getByRole('button', { name: /混音与导入/ }));
+      fireEvent.change(screen.getByLabelText('按时刻叫醒'), { target: { value: '07:30' } });
+      fireEvent.click(
+        within(screen.getByLabelText('按时刻叫醒').closest('form')!).getByRole('button', { name: '开始' })
+      );
+      await waitFor(() => expect(status).toHaveTextContent('已设置唤醒定时，将于 07:30 叫醒'));
+    } finally {
+      nowSpy.mockRestore();
+    }
+  });
+
   it('saves and loads a named mixer preset from the drawer', () => {
     renderWithRouter(<AppRouter />, { routerProps: { initialEntries: ['/studio'] } });
 
