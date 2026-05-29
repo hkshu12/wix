@@ -13,6 +13,8 @@ export interface StudioContextValue {
   allSounds: PlayableSound[];
   selectedLayers: Array<{ layer: MixerState['layers'][number]; sound: PlayableSound }>;
   handleImport: (files: FileList | null) => Promise<void>;
+  exportCustomLibrary: () => Promise<string>;
+  importCustomLibraryBackup: (files: FileList | null) => Promise<string>;
   handleDeleteCustomTrack: (track: CustomTrack) => Promise<void>;
   handlePlayToggle: () => Promise<void>;
   sleepTimerRemainingLabel: string;

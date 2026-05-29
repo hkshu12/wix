@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { deleteCustomTrack, listCustomTracks, revokeCustomTrackUrls, saveCustomTrack } from './customLibrary';
+import { deleteCustomTrack, importStoredCustomTrack, listCustomTracks, listStoredCustomTracks, revokeCustomTrackUrls, saveCustomTrack } from './customLibrary';
 
 describe('custom sound library persistence', () => {
   beforeEach(async () => {
@@ -32,6 +32,26 @@ describe('custom sound library persistence', () => {
     await deleteCustomTrack(saved.id, { databaseName: 'white-noise-mixer-test' });
 
     expect(await listCustomTracks({ databaseName: 'white-noise-mixer-test' })).toEqual([]);
+  });
+
+  it('imports stored track bytes without preserving the original id', async () => {
+    const bytes = new TextEncoder().encode('stored-audio').buffer;
+    const imported = await importStoredCustomTrack(
+      {
+        title: 'nap-loop',
+        fileName: 'nap-loop.wav',
+        mimeType: 'audio/wav',
+        size: bytes.byteLength,
+        createdAt: 1_700_000_000_000,
+        bytes
+      },
+      { databaseName: 'white-noise-mixer-test' }
+    );
+
+    const stored = await listStoredCustomTracks({ databaseName: 'white-noise-mixer-test' });
+    expect(imported.id).toMatch(/^[0-9a-f-]{36}$/);
+    expect(stored).toHaveLength(1);
+    expect(new Uint8Array(stored[0].bytes)).toEqual(new Uint8Array(bytes));
   });
 
   it('revokes generated object URLs without touching non-blob URLs', () => {
