@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.48.0] - 2026-05-29
+
+### Added
+
+- **Studio wake timer UI regression tests**: mirror sleep-timer coverage for starting a wake countdown from the mixer drawer, dock countdown label, screen-reader start/cancel announcements, and cancel flow—reduces regression risk on the v1.41.0 wake feature.
+
 ## [1.47.0] - 2026-05-29
 
 ### Added
