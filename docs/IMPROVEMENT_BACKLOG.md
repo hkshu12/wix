@@ -58,7 +58,7 @@
 | ~~唤醒定时读屏播报~~ | 低视力用户设叫醒 | — | 已随 v1.41.0 |
 | ~~锁屏 Media Session 显示唤醒定时~~ | 锁屏看叫醒倒计时 | — | 已完成 v1.46.0 |
 | ~~Studio 唤醒定时 UI 测试~~ | 回归唤醒流程 | — | 已完成 v1.48.0 |
-| **`useMixerShareDeepLink` 单测** | 分享深链回归 | 无 hook 单测 | `renderHook` + mock navigate |
+| ~~`useMixerShareDeepLink` 单测~~ | 分享深链回归 | — | 已完成 v1.49.0 |
 
 ### 体验场景与缺口（摘要）
 
@@ -77,13 +77,14 @@
 | 锁屏/PWA | 睡眠与唤醒倒计时 | v1.46.0 Media Session 副标题对称 |
 | Android 原生 | 后台播放 | 仍为 P1 最大缺口 |
 
-### 代码与架构备注（2026-05-29 第二十四次挖掘）
+### 代码与架构备注（2026-05-29 第二十五次挖掘）
 
 - **音库**：16 内置轨；分享链接仍不含自定义音轨 blob；CC0 库可续加溪流/雨棚等（P2）。
+- **分享深链**：`useMixerShareDeepLink` + `useAndroidMixerShareDeepLink` + `mixerShareUrl` domain 测试已覆盖 Web/PWA 与 Android 入口。
 - **定时器**：睡眠/唤醒/锁屏/读屏已对称；缺时钟闹钟（非倒计时）与 Android 后台（P1）。
-- **测试**：`StudioPage` 睡眠与唤醒定时 UI 已对称；`useMixerShareDeepLink` 仍无 hook 单测。
-- **版本**：仓库 **1.47.0** → 本次 **1.48.0** 唤醒定时 UI 回归测试。
-- **近期 CHANGELOG**：v1.47 白噪音——避免重复实现。
+- **测试**：深链 hook 与 Studio 定时 UI 回归齐全；下一候选为自定义库导出或新 CC0 环境声。
+- **版本**：仓库 **1.48.0** → 本次 **1.49.0** 分享深链 hook 单测。
+- **近期 CHANGELOG**：v1.48 唤醒 UI 测试——避免重复实现。
 
 ### 外部信号
 
@@ -92,15 +93,16 @@
 
 ## 本次选中项
 
-**Studio 唤醒定时 UI 回归测试（P2 → 午睡/叫醒场景防回归）**
+**`useMixerShareDeepLink` 单元测试（P2 → 分享/社交场景防回归）**
 
-- **理由**：v1.41.0 唤醒定时已有 domain/hook/读屏/锁屏覆盖，但 `StudioPage` 仅有睡眠定时 UI 用例；镜像 3 条用例（起定时、读屏播报、取消）可在单 PR 内完成，无需 Android 构建。
-- **范围**：`StudioPage.test.tsx`；版本 **1.48.0**。
+- **理由**：v1.19.0 混音分享 URL 深链是核心传播路径，Android v1.44 亦依赖同一 hook；`useAndroidMixerShareDeepLink` 已有单测而 Web 入口缺覆盖，5 条 `renderHook` 用例可在单 PR 内完成。
+- **范围**：`useMixerShareDeepLink.test.ts`；版本 **1.49.0**。
 
 ## 历史已完成
 
 | 日期 | 项 | 引用 |
 | --- | --- | --- |
+| 2026-05-29 | `useMixerShareDeepLink` 单元测试 | v1.49.0 |
 | 2026-05-29 | Studio 唤醒定时 UI 回归测试 | v1.48.0 |
 | 2026-05-29 | 内置白噪音环境声 | v1.47.0 |
 | 2026-05-29 | 锁屏 Media Session 显示唤醒定时倒计时 | v1.46.0 |

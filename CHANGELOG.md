@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.49.0] - 2026-05-29
+
+### Added
+
+- **`useMixerShareDeepLink` unit tests**: cover redirecting non-studio routes with `?share=`, importing once when the custom library is ready, preserving other query params when stripping `share`, and no-op without a share param—reduces regression risk on v1.19.0 share deep links.
+
 ## [1.48.0] - 2026-05-29
 
 ### Added
