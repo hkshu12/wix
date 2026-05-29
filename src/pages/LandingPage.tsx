@@ -61,7 +61,7 @@ export function LandingPage() {
             </li>
             <li>桌面键盘快捷键：Space 播放/暂停、M 混音抽屉、+/- 主音量、? 查看说明</li>
             <li>支持的浏览器与 PWA 可在锁屏显示混音标题并控制播放/暂停</li>
-            <li>导入 MP3、WAV、M4A 等格式，保存在本机音频库</li>
+            <li>导入 MP3、WAV、M4A 等格式，保存在本机音频库；设置页可分别备份自定义音频与场景预设，便于换机恢复</li>
           </ul>
         </section>
 

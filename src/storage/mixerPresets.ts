@@ -63,11 +63,32 @@ export function deleteMixerPreset(id: string): void {
   writeMixerPresets(presets);
 }
 
+export function replaceMixerPresets(presets: MixerPreset[]): void {
+  writeMixerPresets(presets);
+}
+
 function writeMixerPresets(presets: MixerPreset[]): void {
   localStorage.setItem(
     STORAGE_KEY_MIXER_PRESETS,
-    JSON.stringify({ version: PRESETS_VERSION, presets })
+    JSON.stringify({ version: PRESETS_VERSION, presets: presets.slice(0, MAX_MIXER_PRESETS) })
   );
+}
+
+export function parseMixerPresetList(presets: unknown): MixerPreset[] {
+  if (!Array.isArray(presets)) {
+    return [];
+  }
+
+  const parsed: MixerPreset[] = [];
+
+  for (const item of presets) {
+    const preset = parsePreset(item);
+    if (preset) {
+      parsed.push(preset);
+    }
+  }
+
+  return parsed.slice(0, MAX_MIXER_PRESETS);
 }
 
 function createPresetId(): string {
@@ -88,16 +109,7 @@ function parseMixerPresetsPayload(value: unknown): MixerPreset[] {
     return [];
   }
 
-  const presets: MixerPreset[] = [];
-
-  for (const item of record.presets) {
-    const preset = parsePreset(item);
-    if (preset) {
-      presets.push(preset);
-    }
-  }
-
-  return presets.slice(0, MAX_MIXER_PRESETS);
+  return parseMixerPresetList(record.presets);
 }
 
 function parsePreset(value: unknown): MixerPreset | null {

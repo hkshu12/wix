@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.52.0] - 2026-05-29
+
+### Added
+
+- **Scene preset backup**: export and import your saved mixer scene presets (up to 12) as JSON from Settings—pairs with custom audio library backup when moving to a new device. Presets that reference custom tracks still need the audio backup imported separately.
+
 ## [1.51.0] - 2026-05-29
 
 ### Added
