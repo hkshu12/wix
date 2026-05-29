@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.59.0] - 2026-05-29
+
+### Added
+
+- **Full backup v2 (session + preferences)**: the recommended full JSON backup now also includes your current mixer layers (built-in and custom) and app preferences—theme, playback fade-in, screen wake lock, and sleep/wake fade durations—so a single import on a new device restores the listening session, not only custom audio and scene presets. v1 backup files still import as before.
+
 ## [1.58.0] - 2026-05-29
 
 ### Added

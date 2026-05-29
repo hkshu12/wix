@@ -10,12 +10,22 @@ const SNAPSHOT_VERSION = 1;
 
 const BUILT_IN_SOUND_IDS = new Set<string>(BUILT_IN_SOUNDS.map((sound) => sound.id));
 
-interface MixerSnapshotPayload {
+export interface MixerSnapshotPayload {
   version: number;
   masterVolume: number;
   stereoWidth: number;
   playbackRate: number;
   layers: MixerLayer[];
+}
+
+export function mixerStateToSnapshotPayload(state: MixerState): MixerSnapshotPayload {
+  return {
+    version: SNAPSHOT_VERSION,
+    masterVolume: state.masterVolume,
+    stereoWidth: state.stereoWidth,
+    playbackRate: state.playbackRate,
+    layers: state.layers
+  };
 }
 
 export function readMixerSnapshot(): MixerSnapshotPayload | null {

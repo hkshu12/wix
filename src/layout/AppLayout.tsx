@@ -4,6 +4,7 @@ import { AudioEngine } from '../audio/AudioEngine';
 import type { PlayableSound } from '../audio/audioGraphPlan';
 import {
   hydrateMixerState,
+  mixerStateToSnapshotPayload,
   readMixerSnapshot,
   writeMixerSnapshot,
   filterMixerLayersToSounds
@@ -38,11 +39,15 @@ import {
   serializeMixerPresetsBackup
 } from '../domain/mixerPresetsBackup';
 import {
+  applyFullAppBackupAppPreferences,
   downloadFullAppBackup,
   formatFullAppBackupFilename,
+  hasFullAppBackupExportContent,
   parseFullAppBackup,
+  readCurrentAppPreferencesForBackup,
   serializeFullAppBackup
 } from '../domain/fullAppBackup';
+import { useTheme } from '../theme/ThemeProvider';
 import {
   deleteMixerPreset,
   readMixerPresets,
@@ -77,6 +82,7 @@ import { UpdateProvider } from './UpdateContext';
 export function AppLayout() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { setPreference: setThemePreference } = useTheme();
   const [mixer, setMixer] = useState<MixerState>(() => hydrateMixerState(readMixerSnapshot()));
   const [customTracks, setCustomTracks] = useState<CustomTrack[]>([]);
   const [customTracksReady, setCustomTracksReady] = useState(false);
@@ -407,15 +413,30 @@ export function AppLayout() {
   async function handleExportFullAppBackup(): Promise<string> {
     const storedTracks = await listStoredCustomTracks();
     const presets = readMixerPresets();
+    const mixerSnapshot = mixer.layers.length > 0 ? mixerStateToSnapshotPayload(mixer) : null;
+    const appPreferences = readCurrentAppPreferencesForBackup();
 
-    if (storedTracks.length === 0 && presets.length === 0) {
-      return '暂无自定义音频或场景预设可导出。';
+    if (
+      !hasFullAppBackupExportContent({
+        tracks: storedTracks,
+        presets,
+        mixerSnapshot,
+        appPreferences
+      })
+    ) {
+      return '暂无自定义音频、场景预设、当前混音或偏好设置可导出。';
     }
 
     const exportedAt = Date.now();
-    const json = serializeFullAppBackup(storedTracks, presets, exportedAt);
+    const json = serializeFullAppBackup({
+      tracks: storedTracks,
+      presets,
+      mixerSnapshot,
+      appPreferences,
+      exportedAt
+    });
     if (!json) {
-      return '暂无自定义音频或场景预设可导出。';
+      return '暂无自定义音频、场景预设、当前混音或偏好设置可导出。';
     }
 
     downloadFullAppBackup(json, formatFullAppBackupFilename(exportedAt));
@@ -425,6 +446,12 @@ export function AppLayout() {
     }
     if (presets.length > 0) {
       parts.push(`${presets.length} 个场景预设`);
+    }
+    if (mixerSnapshot && mixerSnapshot.layers.length > 0) {
+      parts.push('当前混音');
+    }
+    if (appPreferences && Object.keys(appPreferences).length > 0) {
+      parts.push('偏好设置');
     }
     return `已导出完整备份（${parts.join('、')}）。`;
   }
@@ -462,16 +489,36 @@ export function AppLayout() {
 
       const tracks = await listCustomTracks();
       replaceCustomTracks(tracks);
-      const allowedSoundIds = new Set([
-        ...BUILT_IN_SOUNDS.map((sound) => sound.id),
-        ...tracks.map((track) => track.id)
-      ]);
-      setMixer((state) => filterMixerLayersToSounds(state, allowedSoundIds));
     }
 
     if (result.presets.length > 0) {
       replaceMixerPresets(result.presets);
       refreshMixerPresets();
+    }
+
+    const customTrackIds =
+      result.tracks.length > 0
+        ? (await listCustomTracks()).map((track) => track.id)
+        : customTracksRef.current.map((track) => track.id);
+    const allowedSoundIds = new Set([
+      ...BUILT_IN_SOUNDS.map((sound) => sound.id),
+      ...customTrackIds
+    ]);
+
+    if (result.mixerSnapshot && result.mixerSnapshot.layers.length > 0) {
+      const restored = filterMixerLayersToSounds(hydrateMixerState(result.mixerSnapshot), allowedSoundIds);
+      setMixer(restored);
+      writeMixerSnapshot(restored);
+    }
+
+    if (result.appPreferences) {
+      applyFullAppBackupAppPreferences(result.appPreferences, {
+        setTheme: setThemePreference,
+        setPlaybackFadeInSeconds,
+        setScreenWakeLockEnabled,
+        setSleepTimerFadeSeconds: sleepTimerController.setFadeSeconds,
+        setWakeTimerFadeSeconds: wakeTimerController.setFadeSeconds
+      });
     }
 
     const parts: string[] = [];
@@ -480,6 +527,12 @@ export function AppLayout() {
     }
     if (result.presets.length > 0) {
       parts.push(`${result.presets.length} 个场景预设`);
+    }
+    if (result.mixerSnapshot && result.mixerSnapshot.layers.length > 0) {
+      parts.push('当前混音');
+    }
+    if (result.appPreferences && Object.keys(result.appPreferences).length > 0) {
+      parts.push('偏好设置');
     }
     return `已从完整备份恢复 ${parts.join('、')}。`;
   }

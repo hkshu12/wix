@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
+import { hasFullAppBackupExportContent, readCurrentAppPreferencesForBackup } from '../domain/fullAppBackup';
 import { getAppVersionInfo } from '../lib/appMeta';
 import { isAndroidApp } from '../lib/platform';
 import { useStudio } from '../layout/StudioContext';
+import { mixerStateToSnapshotPayload } from '../storage/mixerSnapshot';
 import { ThemeToggle } from '../theme/ThemeToggle';
 
 export function SettingsPage() {
@@ -15,6 +17,7 @@ export function SettingsPage() {
     importMixerPresetsBackup,
     exportFullAppBackup,
     importFullAppBackup,
+    mixer,
     mixerPresets
   } = useStudio();
   const [platformLabel, setPlatformLabel] = useState('');
@@ -31,7 +34,12 @@ export function SettingsPage() {
   const [exportingFullBackup, setExportingFullBackup] = useState(false);
   const [importingFullBackup, setImportingFullBackup] = useState(false);
 
-  const hasFullBackupContent = customTracks.length > 0 || mixerPresets.length > 0;
+  const hasFullBackupContent = hasFullAppBackupExportContent({
+    customTrackCount: customTracks.length,
+    presets: mixerPresets,
+    mixerSnapshot: mixer.layers.length > 0 ? mixerStateToSnapshotPayload(mixer) : null,
+    appPreferences: readCurrentAppPreferencesForBackup()
+  });
   const backupBusy =
     exportingBackup ||
     importingBackup ||
@@ -182,7 +190,7 @@ export function SettingsPage() {
       <section className="app-page-card" aria-labelledby="settings-full-backup-title">
         <h2 id="settings-full-backup-title">完整备份（推荐）</h2>
         <p>
-          将本机的自定义音频与场景预设一并导出为单个 JSON 文件，换设备或重装后一次导入即可恢复，无需分别操作两个备份文件。
+          将本机的自定义音频、场景预设、当前混音与偏好设置（主题、渐入、常亮、定时渐出时长）一并导出为单个 JSON 文件，换设备或重装后一次导入即可恢复会话，无需分别操作多个备份文件。
         </p>
         <div className="app-page-actions">
           <button
