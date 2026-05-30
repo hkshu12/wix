@@ -1,8 +1,7 @@
 import type { MixerState } from './mixer';
-import type { MiuiScene } from './miuiScenes';
+import type { FlagshipScene } from './flagshipScenes';
 
-/** Replace the current mix with a MIUI scene preset (keeps master / transport settings). */
-export function applyMiuiScene(state: MixerState, scene: MiuiScene): MixerState {
+export function applyFlagshipScene(state: MixerState, scene: FlagshipScene): MixerState {
   return {
     ...state,
     layers: scene.layers.map((layer) => ({

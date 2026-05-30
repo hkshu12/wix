@@ -24,9 +24,10 @@ describe('filterSoundsByQuery', () => {
   it('matches built-in title and subtitle case-insensitively', () => {
     const rain = BUILT_IN_SOUNDS.find((sound) => sound.id === 'rain')!;
     expect(filterSoundsByQuery(BUILT_IN_SOUNDS, '雨声')).toEqual([rain]);
-    expect(filterSoundsByQuery(BUILT_IN_SOUNDS, '雨滴')).toEqual([rain]);
-    expect(filterSoundsByQuery(BUILT_IN_SOUNDS, '雨夜')).toEqual(
-      BUILT_IN_SOUNDS.filter((sound) => sound.id === 'thunder')
+    const rainOnLeaves = BUILT_IN_SOUNDS.find((sound) => sound.id === 'rain-on-leaves')!;
+    expect(filterSoundsByQuery(BUILT_IN_SOUNDS, '雨滴')).toEqual([rainOnLeaves]);
+    expect(filterSoundsByQuery(BUILT_IN_SOUNDS, '钟摆')).toEqual(
+      BUILT_IN_SOUNDS.filter((sound) => sound.id === 'clock-tick')
     );
     expect(filterSoundsByQuery(BUILT_IN_SOUNDS, '白噪音')).toEqual(
       BUILT_IN_SOUNDS.filter((sound) => sound.id === 'white-noise')

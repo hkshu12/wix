@@ -8,3 +8,4 @@ coverage/
 android/.gradle/
 android/app/build/
 tmp/
+*.apk

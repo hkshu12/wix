@@ -1,11 +1,19 @@
 export type BuiltInSoundId =
-  | 'campfire'
   | 'rain'
+  | 'summer-rain'
+  | 'river'
+  | 'rain-on-leaves'
+  | 'birds'
   | 'ocean'
+  | 'ocean-near'
+  | 'ocean-far'
   | 'stream'
   | 'fireplace'
-  | 'thunder'
   | 'forest'
+  | 'clock-tick'
+  | 'window-wind'
+  | 'air-hum'
+  | 'piano'
   | 'brown-noise'
   | 'pink-noise'
   | 'white-noise'
@@ -24,28 +32,57 @@ export interface BuiltInSound {
   subtitle: string;
   icon: string;
   accent: string;
-  /** Path under `public/`, e.g. `sounds/rain.ogg` */
+  /** Path under `public/`, e.g. `sounds/studio/rain.mp3` */
   src: string;
 }
 
+const STUDIO = 'sounds/studio';
+
 export const BUILT_IN_SOUNDS: BuiltInSound[] = [
-  {
-    id: 'campfire',
-    kind: 'built-in',
-    title: '篝火',
-    subtitle: '跳动木柴与轻微爆裂',
-    icon: '🔥',
-    accent: '#ff9f43',
-    src: 'sounds/campfire.ogg'
-  },
   {
     id: 'rain',
     kind: 'built-in',
     title: '雨声',
-    subtitle: '密集雨滴与窗外氛围',
+    subtitle: '密集夏雨与窗外氛围',
     icon: '🌧️',
     accent: '#60a5fa',
-    src: 'sounds/rain.ogg'
+    src: `${STUDIO}/summer-rain.mp3`
+  },
+  {
+    id: 'summer-rain',
+    kind: 'built-in',
+    title: '夏雨',
+    subtitle: '六月与夏雨的邂逅',
+    icon: '🌦️',
+    accent: '#38bdf8',
+    src: `${STUDIO}/summer-rain.mp3`
+  },
+  {
+    id: 'river',
+    kind: 'built-in',
+    title: '河流',
+    subtitle: '湍急水流与河谷回响',
+    icon: '🏞️',
+    accent: '#2dd4bf',
+    src: `${STUDIO}/river.mp3`
+  },
+  {
+    id: 'rain-on-leaves',
+    kind: 'built-in',
+    title: '叶上雨',
+    subtitle: '树叶上的细雨滴答',
+    icon: '🍃',
+    accent: '#4ade80',
+    src: `${STUDIO}/rain-on-leaves.mp3`
+  },
+  {
+    id: 'birds',
+    kind: 'built-in',
+    title: '鸟鸣',
+    subtitle: '林间清晨与远处鸟叫',
+    icon: '🐦',
+    accent: '#a3e635',
+    src: `${STUDIO}/birds.mp3`
   },
   {
     id: 'ocean',
@@ -54,7 +91,25 @@ export const BUILT_IN_SOUNDS: BuiltInSound[] = [
     subtitle: '潮汐般起伏的浪声',
     icon: '🌊',
     accent: '#22d3ee',
-    src: 'sounds/ocean.ogg'
+    src: `${STUDIO}/ocean-near.mp3`
+  },
+  {
+    id: 'ocean-near',
+    kind: 'built-in',
+    title: '近海浪',
+    subtitle: '拍岸碎浪与湿润气息',
+    icon: '🌊',
+    accent: '#06b6d4',
+    src: `${STUDIO}/ocean-near.mp3`
+  },
+  {
+    id: 'ocean-far',
+    kind: 'built-in',
+    title: '远海浪',
+    subtitle: '远处起伏的潮汐底噪',
+    icon: '🌅',
+    accent: '#0ea5e9',
+    src: `${STUDIO}/ocean-far.mp3`
   },
   {
     id: 'stream',
@@ -63,7 +118,7 @@ export const BUILT_IN_SOUNDS: BuiltInSound[] = [
     subtitle: '潺潺流水，适合冥想、放松与自然氛围',
     icon: '💧',
     accent: '#2dd4bf',
-    src: 'sounds/stream.ogg'
+    src: `${STUDIO}/stream.mp3`
   },
   {
     id: 'fireplace',
@@ -72,16 +127,7 @@ export const BUILT_IN_SOUNDS: BuiltInSound[] = [
     subtitle: '温暖室内燃烧声',
     icon: '🪵',
     accent: '#fb7185',
-    src: 'sounds/fireplace.ogg'
-  },
-  {
-    id: 'thunder',
-    kind: 'built-in',
-    title: '远雷',
-    subtitle: '低频滚动与雨夜空间',
-    icon: '⛈️',
-    accent: '#818cf8',
-    src: 'sounds/thunder.ogg'
+    src: `${STUDIO}/fireplace.mp3`
   },
   {
     id: 'forest',
@@ -90,7 +136,43 @@ export const BUILT_IN_SOUNDS: BuiltInSound[] = [
     subtitle: '树叶、微风与远处鸟鸣',
     icon: '🌲',
     accent: '#34d399',
-    src: 'sounds/forest.ogg'
+    src: `${STUDIO}/forest.mp3`
+  },
+  {
+    id: 'clock-tick',
+    kind: 'built-in',
+    title: '钟摆',
+    subtitle: '安静室内的机械滴答',
+    icon: '🕰️',
+    accent: '#cbd5e1',
+    src: `${STUDIO}/clock-tick.mp3`
+  },
+  {
+    id: 'window-wind',
+    kind: 'built-in',
+    title: '窗风',
+    subtitle: '窗外风声与冬季氛围',
+    icon: '🌬️',
+    accent: '#94a3b8',
+    src: `${STUDIO}/window-wind.mp3`
+  },
+  {
+    id: 'air-hum',
+    kind: 'built-in',
+    title: '气流嗡鸣',
+    subtitle: '柔和稳定的空间底噪',
+    icon: '💨',
+    accent: '#64748b',
+    src: `${STUDIO}/air-hum.mp3`
+  },
+  {
+    id: 'piano',
+    kind: 'built-in',
+    title: '钢琴',
+    subtitle: '轻柔键盘氛围，适合阅读与放松',
+    icon: '🎹',
+    accent: '#c084fc',
+    src: `${STUDIO}/piano.mp3`
   },
   {
     id: 'brown-noise',

@@ -2,13 +2,17 @@ import { describe, expect, it } from 'vitest';
 import { BUILT_IN_SOUNDS, getSoundById } from './sounds';
 
 describe('built-in sound catalog', () => {
-  it('ships the requested default ambience sounds', () => {
+  it('ships studio ambience loops and focus noise presets', () => {
     expect(BUILT_IN_SOUNDS.map((sound) => sound.id)).toEqual(
       expect.arrayContaining([
-        'campfire',
         'rain',
+        'summer-rain',
+        'river',
         'ocean',
+        'ocean-near',
         'fireplace',
+        'forest',
+        'stream',
         'fan',
         'cafe',
         'train',
@@ -16,8 +20,7 @@ describe('built-in sound catalog', () => {
         'airplane',
         'office',
         'construction-site',
-        'white-noise',
-        'stream'
+        'white-noise'
       ])
     );
   });
@@ -26,11 +29,16 @@ describe('built-in sound catalog', () => {
     const ids = BUILT_IN_SOUNDS.map((sound) => sound.id);
 
     expect(new Set(ids).size).toBe(ids.length);
-    expect(BUILT_IN_SOUNDS.every((sound) => sound.title && sound.src.startsWith('sounds/'))).toBe(true);
+    expect(
+      BUILT_IN_SOUNDS.every(
+        (sound) => sound.title && (sound.src.startsWith('sounds/studio/') || sound.src.startsWith('sounds/'))
+      )
+    ).toBe(true);
   });
 
   it('looks up built-in sounds by id', () => {
     expect(getSoundById('rain')?.title).toBe('雨声');
+    expect(getSoundById('rain')?.src).toBe('sounds/studio/summer-rain.mp3');
     expect(getSoundById('fan')?.title).toBe('风扇');
     expect(getSoundById('cafe')?.title).toBe('咖啡馆');
     expect(getSoundById('train')?.title).toBe('列车');

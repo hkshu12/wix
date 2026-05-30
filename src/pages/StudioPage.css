@@ -15,7 +15,7 @@ p {
   padding: 12px 20px calc(96px + var(--safe-bottom));
 }
 
-.studio-miui {
+.studio-immersive {
   width: 100%;
   max-width: none;
   margin: 0;
@@ -26,7 +26,7 @@ p {
   overflow: hidden;
 }
 
-.miui-topbar {
+.immersive-topbar {
   position: absolute;
   top: 0;
   left: 0;
@@ -41,13 +41,13 @@ p {
   text-shadow: 0 1px 8px rgba(0, 0, 0, 0.45);
 }
 
-.miui-topbar__brand {
+.immersive-topbar__brand {
   font-weight: 700;
   font-size: 0.95rem;
   letter-spacing: 0.02em;
 }
 
-.miui-topbar__actions {
+.immersive-topbar__actions {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -55,7 +55,7 @@ p {
   gap: 8px;
 }
 
-.miui-topbar__btn {
+.immersive-topbar__btn {
   border: 0;
   border-radius: 999px;
   padding: 6px 12px;
@@ -67,21 +67,21 @@ p {
   backdrop-filter: blur(8px);
 }
 
-.studio-miui .theme-toggle {
+.studio-immersive .theme-toggle {
   border-color: rgba(255, 255, 255, 0.28);
   background: rgba(0, 0, 0, 0.22);
 }
 
-.studio-miui .theme-toggle button {
+.studio-immersive .theme-toggle button {
   color: rgba(255, 255, 255, 0.75);
 }
 
-.studio-miui .theme-toggle button.active {
+.studio-immersive .theme-toggle button.active {
   color: #fff;
   background: rgba(255, 255, 255, 0.16);
 }
 
-.miui-stage {
+.immersive-stage {
   position: relative;
   flex: 1;
   min-height: 100dvh;
@@ -91,7 +91,7 @@ p {
   touch-action: pan-y;
 }
 
-.miui-stage__backdrop {
+.immersive-stage__backdrop {
   position: absolute;
   inset: 0;
   background-position: center;
@@ -102,7 +102,7 @@ p {
   transform: scale(1.04);
 }
 
-.miui-stage__backdrop--active {
+.immersive-stage__backdrop--active {
   opacity: 1;
   transform: scale(1);
   transition:
@@ -110,7 +110,7 @@ p {
     transform 8s ease-out;
 }
 
-.miui-stage__scrim {
+.immersive-stage__scrim {
   position: absolute;
   inset: 0;
   background: linear-gradient(
@@ -123,7 +123,7 @@ p {
   pointer-events: none;
 }
 
-.miui-stage__hero {
+.immersive-stage__hero {
   position: relative;
   z-index: 2;
   padding: calc(72px + var(--safe-top)) 24px 0;
@@ -132,26 +132,26 @@ p {
   text-shadow: 0 2px 16px rgba(0, 0, 0, 0.4);
 }
 
-.miui-stage__title {
+.immersive-stage__title {
   margin: 0 0 8px;
   font-size: clamp(2rem, 8vw, 2.75rem);
   font-weight: 300;
   letter-spacing: 0.12em;
 }
 
-.miui-stage__subtitle {
+.immersive-stage__subtitle {
   margin: 0 0 10px;
   font-size: 0.95rem;
   opacity: 0.92;
 }
 
-.miui-stage__hint {
+.immersive-stage__hint {
   margin: 0;
   font-size: 0.78rem;
   opacity: 0.65;
 }
 
-.miui-scene-picker {
+.immersive-scene-picker {
   position: relative;
   z-index: 3;
   display: flex;
@@ -162,7 +162,7 @@ p {
   padding: 0 16px;
 }
 
-.miui-scene-picker__item {
+.immersive-scene-picker__item {
   border: 0;
   padding: 0;
   background: transparent;
@@ -172,18 +172,18 @@ p {
     transform var(--motion-duration-fast) ease;
 }
 
-.miui-scene-picker__item img {
+.immersive-scene-picker__item img {
   display: block;
   width: clamp(34px, 9vw, 44px);
   height: auto;
 }
 
-.miui-scene-picker__item--active {
+.immersive-scene-picker__item--active {
   opacity: 1;
   transform: scale(1.08);
 }
 
-.miui-stage__controls {
+.immersive-stage__controls {
   position: relative;
   z-index: 4;
   display: grid;
@@ -193,8 +193,8 @@ p {
   padding: 12px 20px calc(16px + var(--safe-bottom));
 }
 
-.miui-stage__timer,
-.miui-stage__mixer {
+.immersive-stage__timer,
+.immersive-stage__mixer {
   display: inline-flex;
   flex-direction: column;
   align-items: center;
@@ -209,23 +209,23 @@ p {
   backdrop-filter: blur(10px);
 }
 
-.miui-stage__timer--active {
+.immersive-stage__timer--active {
   background: rgba(255, 255, 255, 0.2);
 }
 
-.miui-stage__timer-icon {
+.immersive-stage__timer-icon {
   font-size: 1.1rem;
   line-height: 1;
 }
 
-.miui-stage__timer-label {
+.immersive-stage__timer-label {
   max-width: 5.5rem;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.miui-stage__play {
+.immersive-stage__play {
   width: 64px;
   height: 64px;
   border: 0;
@@ -236,12 +236,12 @@ p {
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.28);
 }
 
-.miui-stage__mixer {
+.immersive-stage__mixer {
   justify-self: end;
   position: relative;
 }
 
-.miui-stage__mixer-badge {
+.immersive-stage__mixer-badge {
   position: absolute;
   top: 2px;
   right: 4px;

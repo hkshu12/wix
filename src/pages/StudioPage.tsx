@@ -2,14 +2,14 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { BottomDrawer } from '../components/BottomDrawer';
 import { KeyboardShortcutsDialog } from '../components/KeyboardShortcutsDialog';
-import { MiuiImmersiveStage } from '../components/MiuiImmersiveStage';
+import { ImmersiveSceneStage } from '../components/ImmersiveSceneStage';
 import { Slider } from '../components/Slider';
-import { applyMiuiScene } from '../domain/applyMiuiScene';
+import { applyFlagshipScene } from '../domain/applyFlagshipScene';
 import {
-  getAdjacentMiuiScene,
-  getMiuiSceneById,
-  type MiuiSceneId
-} from '../domain/miuiScenes';
+  getAdjacentFlagshipScene,
+  getFlagshipSceneById,
+  type FlagshipSceneId
+} from '../domain/flagshipScenes';
 import { AndroidNavDrawer } from '../layout/AndroidNavDrawer';
 import { useAppUpdate } from '../layout/UpdateContext';
 import { isAndroidApp } from '../lib/platform';
@@ -41,7 +41,7 @@ import {
 } from '../domain/studioKeyboard';
 import { useStudioKeyboardShortcuts } from '../hooks/useStudioKeyboardShortcuts';
 import { APP_DISPLAY_NAME } from '../lib/appMeta';
-import { readMiuiSceneId, writeMiuiSceneId } from '../storage/miuiScenePreference';
+import { readFlagshipSceneId, writeFlagshipSceneId } from '../storage/flagshipScenePreference';
 import {
   PLAYBACK_FADE_IN_OFF,
   PLAYBACK_FADE_IN_PRESETS_SECONDS
@@ -66,7 +66,7 @@ import { useStudio } from '../layout/StudioContext';
 import { ThemeToggle } from '../theme/ThemeToggle';
 import './StudioPage.css';
 
-const DEFAULT_MIUI_SCENE_ID: MiuiSceneId = 'summer-rain';
+const DEFAULT_FLAGSHIP_SCENE_ID: FlagshipSceneId = 'summer-rain';
 
 export function StudioPage() {
   const {
@@ -136,8 +136,8 @@ export function StudioPage() {
   const [wakeClockTime, setWakeClockTime] = useState('07:30');
   const [wakeClockError, setWakeClockError] = useState<string | null>(null);
   const [navOpen, setNavOpen] = useState(false);
-  const [activeSceneId, setActiveSceneId] = useState<MiuiSceneId>(
-    () => readMiuiSceneId() ?? DEFAULT_MIUI_SCENE_ID
+  const [activeSceneId, setActiveSceneId] = useState<FlagshipSceneId>(
+    () => readFlagshipSceneId() ?? DEFAULT_FLAGSHIP_SCENE_ID
   );
   const initialSceneAppliedRef = useRef(false);
   const { updateAvailable } = useAppUpdate();
@@ -304,22 +304,22 @@ export function StudioPage() {
   }, [announcePlayback, handlePlayToggle, mixer.isPlaying]);
 
   const applySceneById = useCallback(
-    (sceneId: MiuiSceneId) => {
-      const scene = getMiuiSceneById(sceneId);
+    (sceneId: FlagshipSceneId) => {
+      const scene = getFlagshipSceneById(sceneId);
       if (!scene) {
         return;
       }
 
       setActiveSceneId(sceneId);
-      writeMiuiSceneId(sceneId);
-      setMixer((state) => applyMiuiScene(state, scene));
+      writeFlagshipSceneId(sceneId);
+      setMixer((state) => applyFlagshipScene(state, scene));
       announcePlayback(`已切换至 ${scene.title}`);
     },
     [announcePlayback, setMixer]
   );
 
   const handleSelectScene = useCallback(
-    (sceneId: MiuiSceneId) => {
+    (sceneId: FlagshipSceneId) => {
       applySceneById(sceneId);
     },
     [applySceneById]
@@ -327,7 +327,7 @@ export function StudioPage() {
 
   const handleSwipeScene = useCallback(
     (direction: 1 | -1) => {
-      applySceneById(getAdjacentMiuiScene(activeSceneId, direction).id);
+      applySceneById(getAdjacentFlagshipScene(activeSceneId, direction).id);
     },
     [activeSceneId, applySceneById]
   );
@@ -338,11 +338,11 @@ export function StudioPage() {
     }
 
     initialSceneAppliedRef.current = true;
-    const scene = getMiuiSceneById(activeSceneId) ?? getMiuiSceneById(DEFAULT_MIUI_SCENE_ID)!;
-    setMixer((state) => applyMiuiScene(state, scene));
+    const scene = getFlagshipSceneById(activeSceneId) ?? getFlagshipSceneById(DEFAULT_FLAGSHIP_SCENE_ID)!;
+    setMixer((state) => applyFlagshipScene(state, scene));
   }, [activeSceneId, mixer.layers.length, setMixer]);
 
-  const activeScene = getMiuiSceneById(activeSceneId) ?? getMiuiSceneById(DEFAULT_MIUI_SCENE_ID)!;
+  const activeScene = getFlagshipSceneById(activeSceneId) ?? getFlagshipSceneById(DEFAULT_FLAGSHIP_SCENE_ID)!;
   const timerDockLabel =
     sleepTimerActive || wakeTimerActive
       ? sleepTimerActive
@@ -402,7 +402,7 @@ export function StudioPage() {
   }
 
   return (
-    <main className="studio-page studio-miui">
+    <main className="studio-page studio-immersive">
       <p
         className="sr-only"
         role="status"
@@ -412,12 +412,12 @@ export function StudioPage() {
       >
         {playbackAnnouncement}
       </p>
-      <header className="miui-topbar">
-        <span className="miui-topbar__brand">{APP_DISPLAY_NAME}</span>
-        <div className="miui-topbar__actions">
+      <header className="immersive-topbar">
+        <span className="immersive-topbar__brand">{APP_DISPLAY_NAME}</span>
+        <div className="immersive-topbar__actions">
           {android ? (
             <button
-              className="miui-topbar__btn studio-menu-btn"
+              className="immersive-topbar__btn studio-menu-btn"
               type="button"
               aria-expanded={navOpen}
               onClick={() => setNavOpen(true)}
@@ -427,10 +427,10 @@ export function StudioPage() {
             </button>
           ) : (
             <>
-              <Link className="miui-topbar__btn" to="/" state={{ fromIntro: true }}>
+              <Link className="immersive-topbar__btn" to="/" state={{ fromIntro: true }}>
                 介绍
               </Link>
-              <Link className="miui-topbar__btn" to="/settings">
+              <Link className="immersive-topbar__btn" to="/settings">
                 设置
               </Link>
             </>
@@ -439,7 +439,7 @@ export function StudioPage() {
         </div>
       </header>
 
-      <MiuiImmersiveStage
+      <ImmersiveSceneStage
         activeSceneId={activeSceneId}
         activeScene={activeScene}
         isPlaying={mixer.isPlaying}
@@ -452,7 +452,7 @@ export function StudioPage() {
         onOpenMixer={() => setDrawerOpen(true)}
       />
 
-      {android ? <AndroidNavDrawer open={navOpen} onClose={() => setNavOpen(false)} /> : null}      {android ? <AndroidNavDrawer open={navOpen} onClose={() => setNavOpen(false)} /> : null}
+      {android ? <AndroidNavDrawer open={navOpen} onClose={() => setNavOpen(false)} /> : null}
 
       <KeyboardShortcutsDialog open={keyboardHelpOpen} onClose={() => setKeyboardHelpOpen(false)} />
 
@@ -461,7 +461,7 @@ export function StudioPage() {
 
         <section className="drawer-section" aria-labelledby="drawer-sounds-title">
           <h3 id="drawer-sounds-title">更多环境声</h3>
-          <p className="drawer-hint">在 MIUI 五场景之外自由叠加、混搭任意内置或导入音频。</p>
+          <p className="drawer-hint">在精选场景之外自由叠加、混搭任意内置或导入音频。</p>
           <label className="studio-sound-search">
             <span className="sr-only">搜索环境声</span>
             <input

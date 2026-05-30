@@ -41,7 +41,7 @@ describe('StudioPage', () => {
     renderWithRouter(<AppRouter />, { routerProps: { initialEntries: ['/studio'] } });
 
     expect(screen.queryByLabelText('应用能力概览')).not.toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: '夏雨' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { level: 2, name: '夏雨' })).toBeInTheDocument();
     openMixerDrawer();
     expect(screen.getByRole('button', { name: /雨声/ })).toBeInTheDocument();
     expect(screen.getByLabelText(/导入自定义音乐/)).toBeInTheDocument();
@@ -72,9 +72,9 @@ describe('StudioPage', () => {
 
     const activePanel = screen.getByLabelText('当前混音轨道');
 
-    expect(within(activePanel).getByText('雨声')).toBeInTheDocument();
+    expect(within(activePanel).getByText('夏雨')).toBeInTheDocument();
     expect(within(activePanel).getByText('海边')).toBeInTheDocument();
-    expect(within(activePanel).getByLabelText('雨声音量')).toHaveValue('72');
+    expect(within(activePanel).getByLabelText('夏雨音量')).toHaveValue('72');
     expect(within(activePanel).getByLabelText('海边音量')).toHaveValue('65');
   });
 
@@ -253,7 +253,7 @@ describe('StudioPage', () => {
     fireEvent.click(screen.getByRole('button', { name: '加载预设 雨夜专注' }));
 
     const activePanel = screen.getByLabelText('当前混音轨道');
-    expect(within(activePanel).getByText('雨声')).toBeInTheDocument();
+    expect(within(activePanel).getByText('夏雨')).toBeInTheDocument();
     expect(within(activePanel).queryByText('海边')).not.toBeInTheDocument();
   });
 
@@ -274,7 +274,7 @@ describe('StudioPage', () => {
     expect(screen.queryByRole('button', { name: '加载预设 旧名' })).not.toBeInTheDocument();
 
     const activePanel = screen.getByLabelText('当前混音轨道');
-    expect(within(activePanel).getByText('雨声')).toBeInTheDocument();
+    expect(within(activePanel).getByText('夏雨')).toBeInTheDocument();
   });
 
   it('duplicates a saved preset as a new entry', () => {
@@ -322,7 +322,6 @@ describe('StudioPage', () => {
     openMixerDrawer();
 
     const activePanel = screen.getByLabelText('当前混音轨道');
-    expect(within(activePanel).getByText('雨声')).toBeInTheDocument();
 
     fireEvent.change(screen.getByLabelText('混音分享码'), { target: { value: shareCode } });
     fireEvent.click(screen.getByRole('button', { name: '导入混音' }));
@@ -457,7 +456,7 @@ describe('StudioPage', () => {
   });
 
   it('shows per-layer retry when a track fails to load during playback', async () => {
-    mockSyncResult = { failedSoundIds: ['rain'] };
+    mockSyncResult = { failedSoundIds: ['summer-rain'] };
 
     renderWithRouter(<AppRouter />, { routerProps: { initialEntries: ['/studio'] } });
 
