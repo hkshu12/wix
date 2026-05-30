@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.61.0] - 2026-05-29
+
+### Fixed
+
+- Android in-app update: tapping **Install** now opens the system package installer instead of closing the app without launching it (FileProvider URI grants, install intent visibility on Android 11+).
+- Android WebView shell feels more native: removed rectangular tap highlights on buttons, disabled long-press text selection on labels (inputs still selectable).
+
 ## [1.60.0] - 2026-05-29
 
 ### Added
