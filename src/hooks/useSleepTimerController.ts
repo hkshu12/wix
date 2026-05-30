@@ -73,6 +73,12 @@ export function useSleepTimerController({
   }
 
   useEffect(() => {
+    if (!mixer.isPlaying && isSleepTimerActive(sleepTimer)) {
+      fadeRampStartedRef.current = false;
+    }
+  }, [mixer.isPlaying, sleepTimer]);
+
+  useEffect(() => {
     if (!initialSleepTimer.current.expiredWhileClosed) {
       return;
     }
@@ -176,11 +182,9 @@ export function useSleepTimerController({
           }
         }
 
-        if (!timerAudio) {
-          const progress = fadeProgress(fadeStartsAt, fadeEndsAt, now);
-          const nextVolume = preFade * (1 - progress);
-          setMixer((state) => setMasterVolume(state, nextVolume));
-        }
+        const progress = fadeProgress(fadeStartsAt, fadeEndsAt, now);
+        const nextVolume = preFade * (1 - progress);
+        setMixer((state) => setMasterVolume(state, nextVolume));
       }
     };
 
