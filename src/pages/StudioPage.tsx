@@ -66,7 +66,7 @@ import { useStudio } from '../layout/StudioContext';
 import { ThemeToggle } from '../theme/ThemeToggle';
 import './StudioPage.css';
 
-const DEFAULT_MIUI_SCENE_ID: MiuiSceneId = 'rain';
+const DEFAULT_MIUI_SCENE_ID: MiuiSceneId = 'summer-rain';
 
 export function StudioPage() {
   const {

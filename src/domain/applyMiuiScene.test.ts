@@ -5,11 +5,11 @@ import { MIUI_SCENES } from './miuiScenes';
 
 describe('applyMiuiScene', () => {
   it('replaces layers with scene preset volumes', () => {
-    const rain = MIUI_SCENES.find((s) => s.id === 'rain')!;
-    const next = applyMiuiScene(createInitialMixerState(), rain);
+    const summerRain = MIUI_SCENES.find((s) => s.id === 'summer-rain')!;
+    const next = applyMiuiScene(createInitialMixerState(), summerRain);
 
-    expect(next.layers).toHaveLength(1);
-    expect(next.layers[0]?.soundId).toBe('rain');
-    expect(next.layers[0]?.volume).toBe(0.78);
+    expect(next.layers).toHaveLength(3);
+    expect(next.layers.map((l) => l.soundId).sort()).toEqual(['rain', 'stream', 'thunder']);
+    expect(next.layers.find((l) => l.soundId === 'rain')?.volume).toBe(0.72);
   });
 });

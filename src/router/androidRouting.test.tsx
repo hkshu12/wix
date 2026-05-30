@@ -39,7 +39,7 @@ describe('Android routing', () => {
       </ThemeProvider>
     );
 
-    expect(screen.getByRole('heading', { name: '细雨' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: '夏雨' })).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: '开始使用' })).not.toBeInTheDocument();
   });
 });

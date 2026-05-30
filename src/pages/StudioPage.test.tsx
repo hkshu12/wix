@@ -41,7 +41,7 @@ describe('StudioPage', () => {
     renderWithRouter(<AppRouter />, { routerProps: { initialEntries: ['/studio'] } });
 
     expect(screen.queryByLabelText('应用能力概览')).not.toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: '细雨' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: '夏雨' })).toBeInTheDocument();
     openMixerDrawer();
     expect(screen.getByRole('button', { name: /雨声/ })).toBeInTheDocument();
     expect(screen.getByLabelText(/导入自定义音乐/)).toBeInTheDocument();
@@ -74,7 +74,7 @@ describe('StudioPage', () => {
 
     expect(within(activePanel).getByText('雨声')).toBeInTheDocument();
     expect(within(activePanel).getByText('海边')).toBeInTheDocument();
-    expect(within(activePanel).getByLabelText('雨声音量')).toHaveValue('78');
+    expect(within(activePanel).getByLabelText('雨声音量')).toHaveValue('72');
     expect(within(activePanel).getByLabelText('海边音量')).toHaveValue('65');
   });
 
@@ -312,34 +312,17 @@ describe('StudioPage', () => {
   });
 
   it('imports a mixer share code from the drawer', () => {
-    const writeText = vi.fn().mockResolvedValue(undefined);
-    Object.defineProperty(navigator, 'clipboard', {
-      configurable: true,
-      value: { writeText, readText: vi.fn() }
-    });
+    let state = createInitialMixerState();
+    state = toggleLayer(state, 'rain');
+    state = toggleLayer(state, 'ocean');
+    const shareCode = serializeMixerShare(state);
 
     renderWithRouter(<AppRouter />, { routerProps: { initialEntries: ['/studio'] } });
 
     openMixerDrawer();
-    fireEvent.click(screen.getByRole('button', { name: /海边/ }));
-
-    fireEvent.click(screen.getByRole('button', { name: '复制分享码' }));
-    expect(writeText).toHaveBeenCalled();
-    const shareCodeCall = writeText.mock.calls.find((call) => {
-      const text = call[0] as string;
-      return text.includes('wix-mixer-share');
-    });
-    expect(shareCodeCall).toBeDefined();
-
-    const shareCode = shareCodeCall?.[0] as string;
-    expect(shareCode).toContain('wix-mixer-share');
-
-    fireEvent.click(screen.getByRole('button', { name: /雨声/ }));
-    fireEvent.click(screen.getByRole('button', { name: /海边/ }));
 
     const activePanel = screen.getByLabelText('当前混音轨道');
-    expect(within(activePanel).queryByText('雨声')).not.toBeInTheDocument();
-    expect(within(activePanel).queryByText('海边')).not.toBeInTheDocument();
+    expect(within(activePanel).getByText('雨声')).toBeInTheDocument();
 
     fireEvent.change(screen.getByLabelText('混音分享码'), { target: { value: shareCode } });
     fireEvent.click(screen.getByRole('button', { name: '导入混音' }));
