@@ -1,7 +1,7 @@
 import { act, renderHook } from '@testing-library/react';
 import { useState } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { createInitialMixerState, setPlaying } from '../domain/mixer';
+import { createInitialMixerState, setMasterVolume, setPlaying } from '../domain/mixer';
 import { SLEEP_TIMER_FADE_SECONDS, startSleepTimer } from '../domain/sleepTimer';
 import { writeSleepTimerSnapshot } from '../storage/sleepTimerSnapshot';
 import { useSleepTimerController } from './useSleepTimerController';
@@ -138,6 +138,52 @@ describe('useSleepTimerController', () => {
 
     expect(result.current.controller.isActive).toBe(true);
     expect(result.current.controller.remainingLabel).toBe('3:00:00');
+  });
+
+  it('keeps faded master volume in sync when pausing during a Web Audio sleep fade', () => {
+    const timerAudio = {
+      scheduleMasterRamp: vi.fn(),
+      setMasterVolumeImmediate: vi.fn()
+    };
+
+    const { result } = renderHook(() => {
+      const [mixer, setMixer] = useState(() =>
+        setMasterVolume(setPlaying(createInitialMixerState(), true), 0.8)
+      );
+      const controller = useSleepTimerController({ mixer, setMixer, timerAudio });
+      return { mixer, setMixer, controller };
+    });
+
+    const startTime = Date.now();
+    act(() => {
+      result.current.controller.start(5);
+    });
+
+    const fadeMs = SLEEP_TIMER_FADE_SECONDS * 1000;
+    const endMs = 5 * 60 * 1000;
+
+    act(() => {
+      vi.setSystemTime(startTime + endMs - fadeMs / 2);
+      vi.advanceTimersByTime(250);
+    });
+
+    expect(result.current.controller.isFading).toBe(true);
+    expect(result.current.mixer.masterVolume).toBeLessThan(0.8);
+
+    act(() => {
+      result.current.setMixer((state) => setPlaying(state, false));
+      vi.advanceTimersByTime(250);
+    });
+
+    expect(result.current.mixer.masterVolume).toBeLessThan(0.8);
+
+    act(() => {
+      result.current.setMixer((state) => setPlaying(state, true));
+      vi.advanceTimersByTime(250);
+    });
+
+    expect(result.current.mixer.masterVolume).toBeLessThan(0.8);
+    expect(timerAudio.scheduleMasterRamp).toHaveBeenCalledTimes(2);
   });
 
   it('rejects out-of-range custom durations', () => {

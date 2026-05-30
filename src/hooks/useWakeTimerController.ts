@@ -70,6 +70,12 @@ export function useWakeTimerController({
   }
 
   useEffect(() => {
+    if (!mixer.isPlaying && isWakeTimerActive(wakeTimer)) {
+      fadeStartedRef.current = false;
+    }
+  }, [mixer.isPlaying, wakeTimer]);
+
+  useEffect(() => {
     if (!initialWakeTimer.current.expiredWhileClosed) {
       return;
     }
@@ -157,34 +163,29 @@ export function useWakeTimerController({
 
         setIsFading(true);
 
+        const progress = fadeProgress(fadeStartsAt, fadeEndsAt, now);
+        const nextVolume = target * progress;
+
         if (!fadeStartedRef.current) {
           fadeStartedRef.current = true;
-          setMixer((state) => {
-            const atZero = setMasterVolume(state, 0);
-            return state.isPlaying ? atZero : setPlaying(atZero, true);
-          });
 
           if (timerAudio) {
-            const progress = fadeProgress(fadeStartsAt, fadeEndsAt, now);
-            const fromVolume = target * progress;
             const remainingSeconds = remainingFadeSeconds(fadeStartsAt, fadeEndsAt, now);
-            timerAudio.scheduleMasterRamp(fromVolume, target, remainingSeconds);
+            timerAudio.scheduleMasterRamp(nextVolume, target, remainingSeconds);
           }
-          return;
         }
 
-        if (!timerAudio) {
-          const progress = fadeProgress(fadeStartsAt, fadeEndsAt, now);
-          const nextVolume = target * progress;
-          setMixer((state) => setMasterVolume(state, nextVolume));
-        }
+        setMixer((state) => {
+          const withVolume = setMasterVolume(state, nextVolume);
+          return state.isPlaying ? withVolume : setPlaying(withVolume, true);
+        });
       }
     };
 
     tick();
     const intervalId = window.setInterval(tick, 250);
     return () => window.clearInterval(intervalId);
-  }, [setMixer, wakeTimer, timerAudio]);
+  }, [mixer.isPlaying, setMixer, wakeTimer, timerAudio]);
 
   return {
     wakeTimer,
