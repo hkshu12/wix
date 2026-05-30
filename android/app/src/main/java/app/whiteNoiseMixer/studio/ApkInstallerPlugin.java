@@ -1,6 +1,11 @@
 package app.whiteNoiseMixer.studio;
 
+import android.app.Activity;
+import android.content.ActivityNotFoundException;
+import android.content.ClipData;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.provider.Settings;
@@ -11,9 +16,14 @@ import com.getcapacitor.PluginCall;
 import com.getcapacitor.PluginMethod;
 import com.getcapacitor.annotation.CapacitorPlugin;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.util.List;
 
 @CapacitorPlugin(name = "ApkInstaller")
 public class ApkInstallerPlugin extends Plugin {
+
+    private static final String APK_MIME = "application/vnd.android.package-archive";
 
     @PluginMethod
     public void canInstall(PluginCall call) {
@@ -31,8 +41,13 @@ public class ApkInstallerPlugin extends Plugin {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             Intent intent = new Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES);
             intent.setData(Uri.parse("package:" + getContext().getPackageName()));
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            getContext().startActivity(intent);
+            Activity activity = getActivity();
+            if (activity != null) {
+                activity.startActivity(intent);
+            } else {
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                getContext().startActivity(intent);
+            }
         }
         call.resolve();
     }
@@ -45,27 +60,130 @@ public class ApkInstallerPlugin extends Plugin {
             return;
         }
 
-        Uri contentUri;
-        if (uriValue.startsWith("content://") || uriValue.startsWith("file://")) {
-            contentUri = Uri.parse(uriValue);
-        } else {
-            File apkFile = new File(uriValue);
-            if (!apkFile.exists()) {
-                call.reject("APK file not found");
-                return;
-            }
-            contentUri =
-                FileProvider.getUriForFile(
-                    getContext(),
-                    getContext().getPackageName() + ".fileprovider",
-                    apkFile
-                );
+        Activity activity = getActivity();
+        if (activity == null) {
+            call.reject("Activity not available");
+            return;
+        }
+
+        Uri contentUri = resolveInstallableUri(uriValue);
+        if (contentUri == null) {
+            call.reject("APK file not found");
+            return;
         }
 
         Intent intent = new Intent(Intent.ACTION_VIEW);
-        intent.setDataAndType(contentUri, "application/vnd.android.package-archive");
-        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_ACTIVITY_NEW_TASK);
-        getContext().startActivity(intent);
-        call.resolve();
+        intent.setDataAndType(contentUri, APK_MIME);
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        intent.setClipData(ClipData.newRawUri("", contentUri));
+
+        PackageManager packageManager = activity.getPackageManager();
+        List<ResolveInfo> handlers =
+            packageManager.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY);
+        for (ResolveInfo handler : handlers) {
+            String packageName = handler.activityInfo.packageName;
+            activity.grantUriPermission(
+                packageName,
+                contentUri,
+                Intent.FLAG_GRANT_READ_URI_PERMISSION
+            );
+        }
+
+        try {
+            activity.startActivity(intent);
+            call.resolve();
+        } catch (ActivityNotFoundException error) {
+            call.reject("No app can install APK packages", error);
+        }
+    }
+
+    private Uri resolveInstallableUri(String uriValue) {
+        File apkFile = resolveApkFile(uriValue);
+        if (apkFile == null || !apkFile.exists()) {
+            return null;
+        }
+
+        return FileProvider.getUriForFile(
+            getContext(),
+            getContext().getPackageName() + ".fileprovider",
+            apkFile
+        );
+    }
+
+    private File resolveApkFile(String uriValue) {
+        if (uriValue.startsWith("file://")) {
+            return new File(Uri.parse(uriValue).getPath());
+        }
+
+        if (uriValue.startsWith("content://")) {
+            Uri contentUri = Uri.parse(uriValue);
+            File fromProvider = resolveFileFromFileProviderUri(contentUri);
+            if (fromProvider != null) {
+                return fromProvider;
+            }
+
+            return copyContentUriToInstallCache(contentUri);
+        }
+
+        if (uriValue.startsWith("/")) {
+            return new File(uriValue);
+        }
+
+        return new File(getContext().getCacheDir(), uriValue);
+    }
+
+    private File resolveFileFromFileProviderUri(Uri contentUri) {
+        String authority = getContext().getPackageName() + ".fileprovider";
+        if (!authority.equals(contentUri.getAuthority())) {
+            return null;
+        }
+
+        List<String> segments = contentUri.getPathSegments();
+        if (segments == null || segments.size() < 2) {
+            return null;
+        }
+
+        String mappedRoot = segments.get(0);
+        String relativePath = String.join("/", segments.subList(1, segments.size()));
+
+        if ("my_cache_images".equals(mappedRoot)) {
+            return new File(getContext().getCacheDir(), relativePath);
+        }
+
+        if ("my_images".equals(mappedRoot)) {
+            File externalRoot = getContext().getExternalFilesDir(null);
+            if (externalRoot == null) {
+                return null;
+            }
+            return new File(externalRoot, relativePath);
+        }
+
+        return null;
+    }
+
+    private File copyContentUriToInstallCache(Uri contentUri) {
+        File destination = new File(getContext().getCacheDir(), "updates/install-pending.apk");
+        File parent = destination.getParentFile();
+        if (parent != null && !parent.exists()) {
+            parent.mkdirs();
+        }
+
+        try (
+            InputStream input = getContext().getContentResolver().openInputStream(contentUri);
+            FileOutputStream output = new FileOutputStream(destination, false)
+        ) {
+            if (input == null) {
+                return null;
+            }
+
+            byte[] buffer = new byte[8192];
+            int read;
+            while ((read = input.read(buffer)) != -1) {
+                output.write(buffer, 0, read);
+            }
+            return destination;
+        } catch (Exception error) {
+            return null;
+        }
     }
 }
