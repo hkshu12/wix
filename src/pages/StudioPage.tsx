@@ -2,7 +2,14 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { BottomDrawer } from '../components/BottomDrawer';
 import { KeyboardShortcutsDialog } from '../components/KeyboardShortcutsDialog';
+import { MiuiImmersiveStage } from '../components/MiuiImmersiveStage';
 import { Slider } from '../components/Slider';
+import { applyMiuiScene } from '../domain/applyMiuiScene';
+import {
+  getAdjacentMiuiScene,
+  getMiuiSceneById,
+  type MiuiSceneId
+} from '../domain/miuiScenes';
 import { AndroidNavDrawer } from '../layout/AndroidNavDrawer';
 import { useAppUpdate } from '../layout/UpdateContext';
 import { isAndroidApp } from '../lib/platform';
@@ -34,7 +41,7 @@ import {
 } from '../domain/studioKeyboard';
 import { useStudioKeyboardShortcuts } from '../hooks/useStudioKeyboardShortcuts';
 import { APP_DISPLAY_NAME } from '../lib/appMeta';
-import { assetUrl } from '../lib/assetUrl';
+import { readMiuiSceneId, writeMiuiSceneId } from '../storage/miuiScenePreference';
 import {
   PLAYBACK_FADE_IN_OFF,
   PLAYBACK_FADE_IN_PRESETS_SECONDS
@@ -58,6 +65,8 @@ import {
 import { useStudio } from '../layout/StudioContext';
 import { ThemeToggle } from '../theme/ThemeToggle';
 import './StudioPage.css';
+
+const DEFAULT_MIUI_SCENE_ID: MiuiSceneId = 'rain';
 
 export function StudioPage() {
   const {
@@ -127,6 +136,10 @@ export function StudioPage() {
   const [wakeClockTime, setWakeClockTime] = useState('07:30');
   const [wakeClockError, setWakeClockError] = useState<string | null>(null);
   const [navOpen, setNavOpen] = useState(false);
+  const [activeSceneId, setActiveSceneId] = useState<MiuiSceneId>(
+    () => readMiuiSceneId() ?? DEFAULT_MIUI_SCENE_ID
+  );
+  const initialSceneAppliedRef = useRef(false);
   const { updateAvailable } = useAppUpdate();
   const android = isAndroidApp();
   const { message: playbackAnnouncement, announce: announcePlayback } = usePlaybackAnnouncer();
@@ -290,6 +303,53 @@ export function StudioPage() {
     announcePlayback(formatPlayToggleAnnouncement(nextPlaying));
   }, [announcePlayback, handlePlayToggle, mixer.isPlaying]);
 
+  const applySceneById = useCallback(
+    (sceneId: MiuiSceneId) => {
+      const scene = getMiuiSceneById(sceneId);
+      if (!scene) {
+        return;
+      }
+
+      setActiveSceneId(sceneId);
+      writeMiuiSceneId(sceneId);
+      setMixer((state) => applyMiuiScene(state, scene));
+      announcePlayback(`已切换至 ${scene.title}`);
+    },
+    [announcePlayback, setMixer]
+  );
+
+  const handleSelectScene = useCallback(
+    (sceneId: MiuiSceneId) => {
+      applySceneById(sceneId);
+    },
+    [applySceneById]
+  );
+
+  const handleSwipeScene = useCallback(
+    (direction: 1 | -1) => {
+      applySceneById(getAdjacentMiuiScene(activeSceneId, direction).id);
+    },
+    [activeSceneId, applySceneById]
+  );
+
+  useEffect(() => {
+    if (initialSceneAppliedRef.current || mixer.layers.length > 0) {
+      return;
+    }
+
+    initialSceneAppliedRef.current = true;
+    const scene = getMiuiSceneById(activeSceneId) ?? getMiuiSceneById(DEFAULT_MIUI_SCENE_ID)!;
+    setMixer((state) => applyMiuiScene(state, scene));
+  }, [activeSceneId, mixer.layers.length, setMixer]);
+
+  const activeScene = getMiuiSceneById(activeSceneId) ?? getMiuiSceneById(DEFAULT_MIUI_SCENE_ID)!;
+  const timerDockLabel =
+    sleepTimerActive || wakeTimerActive
+      ? sleepTimerActive
+        ? `${sleepTimerFading ? '渐出' : '睡眠'} ${sleepTimerRemainingLabel}`
+        : `${wakeTimerFading ? '渐入' : '唤醒'} ${wakeTimerRemainingLabel}`
+      : null;
+
   useStudioKeyboardShortcuts(
     { drawerOpen, navOpen, keyboardHelpOpen },
     {
@@ -342,7 +402,7 @@ export function StudioPage() {
   }
 
   return (
-    <main className="studio-page studio-remote">
+    <main className="studio-page studio-miui">
       <p
         className="sr-only"
         role="status"
@@ -352,18 +412,12 @@ export function StudioPage() {
       >
         {playbackAnnouncement}
       </p>
-      <header className="studio-topbar">
-        <div className="studio-topbar-start">
-          <img className="studio-mark" src={assetUrl('icon-mark-96.png')} alt="" width={28} height={28} />
-          <div>
-            <span className="studio-title">{APP_DISPLAY_NAME}</span>
-            <p className="studio-subtitle">远程声景 · 点选即播</p>
-          </div>
-        </div>
-        <div className="studio-topbar-actions">
+      <header className="miui-topbar">
+        <span className="miui-topbar__brand">{APP_DISPLAY_NAME}</span>
+        <div className="miui-topbar__actions">
           {android ? (
             <button
-              className="studio-btn studio-btn--ghost studio-menu-btn"
+              className="miui-topbar__btn studio-menu-btn"
               type="button"
               aria-expanded={navOpen}
               onClick={() => setNavOpen(true)}
@@ -373,10 +427,10 @@ export function StudioPage() {
             </button>
           ) : (
             <>
-              <Link className="studio-btn studio-btn--ghost" to="/" state={{ fromIntro: true }}>
+              <Link className="miui-topbar__btn" to="/" state={{ fromIntro: true }}>
                 介绍
               </Link>
-              <Link className="studio-btn studio-btn--ghost" to="/settings">
+              <Link className="miui-topbar__btn" to="/settings">
                 设置
               </Link>
             </>
@@ -385,10 +439,29 @@ export function StudioPage() {
         </div>
       </header>
 
-      <section className="studio-stage" aria-labelledby="remote-sounds-title">
-        <div className="studio-stage-heading">
-          <h2 id="remote-sounds-title">选择环境声</h2>
-          <p>像遥控器一样叠加远处声景，无需在页面间来回切换。</p>
+      <MiuiImmersiveStage
+        activeSceneId={activeSceneId}
+        activeScene={activeScene}
+        isPlaying={mixer.isPlaying}
+        timerLabel={timerDockLabel}
+        activeLayerCount={activeCount}
+        onSelectScene={handleSelectScene}
+        onSwipeScene={handleSwipeScene}
+        onPlayToggle={() => void handlePlayToggleWithAnnouncement()}
+        onOpenTimer={() => setDrawerOpen(true)}
+        onOpenMixer={() => setDrawerOpen(true)}
+      />
+
+      {android ? <AndroidNavDrawer open={navOpen} onClose={() => setNavOpen(false)} /> : null}      {android ? <AndroidNavDrawer open={navOpen} onClose={() => setNavOpen(false)} /> : null}
+
+      <KeyboardShortcutsDialog open={keyboardHelpOpen} onClose={() => setKeyboardHelpOpen(false)} />
+
+      <BottomDrawer open={drawerOpen} title="混音与导入" onClose={() => setDrawerOpen(false)}>
+        <p className="drawer-hint drawer-hint--muted">桌面端按 <kbd>?</kbd> 可查看键盘快捷键。</p>
+
+        <section className="drawer-section" aria-labelledby="drawer-sounds-title">
+          <h3 id="drawer-sounds-title">更多环境声</h3>
+          <p className="drawer-hint">在 MIUI 五场景之外自由叠加、混搭任意内置或导入音频。</p>
           <label className="studio-sound-search">
             <span className="sr-only">搜索环境声</span>
             <input
@@ -400,68 +473,39 @@ export function StudioPage() {
               onChange={(event) => setSoundSearchQuery(event.target.value)}
             />
           </label>
-        </div>
-        {soundSearchActive && visibleSounds.length === 0 ? (
-          <p className="studio-sound-search-empty" aria-live="polite">
-            没有匹配「{soundSearchQuery.trim()}」的环境声，请换个关键词。
-          </p>
-        ) : null}
-        <div className="sound-grid sound-grid--remote">
-          {visibleSounds.map((sound) => {
-            const selected = mixer.layers.some((layer) => layer.soundId === sound.id);
-            const accent = sound.kind === 'built-in' ? sound.accent : '#a78bfa';
-            const icon = sound.kind === 'built-in' ? sound.icon : '🎵';
-            const subtitle =
-              sound.kind === 'built-in' ? sound.subtitle : `${formatBytes(sound.size)} · ${sound.fileName}`;
+          {soundSearchActive && visibleSounds.length === 0 ? (
+            <p className="studio-sound-search-empty" aria-live="polite">
+              没有匹配「{soundSearchQuery.trim()}」的环境声，请换个关键词。
+            </p>
+          ) : null}
+          <div className="sound-grid sound-grid--drawer">
+            {visibleSounds.map((sound) => {
+              const selected = mixer.layers.some((layer) => layer.soundId === sound.id);
+              const accent = sound.kind === 'built-in' ? sound.accent : '#a78bfa';
+              const icon = sound.kind === 'built-in' ? sound.icon : '🎵';
+              const subtitle =
+                sound.kind === 'built-in' ? sound.subtitle : `${formatBytes(sound.size)} · ${sound.fileName}`;
 
-            return (
-              <button
-                className={`sound-card sound-card--remote ${selected ? 'selected' : ''}`}
-                key={sound.id}
-                style={{ '--accent': accent } as React.CSSProperties}
-                type="button"
-                aria-pressed={selected}
-                onClick={() => handleLayerToggle(sound.id, sound.title)}
-              >
-                <span className="sound-icon">{icon}</span>
-                <span className="sound-card-copy">
-                  <strong>{sound.title}</strong>
-                  <small>{subtitle}</small>
-                </span>
-              </button>
-            );
-          })}
-        </div>
-      </section>
+              return (
+                <button
+                  className={`sound-card sound-card--drawer ${selected ? 'selected' : ''}`}
+                  key={sound.id}
+                  style={{ '--accent': accent } as React.CSSProperties}
+                  type="button"
+                  aria-pressed={selected}
+                  onClick={() => handleLayerToggle(sound.id, sound.title)}
+                >
+                  <span className="sound-icon">{icon}</span>
+                  <span className="sound-card-copy">
+                    <strong>{sound.title}</strong>
+                    <small>{subtitle}</small>
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </section>
 
-      <footer className="studio-dock" aria-label="播放与混音控制">
-        {sleepTimerActive ? (
-          <p className="studio-dock-timer" aria-live="polite">
-            {sleepTimerFading ? '渐出中' : '睡眠'} · {sleepTimerRemainingLabel}
-          </p>
-        ) : wakeTimerActive ? (
-          <p className="studio-dock-timer" aria-live="polite">
-            {wakeTimerFading ? '渐入中' : '唤醒'} · {wakeTimerRemainingLabel}
-          </p>
-        ) : null}
-        <button className="studio-dock-play" type="button" onClick={() => void handlePlayToggleWithAnnouncement()}>
-          <span className="studio-dock-play-icon" aria-hidden>
-            {mixer.isPlaying ? '❚❚' : '▶'}
-          </span>
-          <span>{mixer.isPlaying ? '暂停' : '播放'}</span>
-        </button>
-        <button className="studio-dock-mixer" type="button" onClick={() => setDrawerOpen(true)}>
-          <span>混音与导入</span>
-          {activeCount > 0 ? <span className="studio-dock-badge">{activeCount}</span> : null}
-        </button>
-      </footer>
-
-      {android ? <AndroidNavDrawer open={navOpen} onClose={() => setNavOpen(false)} /> : null}
-
-      <KeyboardShortcutsDialog open={keyboardHelpOpen} onClose={() => setKeyboardHelpOpen(false)} />
-
-      <BottomDrawer open={drawerOpen} title="混音与导入" onClose={() => setDrawerOpen(false)}>
-        <p className="drawer-hint drawer-hint--muted">桌面端按 <kbd>?</kbd> 可查看键盘快捷键。</p>
         <section className="drawer-section" aria-labelledby="drawer-import-title">
           <h3 id="drawer-import-title">添加到本机</h3>
           <p className="drawer-hint">从底部抽屉导入音频，混音台与轨道调节都在此完成。</p>
