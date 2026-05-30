@@ -39,7 +39,7 @@ describe('Android routing', () => {
       </ThemeProvider>
     );
 
-    expect(screen.getByText('远程声景 · 点选即播')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { level: 2, name: '夏雨' })).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: '开始使用' })).not.toBeInTheDocument();
   });
 });

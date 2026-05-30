@@ -33,10 +33,16 @@ describe('StudioPage', () => {
     localStorage.clear();
   });
 
+  function openMixerDrawer() {
+    fireEvent.click(screen.getByRole('button', { name: '混音' }));
+  }
+
   it('renders studio without marketing stat grid', () => {
     renderWithRouter(<AppRouter />, { routerProps: { initialEntries: ['/studio'] } });
 
     expect(screen.queryByLabelText('应用能力概览')).not.toBeInTheDocument();
+    expect(screen.getByRole('heading', { level: 2, name: '夏雨' })).toBeInTheDocument();
+    openMixerDrawer();
     expect(screen.getByRole('button', { name: /雨声/ })).toBeInTheDocument();
     expect(screen.getByLabelText(/导入自定义音乐/)).toBeInTheDocument();
   });
@@ -44,6 +50,7 @@ describe('StudioPage', () => {
   it('filters sound cards by search query', () => {
     renderWithRouter(<AppRouter />, { routerProps: { initialEntries: ['/studio'] } });
 
+    openMixerDrawer();
     expect(screen.getByRole('button', { name: /雨声/ })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /海边/ })).toBeInTheDocument();
 
@@ -60,15 +67,14 @@ describe('StudioPage', () => {
   it('selects multiple sounds and exposes per-layer volume controls in the mixer drawer', () => {
     renderWithRouter(<AppRouter />, { routerProps: { initialEntries: ['/studio'] } });
 
-    fireEvent.click(screen.getByRole('button', { name: /雨声/ }));
+    openMixerDrawer();
     fireEvent.click(screen.getByRole('button', { name: /海边/ }));
-    fireEvent.click(screen.getByRole('button', { name: /混音与导入/ }));
 
     const activePanel = screen.getByLabelText('当前混音轨道');
 
-    expect(within(activePanel).getByText('雨声')).toBeInTheDocument();
+    expect(within(activePanel).getByText('夏雨')).toBeInTheDocument();
     expect(within(activePanel).getByText('海边')).toBeInTheDocument();
-    expect(within(activePanel).getByLabelText('雨声音量')).toHaveValue('65');
+    expect(within(activePanel).getByLabelText('夏雨音量')).toHaveValue('72');
     expect(within(activePanel).getByLabelText('海边音量')).toHaveValue('65');
   });
 
@@ -83,7 +89,8 @@ describe('StudioPage', () => {
   it('starts playback when a sound is selected without pressing play', async () => {
     renderWithRouter(<AppRouter />, { routerProps: { initialEntries: ['/studio'] } });
 
-    fireEvent.click(screen.getByRole('button', { name: /雨声/ }));
+    openMixerDrawer();
+    fireEvent.click(screen.getByRole('button', { name: /海边/ }));
 
     await waitFor(() => expect(resumeMock).toHaveBeenCalled());
     await waitFor(() => expect(screen.getByRole('button', { name: '暂停' })).toBeInTheDocument());
@@ -98,23 +105,25 @@ describe('StudioPage', () => {
     fireEvent.click(screen.getByRole('button', { name: '播放' }));
     await waitFor(() => expect(status).toHaveTextContent('已开始播放'));
 
-    fireEvent.click(screen.getByRole('button', { name: /雨声/ }));
-    await waitFor(() => expect(status).toHaveTextContent('已添加 雨声'));
+    openMixerDrawer();
+    fireEvent.click(screen.getByRole('button', { name: /海边/ }));
+    await waitFor(() => expect(status).toHaveTextContent('已添加 海边'));
 
     fireEvent.click(screen.getByRole('button', { name: '暂停' }));
     await waitFor(() => expect(status).toHaveTextContent('已暂停播放'));
 
-    fireEvent.click(screen.getByRole('button', { name: /雨声/ }));
-    await waitFor(() => expect(status).toHaveTextContent('已移除 雨声，混音已清空'));
+    openMixerDrawer();
+    fireEvent.click(screen.getByRole('button', { name: /海边/ }));
+    await waitFor(() => expect(status).toHaveTextContent('已移除 海边'));
   });
 
   it('starts a sleep timer from the mixer drawer and shows remaining time in the dock', () => {
     renderWithRouter(<AppRouter />, { routerProps: { initialEntries: ['/studio'] } });
 
-    fireEvent.click(screen.getByRole('button', { name: /混音与导入/ }));
+    openMixerDrawer();
     fireEvent.click(within(screen.getByRole('group', { name: '睡眠定时预设' })).getByRole('button', { name: '30 分钟' }));
 
-    expect(screen.getByText(/睡眠 · 30:00/)).toBeInTheDocument();
+    expect(screen.getByLabelText(/定时：睡眠 30:00/)).toBeInTheDocument();
     expect(screen.getByText(/剩余 30:00/)).toBeInTheDocument();
   });
 
@@ -123,7 +132,7 @@ describe('StudioPage', () => {
 
     const status = screen.getByLabelText('混音播放状态');
 
-    fireEvent.click(screen.getByRole('button', { name: /混音与导入/ }));
+    openMixerDrawer();
     fireEvent.click(within(screen.getByRole('group', { name: '睡眠定时预设' })).getByRole('button', { name: '30 分钟' }));
     await waitFor(() => expect(status).toHaveTextContent('已设置睡眠定时 30 分钟'));
 
@@ -137,13 +146,13 @@ describe('StudioPage', () => {
     try {
       renderWithRouter(<AppRouter />, { routerProps: { initialEntries: ['/studio'] } });
 
-      fireEvent.click(screen.getByRole('button', { name: /混音与导入/ }));
+      openMixerDrawer();
       fireEvent.change(screen.getByLabelText('按时刻停止'), { target: { value: '23:00' } });
       fireEvent.click(
         within(screen.getByLabelText('按时刻停止').closest('form')!).getByRole('button', { name: '开始' })
       );
 
-      expect(screen.getByText(/睡眠 · 3:00:00/)).toBeInTheDocument();
+      expect(screen.getByLabelText(/定时：睡眠 3:00:00/)).toBeInTheDocument();
     } finally {
       nowSpy.mockRestore();
     }
@@ -157,7 +166,7 @@ describe('StudioPage', () => {
 
       const status = screen.getByLabelText('混音播放状态');
 
-      fireEvent.click(screen.getByRole('button', { name: /混音与导入/ }));
+      openMixerDrawer();
       fireEvent.change(screen.getByLabelText('按时刻停止'), { target: { value: '23:00' } });
       fireEvent.click(
         within(screen.getByLabelText('按时刻停止').closest('form')!).getByRole('button', { name: '开始' })
@@ -173,10 +182,10 @@ describe('StudioPage', () => {
   it('starts a wake timer from the mixer drawer and shows remaining time in the dock', () => {
     renderWithRouter(<AppRouter />, { routerProps: { initialEntries: ['/studio'] } });
 
-    fireEvent.click(screen.getByRole('button', { name: /混音与导入/ }));
+    openMixerDrawer();
     fireEvent.click(within(screen.getByRole('group', { name: '唤醒定时预设' })).getByRole('button', { name: '30 分钟' }));
 
-    expect(screen.getByText(/唤醒 · 30:00/)).toBeInTheDocument();
+    expect(screen.getByLabelText(/定时：唤醒 30:00/)).toBeInTheDocument();
     expect(screen.getByText(/剩余 30:00/)).toBeInTheDocument();
   });
 
@@ -185,7 +194,7 @@ describe('StudioPage', () => {
 
     const status = screen.getByLabelText('混音播放状态');
 
-    fireEvent.click(screen.getByRole('button', { name: /混音与导入/ }));
+    openMixerDrawer();
     fireEvent.click(within(screen.getByRole('group', { name: '唤醒定时预设' })).getByRole('button', { name: '30 分钟' }));
     await waitFor(() => expect(status).toHaveTextContent('已设置唤醒定时 30 分钟'));
 
@@ -199,13 +208,13 @@ describe('StudioPage', () => {
     try {
       renderWithRouter(<AppRouter />, { routerProps: { initialEntries: ['/studio'] } });
 
-      fireEvent.click(screen.getByRole('button', { name: /混音与导入/ }));
+      openMixerDrawer();
       fireEvent.change(screen.getByLabelText('按时刻叫醒'), { target: { value: '07:30' } });
       fireEvent.click(
         within(screen.getByLabelText('按时刻叫醒').closest('form')!).getByRole('button', { name: '开始' })
       );
 
-      expect(screen.getByText(/唤醒 · 1:30:00/)).toBeInTheDocument();
+      expect(screen.getByLabelText(/定时：唤醒 1:30:00/)).toBeInTheDocument();
     } finally {
       nowSpy.mockRestore();
     }
@@ -219,7 +228,7 @@ describe('StudioPage', () => {
 
       const status = screen.getByLabelText('混音播放状态');
 
-      fireEvent.click(screen.getByRole('button', { name: /混音与导入/ }));
+      openMixerDrawer();
       fireEvent.change(screen.getByLabelText('按时刻叫醒'), { target: { value: '07:30' } });
       fireEvent.click(
         within(screen.getByLabelText('按时刻叫醒').closest('form')!).getByRole('button', { name: '开始' })
@@ -233,8 +242,7 @@ describe('StudioPage', () => {
   it('saves and loads a named mixer preset from the drawer', () => {
     renderWithRouter(<AppRouter />, { routerProps: { initialEntries: ['/studio'] } });
 
-    fireEvent.click(screen.getByRole('button', { name: /雨声/ }));
-    fireEvent.click(screen.getByRole('button', { name: /混音与导入/ }));
+    openMixerDrawer();
 
     fireEvent.change(screen.getByLabelText('预设名称'), { target: { value: '雨夜专注' } });
     fireEvent.click(screen.getByRole('button', { name: '保存当前混音' }));
@@ -245,15 +253,14 @@ describe('StudioPage', () => {
     fireEvent.click(screen.getByRole('button', { name: '加载预设 雨夜专注' }));
 
     const activePanel = screen.getByLabelText('当前混音轨道');
-    expect(within(activePanel).getByText('雨声')).toBeInTheDocument();
+    expect(within(activePanel).getByText('夏雨')).toBeInTheDocument();
     expect(within(activePanel).queryByText('海边')).not.toBeInTheDocument();
   });
 
   it('renames a saved preset without reloading the mix', () => {
     renderWithRouter(<AppRouter />, { routerProps: { initialEntries: ['/studio'] } });
 
-    fireEvent.click(screen.getByRole('button', { name: /雨声/ }));
-    fireEvent.click(screen.getByRole('button', { name: /混音与导入/ }));
+    openMixerDrawer();
 
     fireEvent.change(screen.getByLabelText('预设名称'), { target: { value: '旧名' } });
     fireEvent.click(screen.getByRole('button', { name: '保存当前混音' }));
@@ -267,14 +274,13 @@ describe('StudioPage', () => {
     expect(screen.queryByRole('button', { name: '加载预设 旧名' })).not.toBeInTheDocument();
 
     const activePanel = screen.getByLabelText('当前混音轨道');
-    expect(within(activePanel).getByText('雨声')).toBeInTheDocument();
+    expect(within(activePanel).getByText('夏雨')).toBeInTheDocument();
   });
 
   it('duplicates a saved preset as a new entry', () => {
     renderWithRouter(<AppRouter />, { routerProps: { initialEntries: ['/studio'] } });
 
-    fireEvent.click(screen.getByRole('button', { name: /雨声/ }));
-    fireEvent.click(screen.getByRole('button', { name: /混音与导入/ }));
+    openMixerDrawer();
 
     fireEvent.change(screen.getByLabelText('预设名称'), { target: { value: '雨夜专注' } });
     fireEvent.click(screen.getByRole('button', { name: '保存当前混音' }));
@@ -306,34 +312,16 @@ describe('StudioPage', () => {
   });
 
   it('imports a mixer share code from the drawer', () => {
-    const writeText = vi.fn().mockResolvedValue(undefined);
-    Object.defineProperty(navigator, 'clipboard', {
-      configurable: true,
-      value: { writeText, readText: vi.fn() }
-    });
+    let state = createInitialMixerState();
+    state = toggleLayer(state, 'rain');
+    state = toggleLayer(state, 'ocean');
+    const shareCode = serializeMixerShare(state);
 
     renderWithRouter(<AppRouter />, { routerProps: { initialEntries: ['/studio'] } });
 
-    fireEvent.click(screen.getByRole('button', { name: /雨声/ }));
-    fireEvent.click(screen.getByRole('button', { name: /海边/ }));
-    fireEvent.click(screen.getByRole('button', { name: /混音与导入/ }));
-
-    fireEvent.click(screen.getByRole('button', { name: '复制分享码' }));
-    expect(writeText).toHaveBeenCalled();
-    const shareCodeCall = writeText.mock.calls.find((call) => {
-      const text = call[0] as string;
-      return text.includes('wix-mixer-share');
-    });
-    expect(shareCodeCall).toBeDefined();
-
-    const shareCode = shareCodeCall?.[0] as string;
-    expect(shareCode).toContain('wix-mixer-share');
-
-    fireEvent.click(screen.getByRole('button', { name: /雨声/ }));
-    fireEvent.click(screen.getByRole('button', { name: /海边/ }));
+    openMixerDrawer();
 
     const activePanel = screen.getByLabelText('当前混音轨道');
-    expect(within(activePanel).queryByText('雨声')).not.toBeInTheDocument();
 
     fireEvent.change(screen.getByLabelText('混音分享码'), { target: { value: shareCode } });
     fireEvent.click(screen.getByRole('button', { name: '导入混音' }));
@@ -357,7 +345,7 @@ describe('StudioPage', () => {
   it('does not toggle playback with Space while the mixer drawer is open', async () => {
     renderWithRouter(<AppRouter />, { routerProps: { initialEntries: ['/studio'] } });
 
-    fireEvent.click(screen.getByRole('button', { name: /混音与导入/ }));
+    openMixerDrawer();
     fireEvent.keyDown(window, { key: ' ', code: 'Space' });
 
     expect(resumeMock).not.toHaveBeenCalled();
@@ -367,7 +355,7 @@ describe('StudioPage', () => {
   it('does not toggle playback with Space while typing in the drawer', async () => {
     renderWithRouter(<AppRouter />, { routerProps: { initialEntries: ['/studio'] } });
 
-    fireEvent.click(screen.getByRole('button', { name: /混音与导入/ }));
+    openMixerDrawer();
     const presetInput = screen.getByLabelText('预设名称');
     presetInput.focus();
     fireEvent.keyDown(presetInput, { key: ' ', code: 'Space' });
@@ -440,7 +428,7 @@ describe('StudioPage', () => {
   it('announces master volume changes from the slider in the playback status region', async () => {
     renderWithRouter(<AppRouter />, { routerProps: { initialEntries: ['/studio'] } });
 
-    fireEvent.click(screen.getByRole('button', { name: /混音与导入/ }));
+    openMixerDrawer();
 
     const status = screen.getByLabelText('混音播放状态');
     const masterSlider = screen.getByLabelText('主音量');
@@ -459,7 +447,7 @@ describe('StudioPage', () => {
   it('does not toggle the mixer drawer with M while typing in the drawer', () => {
     renderWithRouter(<AppRouter />, { routerProps: { initialEntries: ['/studio'] } });
 
-    fireEvent.click(screen.getByRole('button', { name: /混音与导入/ }));
+    openMixerDrawer();
     const presetInput = screen.getByLabelText('预设名称');
     presetInput.focus();
     fireEvent.keyDown(presetInput, { key: 'm', code: 'KeyM' });
@@ -468,14 +456,13 @@ describe('StudioPage', () => {
   });
 
   it('shows per-layer retry when a track fails to load during playback', async () => {
-    mockSyncResult = { failedSoundIds: ['rain'] };
+    mockSyncResult = { failedSoundIds: ['summer-rain'] };
 
     renderWithRouter(<AppRouter />, { routerProps: { initialEntries: ['/studio'] } });
 
-    fireEvent.click(screen.getByRole('button', { name: /雨声/ }));
     fireEvent.click(screen.getByRole('button', { name: '播放' }));
 
-    fireEvent.click(screen.getByRole('button', { name: /混音与导入/ }));
+    openMixerDrawer();
 
     const activePanel = screen.getByLabelText('当前混音轨道');
     await waitFor(() => {
@@ -492,7 +479,7 @@ describe('StudioPage', () => {
   it('cancels an active sleep timer', () => {
     renderWithRouter(<AppRouter />, { routerProps: { initialEntries: ['/studio'] } });
 
-    fireEvent.click(screen.getByRole('button', { name: /混音与导入/ }));
+    openMixerDrawer();
     fireEvent.click(within(screen.getByRole('group', { name: '睡眠定时预设' })).getByRole('button', { name: '15 分钟' }));
     fireEvent.click(screen.getByRole('button', { name: '取消睡眠定时' }));
 
@@ -502,7 +489,7 @@ describe('StudioPage', () => {
   it('cancels an active wake timer', () => {
     renderWithRouter(<AppRouter />, { routerProps: { initialEntries: ['/studio'] } });
 
-    fireEvent.click(screen.getByRole('button', { name: /混音与导入/ }));
+    openMixerDrawer();
     fireEvent.click(within(screen.getByRole('group', { name: '唤醒定时预设' })).getByRole('button', { name: '15 分钟' }));
     fireEvent.click(screen.getByRole('button', { name: '取消唤醒定时' }));
 
