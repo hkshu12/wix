@@ -90,6 +90,7 @@ export function useWakeTimerController({
     setIsFading(false);
     fadeStartedRef.current = false;
     timerAudio?.setMasterVolumeImmediate(targetMasterVolumeRef.current);
+    setMixer((state) => setMasterVolume(state, targetMasterVolumeRef.current));
   }
 
   function start(minutes: number): boolean {
