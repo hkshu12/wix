@@ -125,6 +125,46 @@ describe('useWakeTimerController', () => {
     expect(result.current.controller.isFading).toBe(true);
   });
 
+  it('restores mixer master volume when cancelling mid-fade with timerAudio', () => {
+    const timerAudio = {
+      scheduleMasterRamp: vi.fn(),
+      setMasterVolumeImmediate: vi.fn()
+    };
+
+    const { result } = renderHook(() => {
+      const [mixer, setMixer] = useState(createInitialMixerState);
+      const controller = useWakeTimerController({ mixer, setMixer, timerAudio });
+      return { mixer, controller };
+    });
+
+    const targetVolume = result.current.mixer.masterVolume;
+    const startTime = Date.now();
+
+    act(() => {
+      result.current.controller.start(5);
+    });
+
+    const fadeMs = WAKE_TIMER_FADE_SECONDS * 1000;
+    const endMs = 5 * 60 * 1000;
+
+    act(() => {
+      vi.setSystemTime(startTime + endMs - fadeMs / 2);
+      vi.advanceTimersByTime(250);
+    });
+
+    expect(result.current.mixer.masterVolume).toBe(0);
+    expect(result.current.controller.isFading).toBe(true);
+
+    act(() => {
+      result.current.controller.cancel();
+    });
+
+    expect(timerAudio.setMasterVolumeImmediate).toHaveBeenCalledWith(targetVolume);
+    expect(result.current.mixer.masterVolume).toBe(targetVolume);
+    expect(result.current.controller.isActive).toBe(false);
+    expect(result.current.controller.isFading).toBe(false);
+  });
+
   it('starts a clock wake timer until the next occurrence of the chosen time', () => {
     vi.setSystemTime(new Date('2026-05-29T06:00:00'));
 
