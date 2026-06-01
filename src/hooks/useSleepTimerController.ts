@@ -57,6 +57,7 @@ export function useSleepTimerController({
   timerAudio
 }: UseSleepTimerControllerOptions): SleepTimerController {
   const initialSleepTimer = useRef(readInitialSleepTimer());
+  const suppressRestoreAutoplayRef = useRef(initialSleepTimer.current.expiredWhileClosed);
   const [sleepTimer, setSleepTimer] = useState<SleepTimerState>(() => initialSleepTimer.current.timer);
   const [remainingMs, setRemainingMs] = useState(() =>
     getSleepTimerRemainingMs(initialSleepTimer.current.timer, Date.now())
@@ -197,7 +198,7 @@ export function useSleepTimerController({
     isActive: isSleepTimerActive(sleepTimer),
     isFading,
     fadeSeconds,
-    suppressRestoreAutoplay: initialSleepTimer.current.expiredWhileClosed,
+    suppressRestoreAutoplay: suppressRestoreAutoplayRef.current,
     setFadeSeconds,
     start,
     startAtClock,

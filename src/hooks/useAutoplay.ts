@@ -25,6 +25,7 @@ export function useAutoplay({
   const mixerRef = useRef(mixer);
   const prevLayerIdsRef = useRef<string[]>([]);
   const sessionAutoplayDoneRef = useRef(false);
+  const pendingInitialHydrationRef = useRef(true);
 
   useEffect(() => {
     mixerRef.current = mixer;
@@ -46,6 +47,9 @@ export function useAutoplay({
       return;
     }
 
+    const isInitialHydration = pendingInitialHydrationRef.current;
+    pendingInitialHydrationRef.current = false;
+
     const currentIds = mixer.layers.map((layer) => layer.soundId);
     const prevIds = prevLayerIdsRef.current;
     const addedLayer = currentIds.some((id) => !prevIds.includes(id));
@@ -58,18 +62,13 @@ export function useAutoplay({
       return;
     }
 
-    const shouldAutoplay =
-      !mixer.isPlaying && (addedLayer || (!sessionAutoplayDoneRef.current && currentIds.length > 0));
-
-    if (
-      suppressRestoreAutoplay &&
-      !sessionAutoplayDoneRef.current &&
-      currentIds.length > 0 &&
-      !addedLayer
-    ) {
+    if (suppressRestoreAutoplay && isInitialHydration && currentIds.length > 0) {
       sessionAutoplayDoneRef.current = true;
       return;
     }
+
+    const shouldAutoplay =
+      !mixer.isPlaying && (addedLayer || (!sessionAutoplayDoneRef.current && currentIds.length > 0));
 
     if (!shouldAutoplay) {
       return;
