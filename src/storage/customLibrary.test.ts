@@ -54,6 +54,26 @@ describe('custom sound library persistence', () => {
     expect(new Uint8Array(stored[0].bytes)).toEqual(new Uint8Array(bytes));
   });
 
+  it('preserves a provided track id on import', async () => {
+    const bytes = new TextEncoder().encode('stored-audio').buffer;
+    const trackId = 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee';
+    const imported = await importStoredCustomTrack(
+      {
+        id: trackId,
+        title: 'nap-loop',
+        fileName: 'nap-loop.wav',
+        mimeType: 'audio/wav',
+        size: bytes.byteLength,
+        createdAt: 1_700_000_000_000,
+        bytes
+      },
+      { databaseName: 'white-noise-mixer-test' }
+    );
+
+    expect(imported.id).toBe(trackId);
+    expect((await listCustomTracks({ databaseName: 'white-noise-mixer-test' }))[0]?.id).toBe(trackId);
+  });
+
   it('revokes generated object URLs without touching non-blob URLs', () => {
     const revoke = vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => undefined);
 

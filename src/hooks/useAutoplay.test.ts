@@ -51,6 +51,30 @@ describe('useAutoplay', () => {
     expect(mixer.isPlaying).toBe(true);
   });
 
+  it('skips restore autoplay when suppressRestoreAutoplay is set', async () => {
+    const resumeAudio = vi.fn().mockResolvedValue(undefined);
+    let mixer = toggleLayer(createInitialMixerState(), 'rain');
+
+    renderHook(() =>
+      useAutoplay({
+        mixer,
+        setMixer: (update) => {
+          mixer = typeof update === 'function' ? update(mixer) : update;
+        },
+        customTracksReady: true,
+        resumeAudio,
+        suppressRestoreAutoplay: true
+      })
+    );
+
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    expect(resumeAudio).not.toHaveBeenCalled();
+    expect(mixer.isPlaying).toBe(false);
+  });
+
   it('pauses when all layers are removed', async () => {
     const resumeAudio = vi.fn().mockResolvedValue(undefined);
     let mixer = setPlaying(toggleLayer(createInitialMixerState(), 'rain'), true);

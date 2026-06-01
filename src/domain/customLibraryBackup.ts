@@ -2,6 +2,8 @@ export const CUSTOM_LIBRARY_BACKUP_TYPE = 'wix-custom-library';
 export const CUSTOM_LIBRARY_BACKUP_VERSION = 1;
 
 export interface CustomLibraryBackupTrack {
+  /** Preserved on full backup export so presets and mixer layers keep valid soundId references. */
+  id?: string;
   title: string;
   fileName: string;
   mimeType: string;
@@ -18,6 +20,7 @@ export interface CustomLibraryBackupPayload {
 }
 
 export interface StoredCustomTrackBytes {
+  id?: string;
   title: string;
   fileName: string;
   mimeType: string;
@@ -39,6 +42,7 @@ export function serializeCustomLibraryBackup(
     version: CUSTOM_LIBRARY_BACKUP_VERSION,
     exportedAt,
     tracks: tracks.map((track) => ({
+      ...(track.id ? { id: track.id } : {}),
       title: track.title,
       fileName: track.fileName,
       mimeType: track.mimeType,
@@ -140,7 +144,10 @@ function parseBackupTrack(entry: unknown): StoredCustomTrackBytes | null {
     return null;
   }
 
+  const id = readNonEmptyString(record.id) ?? undefined;
+
   return {
+    ...(id ? { id } : {}),
     title,
     fileName,
     mimeType,

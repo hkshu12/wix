@@ -98,6 +98,8 @@ describe('useSleepTimerController', () => {
 
     expect(result.current.controller.isActive).toBe(false);
     expect(result.current.mixer.masterVolume).toBe(0.8);
+    expect(result.current.mixer.isPlaying).toBe(false);
+    expect(result.current.controller.suppressRestoreAutoplay).toBe(true);
   });
 
   it('uses a persisted fade duration when starting the timer', () => {
