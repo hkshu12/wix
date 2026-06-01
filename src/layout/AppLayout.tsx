@@ -186,7 +186,8 @@ export function AppLayout() {
     mixer,
     setMixer,
     customTracksReady,
-    resumeAudio
+    resumeAudio,
+    suppressRestoreAutoplay: sleepTimerController.suppressRestoreAutoplay
   });
 
   useEffect(() => {
@@ -246,7 +247,12 @@ export function AppLayout() {
     }
 
     const fadeInSeconds =
-      mixer.isPlaying && !wasPlayingRef.current && playbackFadeInSeconds > 0 ? playbackFadeInSeconds : 0;
+      mixer.isPlaying &&
+      !wasPlayingRef.current &&
+      playbackFadeInSeconds > 0 &&
+      !wakeTimerController.isFading
+        ? playbackFadeInSeconds
+        : 0;
     wasPlayingRef.current = mixer.isPlaying;
 
     void engineRef.current

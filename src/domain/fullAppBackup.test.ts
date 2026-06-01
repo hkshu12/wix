@@ -13,10 +13,11 @@ import {
   serializeFullAppBackup
 } from './fullAppBackup';
 
-function sampleTrack(): StoredCustomTrackBytes {
+function sampleTrack(id = 'custom-track-1'): StoredCustomTrackBytes {
   const bytes = new TextEncoder().encode('audio-bytes').buffer;
 
   return {
+    id,
     title: 'focus-loop',
     fileName: 'focus-loop.mp3',
     mimeType: 'audio/mpeg',
@@ -74,6 +75,51 @@ describe('fullAppBackup', () => {
     expect(result.presets[0].name).toBe('专注');
     expect(new Uint8Array(result.tracks[0].bytes)).toEqual(new Uint8Array(track.bytes));
     expect(JSON.parse(json!).version).toBe(FULL_APP_BACKUP_VERSION);
+  });
+
+  it('preserves custom track ids so mixer layers survive import', () => {
+    const track = sampleTrack('custom-track-abc');
+    const preset: MixerPreset = {
+      ...samplePreset(),
+      layers: [
+        {
+          soundId: 'custom-track-abc',
+          volume: 0.6,
+          pan: 0,
+          playbackRate: 1,
+          muted: false
+        }
+      ]
+    };
+    const mixerSnapshot: MixerSnapshotPayload = {
+      ...sampleMixerSnapshot(),
+      layers: [
+        {
+          soundId: 'custom-track-abc',
+          volume: 0.4,
+          pan: 0,
+          playbackRate: 1,
+          muted: false
+        }
+      ]
+    };
+
+    const json = serializeFullAppBackup({
+      tracks: [track],
+      presets: [preset],
+      mixerSnapshot
+    });
+    expect(json).not.toBeNull();
+
+    const result = parseFullAppBackup(json!);
+    expect(result.ok).toBe(true);
+    if (!result.ok) {
+      return;
+    }
+
+    expect(result.tracks[0]?.id).toBe('custom-track-abc');
+    expect(result.presets[0]?.layers[0]?.soundId).toBe('custom-track-abc');
+    expect(result.mixerSnapshot?.layers[0]?.soundId).toBe('custom-track-abc');
   });
 
   it('includes mixer snapshot and app preferences in v2 backups', () => {

@@ -43,6 +43,8 @@ export interface SleepTimerController {
   isActive: boolean;
   isFading: boolean;
   fadeSeconds: number;
+  /** Skip session restore autoplay after the timer stopped playback while the app was closed. */
+  suppressRestoreAutoplay: boolean;
   setFadeSeconds: (seconds: number) => void;
   start: (minutes: number) => boolean;
   startAtClock: (hour: number, minute: number) => boolean;
@@ -55,6 +57,7 @@ export function useSleepTimerController({
   timerAudio
 }: UseSleepTimerControllerOptions): SleepTimerController {
   const initialSleepTimer = useRef(readInitialSleepTimer());
+  const suppressRestoreAutoplayRef = useRef(initialSleepTimer.current.expiredWhileClosed);
   const [sleepTimer, setSleepTimer] = useState<SleepTimerState>(() => initialSleepTimer.current.timer);
   const [remainingMs, setRemainingMs] = useState(() =>
     getSleepTimerRemainingMs(initialSleepTimer.current.timer, Date.now())
@@ -83,7 +86,7 @@ export function useSleepTimerController({
     }
 
     preFadeMasterVolumeRef.current = preFade;
-    setMixer((state) => setMasterVolume(state, preFade));
+    setMixer((state) => setPlaying(setMasterVolume(state, preFade), false));
     initialSleepTimer.current.expiredWhileClosed = false;
   }, [setMixer]);
 
@@ -195,6 +198,7 @@ export function useSleepTimerController({
     isActive: isSleepTimerActive(sleepTimer),
     isFading,
     fadeSeconds,
+    suppressRestoreAutoplay: suppressRestoreAutoplayRef.current,
     setFadeSeconds,
     start,
     startAtClock,

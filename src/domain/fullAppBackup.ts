@@ -109,6 +109,7 @@ export function serializeFullAppBackup(input: FullAppBackupSerializeInput): stri
     version: FULL_APP_BACKUP_VERSION,
     exportedAt,
     customTracks: tracks.map((track) => ({
+      ...(track.id ? { id: track.id } : {}),
       title: track.title,
       fileName: track.fileName,
       mimeType: track.mimeType,
@@ -443,7 +444,10 @@ function parseBackupTrack(entry: unknown): StoredCustomTrackBytes | null {
     return null;
   }
 
+  const id = readNonEmptyString(record.id) ?? undefined;
+
   return {
+    ...(id ? { id } : {}),
     title,
     fileName,
     mimeType,

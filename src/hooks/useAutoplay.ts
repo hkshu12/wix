@@ -6,6 +6,8 @@ interface UseAutoplayOptions {
   setMixer: Dispatch<SetStateAction<MixerState>>;
   customTracksReady: boolean;
   resumeAudio: () => Promise<void>;
+  /** When true, do not autoplay restored layers on cold start (e.g. sleep timer already stopped playback). */
+  suppressRestoreAutoplay?: boolean;
 }
 
 /**
@@ -13,10 +15,17 @@ interface UseAutoplayOptions {
  * or after presets/share import. Pauses when all layers are removed.
  * Manual play/pause remains available via {@link handlePlayToggle}.
  */
-export function useAutoplay({ mixer, setMixer, customTracksReady, resumeAudio }: UseAutoplayOptions) {
+export function useAutoplay({
+  mixer,
+  setMixer,
+  customTracksReady,
+  resumeAudio,
+  suppressRestoreAutoplay = false
+}: UseAutoplayOptions) {
   const mixerRef = useRef(mixer);
   const prevLayerIdsRef = useRef<string[]>([]);
   const sessionAutoplayDoneRef = useRef(false);
+  const pendingInitialHydrationRef = useRef(true);
 
   useEffect(() => {
     mixerRef.current = mixer;
@@ -38,6 +47,9 @@ export function useAutoplay({ mixer, setMixer, customTracksReady, resumeAudio }:
       return;
     }
 
+    const isInitialHydration = pendingInitialHydrationRef.current;
+    pendingInitialHydrationRef.current = false;
+
     const currentIds = mixer.layers.map((layer) => layer.soundId);
     const prevIds = prevLayerIdsRef.current;
     const addedLayer = currentIds.some((id) => !prevIds.includes(id));
@@ -50,6 +62,11 @@ export function useAutoplay({ mixer, setMixer, customTracksReady, resumeAudio }:
       return;
     }
 
+    if (suppressRestoreAutoplay && isInitialHydration && currentIds.length > 0) {
+      sessionAutoplayDoneRef.current = true;
+      return;
+    }
+
     const shouldAutoplay =
       !mixer.isPlaying && (addedLayer || (!sessionAutoplayDoneRef.current && currentIds.length > 0));
 
@@ -59,7 +76,7 @@ export function useAutoplay({ mixer, setMixer, customTracksReady, resumeAudio }:
 
     sessionAutoplayDoneRef.current = true;
     void startPlayback();
-  }, [customTracksReady, mixer.isPlaying, mixer.layers, setMixer, startPlayback]);
+  }, [customTracksReady, mixer.isPlaying, mixer.layers, setMixer, startPlayback, suppressRestoreAutoplay]);
 
   return { startPlayback, primeAudioContext };
 }

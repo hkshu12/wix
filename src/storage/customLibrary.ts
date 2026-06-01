@@ -60,6 +60,7 @@ export async function deleteCustomTrack(id: string, options: CustomLibraryOption
 }
 
 export interface StoredCustomTrackInput {
+  id?: string;
   title: string;
   fileName: string;
   mimeType: string;
@@ -74,6 +75,7 @@ export async function listStoredCustomTracks(options: CustomLibraryOptions = {})
   db.close();
 
   return storedTracks.map((track) => ({
+    id: track.id,
     title: track.title,
     fileName: track.fileName,
     mimeType: track.mimeType,
@@ -89,7 +91,7 @@ export async function importStoredCustomTrack(
 ): Promise<CustomTrack> {
   const db = await openDatabase(options.databaseName);
   const storedTrack: StoredCustomTrack = {
-    id: createTrackId(),
+    id: input.id && input.id.trim() ? input.id : createTrackId(),
     kind: 'custom',
     title: input.title,
     fileName: input.fileName,

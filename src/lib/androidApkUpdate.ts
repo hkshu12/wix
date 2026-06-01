@@ -175,24 +175,39 @@ export async function downloadAndroidApk(
 }
 
 async function waitForInstallPermissionFromSettings(): Promise<boolean> {
-  let sawBackground = false;
+  let settled = false;
 
   return new Promise((resolve) => {
     void (async () => {
-      const handle = await App.addListener('appStateChange', async (state) => {
-        if (!state.isActive) {
-          sawBackground = true;
+      let sawInactive = false;
+
+      const finish = async (listener: { remove: () => Promise<void> }) => {
+        if (settled) {
           return;
         }
 
-        if (!sawBackground) {
-          return;
-        }
-
-        await handle.remove();
+        settled = true;
+        window.clearTimeout(timeoutId);
+        await listener.remove();
         const recheck = await ApkInstaller.canInstall();
         resolve(recheck.allowed);
+      };
+
+      const listener = await App.addListener('appStateChange', (state) => {
+        if (!state.isActive) {
+          sawInactive = true;
+          return;
+        }
+
+        if (sawInactive) {
+          void finish(listener);
+        }
       });
+
+      // Some devices show the permission screen as an overlay without backgrounding the app.
+      const timeoutId = window.setTimeout(() => {
+        void finish(listener);
+      }, 60_000);
     })();
   });
 }
